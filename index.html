@@ -110,7 +110,17 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   border-radius:50%;display:inline-block;
 }
 .cal-cell.is-selected .junk-dot{background:#ff5a64}
-@media(max-width:600px){.cal-cell{min-height:66px;padding:6px 5px}}
+@media(max-width:600px){
+  .cal-cell{min-height:66px;padding:6px 5px}
+}
+@media(max-width:390px){
+  .cal-cell{min-height:52px!important;padding:4px!important}
+  .cal-daynum{font-size:10px!important}
+  .cal-tag{font-size:9px!important;padding:1px 3px!important}
+  .cal-meta{font-size:9px!important;margin-top:3px!important}
+  .junk-dot{width:4px!important;height:4px!important}
+  .eaten-indicator{font-size:9px!important}
+}
 @media(max-width:390px){
   .cal-cell{min-height:56px;padding:4px}
   .cal-daynum{font-size:10px}
@@ -396,6 +406,39 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 #pwaInstallBanner.show{display:flex}
 @media(min-width:768px){
   #pwaInstallBanner{left:auto;right:18px;width:420px}
+}
+/* ── G：按鈕點擊回饋 ── */
+.btn:active{
+  background:var(--ink)!important;
+  color:var(--paper)!important;
+  transform:scale(.97);
+  transition:transform .08s;
+}
+.btn-signal:active{
+  background:#a00410!important;
+  transform:scale(.97);
+  transition:transform .08s;
+}
+.set-check:active{
+  opacity:.7;
+  transform:scale(.92);
+  transition:transform .08s;
+}
+.search-chip:active{
+  transform:scale(.95);
+  transition:transform .08s;
+}
+.copy-btn:active,
+.meal-copy-btn:active{
+  opacity:.6;
+  transition:opacity .08s;
+}
+.cal-cell:active:not(.is-other){
+  background:#e0dcd7!important;
+  transition:background .08s;
+}
+.cal-cell.is-selected:active{
+  background:#1a1a1a!important;
 }
 </style>
 </head>
