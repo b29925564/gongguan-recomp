@@ -1,57 +1,86 @@
 'use strict';
 
-const CACHE_NAME = 'recomp-v1';
-const CACHE_URLS = ['/', '/index.html'];
+const CACHE_NAME = 'recomp-v2';
+const CORE_ASSETS = ['/', '/index.html', '/manifest.json'];
 
-/* 安裝：把主要資源快取起來 */
-self.addEventListener('install', e => {
-  e.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(CACHE_URLS))
-      .then(() => self.skipWaiting())
+/* 安裝：先把核心資源存起來 */
+self.addEventListener('install', event => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => cache.addAll(CORE_ASSETS))
   );
 });
 
-/* 啟動：清掉舊版快取 */
-self.addEventListener('activate', e => {
-  e.waitUntil(
-    caches.keys()
-      .then(keys => Promise.all(
+/* 啟用：刪掉舊快取，接手頁面 */
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(keys =>
+      Promise.all(
         keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k))
-      ))
-      .then(() => self.clients.claim())
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-/* 攔截請求：快取優先，沒有再去網路拿 */
-self.addEventListener('fetch', e => {
-  const url = new URL(e.request.url);
+/* 讓頁面可以命令 waiting 的 SW 立即啟用 */
+self.addEventListener('message', event => {
+  if(event.data && event.data.type === 'SKIP_WAITING'){
+    self.skipWaiting();
+  }
+});
 
-  /* Google Fonts：網路優先，失敗才用快取 */
-  if(url.hostname.includes('fonts.g')){
-    e.respondWith(
-      fetch(e.request)
-        .then(res => {
+/* 抓資源策略 */
+self.addEventListener('fetch', event => {
+  const req = event.request;
+  if(req.method !== 'GET') return;
+
+  const url = new URL(req.url);
+
+  /* HTML / 頁面導覽：網路優先
+     → 線上時盡量拿最新版
+     → 離線時再退回快取 */
+  if(req.mode === 'navigate' || req.destination === 'document'){
+    event.respondWith(
+      fetch(req).then(res => {
+        if(res && res.status === 200){
           const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
-          return res;
-        })
-        .catch(() => caches.match(e.request))
+          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+        }
+        return res;
+      }).catch(async () => {
+        const cached = await caches.match(req);
+        return cached || caches.match('/') || caches.match('/index.html');
+      })
     );
     return;
   }
 
-  /* 其他資源：快取優先 */
-  e.respondWith(
-    caches.match(e.request)
-      .then(cached => {
-        if(cached) return cached;
-        return fetch(e.request).then(res => {
-          if(!res || res.status !== 200 || res.type === 'opaque') return res;
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+  /* Google Fonts：有快取先用，背景更新 */
+  if(url.hostname.includes('fonts.g')){
+    event.respondWith(
+      caches.match(req).then(cached => {
+        const networkFetch = fetch(req).then(res => {
+          if(res && res.status === 200){
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+          }
           return res;
         });
+        return cached || networkFetch;
       })
+    );
+    return;
+  }
+
+  /* 其他靜態資源：快取優先 */
+  event.respondWith(
+    caches.match(req).then(cached => {
+      if(cached) return cached;
+      return fetch(req).then(res => {
+        if(!res || res.status !== 200 || res.type === 'opaque') return res;
+        const clone = res.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+        return res;
+      });
+    })
   );
 });
