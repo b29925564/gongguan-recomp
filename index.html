@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>公館重組計畫 — Body Recomposition</title>
 <meta name="theme-color" content="#E30613">
 <link rel="manifest" href="./manifest.json">
@@ -61,6 +61,13 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   transition:.13s;color:var(--ink);
 }
 .btn:hover{border-color:var(--ink)}
+.btn:active{background:var(--ink);color:var(--paper);transform:scale(.97)}
+.btn-signal:active{background:#a00410;transform:scale(.97)}
+.set-check:active{opacity:.7;transform:scale(.92)}
+.search-chip:active{transform:scale(.95)}
+.copy-btn:active,.meal-copy-btn:active{opacity:.6}
+.cal-cell:active:not(.is-other){background:#e8e4df}
+.cal-cell.is-selected:active{background:#2a2a2a}  
 .btn.active,.btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
 .btn-signal{
   background:var(--signal);color:#fff;border:1px solid var(--signal);
@@ -74,6 +81,9 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 
 .two-col{display:grid;gap:20px}
 @media(min-width:980px){.two-col{grid-template-columns:1.45fr .9fr}}
+@media(max-width:979px){
+  #dayPanel{position:static!important;top:auto!important}
+}
 
 .rest-grid{display:grid;gap:12px}
 @media(min-width:640px){.rest-grid{grid-template-columns:repeat(2,1fr)}}
@@ -101,6 +111,13 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 .cal-cell.is-selected .junk-dot{background:#ff5a64}
 @media(max-width:600px){.cal-cell{min-height:66px;padding:6px 5px}}
+@media(max-width:390px){
+  .cal-cell{min-height:56px;padding:4px}
+  .cal-daynum{font-size:10px}
+  .cal-tag{font-size:9px;padding:1px 3px}
+  .cal-meta{font-size:9px!important}
+  .junk-dot{width:4px;height:4px}
+}
 
 .set-check{
   width:21px;height:21px;border:1.5px solid #141414;
@@ -230,10 +247,11 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 
 #toast{
-  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  position:fixed;top:18px;left:50%;transform:translateX(-50%);
   background:var(--ink);color:var(--paper);padding:8px 14px;
   font-size:12px;border-radius:4px;opacity:0;
-  transition:opacity .18s;pointer-events:none;z-index:70;
+  transition:opacity .18s;pointer-events:none;z-index:80;
+  white-space:nowrap;
 }
 
 #orderDrawer{
@@ -250,7 +268,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 #drawerBackdrop.show{display:block}
 #orderFab{
-  position:fixed;right:18px;bottom:18px;z-index:45;
+  position:fixed;right:18px;z-index:45;
+  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
   background:var(--signal);color:#fff;border:none;
   padding:11px 16px;font-size:12px;font-weight:700;
   border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.18);
@@ -259,7 +278,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 #orderFab:hover{background:#c00510}
 
 #searchFab{
-  position:fixed;left:18px;bottom:18px;z-index:45;
+  position:fixed;left:18px;z-index:45;
+  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
   background:var(--ink);color:var(--paper);border:none;
   padding:11px 16px;font-size:12px;font-weight:700;
   border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.18);
@@ -365,7 +385,9 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 
 #pwaInstallBanner{
-  position:fixed;left:18px;right:18px;bottom:74px;z-index:55;
+  position:fixed;left:18px;right:18px;
+  bottom:calc(74px + env(safe-area-inset-bottom, 0px));
+  z-index:55;
   display:none;justify-content:space-between;align-items:center;
   gap:12px;flex-wrap:wrap;background:var(--card);
   border:1px solid var(--ink);padding:12px 14px;border-radius:4px;
@@ -645,7 +667,13 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     <button type="button" id="closeSearchDrawer" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉">×</button>
   </div>
   <div class="drawer-body">
-    <input type="search" id="searchInput" class="search-input" placeholder="輸入日期、店名、動作、A/B/休…">
+    <div style="position:relative">
+  <input type="search" id="searchInput" class="search-input" placeholder="輸入日期、店名、動作、A/B/休…" style="padding-right:36px">
+  <button type="button" id="searchClearBtn" aria-label="清除搜尋"
+    style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
+    background:none;border:none;cursor:pointer;font-size:16px;
+    color:var(--concrete);display:none;padding:0;line-height:1">×</button>
+</div>
     <div class="search-filter-row" id="searchFilterRow">
       <button type="button" class="search-chip active" data-filter="all">全部</button>
       <button type="button" class="search-chip" data-filter="A">A日</button>
@@ -2179,7 +2207,20 @@ function initApp(){
 
   document.getElementById('searchFab').addEventListener('click', openSearchDrawer);
   document.getElementById('closeSearchDrawer').addEventListener('click', () => closeSearchDrawer());
-  document.getElementById('searchInput').addEventListener('input', runSearch);
+  const searchInput = document.getElementById('searchInput');
+const searchClearBtn = document.getElementById('searchClearBtn');
+
+searchInput.addEventListener('input', () => {
+  searchClearBtn.style.display = searchInput.value ? 'block' : 'none';
+  runSearch();
+});
+
+searchClearBtn.addEventListener('click', () => {
+  searchInput.value = '';
+  searchClearBtn.style.display = 'none';
+  searchInput.focus();
+  runSearch();
+});
   document.getElementById('searchFilterRow').addEventListener('click', e => {
     const btn = e.target.closest('[data-filter]');
     if(!btn) return;
