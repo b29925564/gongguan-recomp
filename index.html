@@ -18,6 +18,291 @@
   --line:#D9D4CE;
   --card:#FFFCF9;
 }
+/* ── Dark Theme ── */
+[data-theme="dark"]{
+  --paper:#1a1a1e;
+  --ink:#e8e4df;
+  --signal:#ff4d58;
+  --concrete:#8a8a8a;
+  --line:#333338;
+  --card:#242428;
+}
+[data-theme="dark"] body{
+  background:var(--paper);
+  color:var(--ink);
+}
+[data-theme="dark"] .red-bar{
+  background:var(--signal);
+}
+[data-theme="dark"] header{
+  border-bottom-color:var(--line);
+}
+
+/* ── calendar dark ── */
+[data-theme="dark"] .cal-cell{
+  background:var(--card);
+  border-color:var(--line);
+}
+[data-theme="dark"] .cal-cell:hover{
+  border-color:#666;
+}
+[data-theme="dark"] .cal-cell.is-other{
+  background:#222226;
+  color:#555;
+}
+[data-theme="dark"] .cal-cell.is-selected{
+  background:#e8e4df;
+  color:#1a1a1e;
+  border-color:#e8e4df;
+}
+[data-theme="dark"] .cal-cell.is-selected .cal-meta{
+  color:#555!important;
+}
+[data-theme="dark"] .cal-cell.is-selected .cal-tag{
+  border-color:#999;
+  color:#444;
+}
+[data-theme="dark"] .cal-cell.is-selected .junk-dot{
+  background:#E30613;
+}
+[data-theme="dark"] .cal-tag{
+  border-color:#444;
+  color:var(--concrete);
+}
+[data-theme="dark"] .cal-cell:active:not(.is-other){
+  background:#2a2a2e!important;
+}
+[data-theme="dark"] .cal-cell.is-selected:active{
+  background:#ccc8c3!important;
+}
+
+/* ── set check dark ── */
+[data-theme="dark"] .set-check{
+  border-color:#e8e4df;
+  background:var(--card);
+}
+[data-theme="dark"] .set-check.done{
+  background:#e8e4df;
+}
+[data-theme="dark"] .set-check.done::after{
+  border-color:#1a1a1e;
+}
+[data-theme="dark"] .set-check.cap{
+  background:var(--signal);
+  border-color:var(--signal);
+}
+[data-theme="dark"] .set-check.cap::after{
+  border-color:#fff;
+}
+
+/* ── cards / rules dark ── */
+[data-theme="dark"] .swiss-card{
+  background:var(--card);
+  border-color:var(--line);
+}
+[data-theme="dark"] .swiss-rule{
+  border-top-color:var(--ink);
+}
+[data-theme="dark"] .msum-cell{
+  background:var(--card);
+  border-color:var(--line);
+}
+[data-theme="dark"] .week-cell{
+  background:var(--card);
+  border-color:var(--line);
+}
+[data-theme="dark"] .progress-track{
+  background:var(--line);
+}
+
+/* ── buttons dark ── */
+[data-theme="dark"] .btn{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink);
+}
+[data-theme="dark"] .btn:hover{
+  border-color:var(--ink);
+}
+[data-theme="dark"] .btn.active,
+[data-theme="dark"] .btn.on{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+[data-theme="dark"] .btn:active{
+  background:var(--ink)!important;
+  color:var(--paper)!important;
+}
+[data-theme="dark"] .btn-danger{
+  color:var(--signal);
+  border-color:var(--signal);
+}
+
+/* ── inputs dark ── */
+[data-theme="dark"] .bw-field input{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink);
+}
+[data-theme="dark"] .bw-field input:focus{
+  border-color:var(--ink);
+}
+[data-theme="dark"] .search-input{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink);
+}
+[data-theme="dark"] .search-input:focus{
+  border-color:var(--ink);
+}
+
+/* ── bw stats / chart ── */
+[data-theme="dark"] .bw-stat{
+  background:var(--card);
+  border-color:var(--line);
+}
+
+/* ── meal / exercise dark ── */
+[data-theme="dark"] .meal-block{
+  background:var(--card);
+  border-color:var(--line);
+}
+[data-theme="dark"] .meal-sup{
+  background:#2a2a2e;
+  border-color:var(--line);
+}
+[data-theme="dark"] .ex-row{
+  border-bottom-color:var(--line);
+}
+
+/* ── search chips / tags ── */
+[data-theme="dark"] .search-chip{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink);
+}
+[data-theme="dark"] .search-chip.active{
+  background:var(--ink);
+  color:var(--paper);
+  border-color:var(--ink);
+}
+[data-theme="dark"] .search-tag{
+  border-color:var(--line);
+  color:var(--concrete);
+}
+[data-theme="dark"] .search-tag.ok{
+  color:#3cb;
+  border-color:#3cb;
+}
+[data-theme="dark"] .search-tag.warn{
+  color:var(--signal);
+  border-color:var(--signal);
+}
+[data-theme="dark"] .search-item{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink);
+}
+[data-theme="dark"] .search-item:hover{
+  border-color:var(--ink);
+}
+
+/* ── drawers / modals dark ── */
+[data-theme="dark"] #orderDrawer{
+  background:var(--card);
+  border-left-color:var(--ink);
+}
+[data-theme="dark"] #searchDrawer{
+  background:var(--card);
+  border-right-color:var(--ink);
+}
+[data-theme="dark"] .drawer-head{
+  border-bottom-color:var(--line);
+}
+[data-theme="dark"] .modal-card{
+  background:var(--card);
+  border-color:var(--ink);
+}
+[data-theme="dark"] .modal-head{
+  border-bottom-color:var(--line);
+}
+[data-theme="dark"] .modal{
+  background:rgba(0,0,0,.5);
+}
+
+/* ── FABs dark ── */
+[data-theme="dark"] #orderFab{
+  background:var(--signal);
+  color:#fff;
+}
+[data-theme="dark"] #searchFab{
+  background:var(--ink);
+  color:var(--paper);
+}
+
+/* ── toast / banners dark ── */
+[data-theme="dark"] #toast{
+  background:var(--ink);
+  color:var(--paper);
+}
+[data-theme="dark"] #pwaInstallBanner,
+[data-theme="dark"] #pwaUpdateBanner{
+  background:var(--card);
+  border-color:var(--ink);
+}
+[data-theme="dark"] #errorBanner{
+  background:#3a1a1a;
+  border-color:#a44;
+  color:#f99;
+}
+
+/* ── restaurant section dark ── */
+[data-theme="dark"] section[style*="ECEAE6"]{
+  background:var(--paper)!important;
+  border-top-color:var(--line)!important;
+  border-bottom-color:var(--line)!important;
+}
+
+/* ── rest cards dark ── */
+[data-theme="dark"] .rest-card-p{
+  border-color:var(--line);
+  color:var(--concrete);
+}
+[data-theme="dark"] .rest-card-footer{
+  border-top-color:var(--line);
+}
+
+/* ── week rows dark ── */
+[data-theme="dark"] .week-row{
+  border-bottom-color:var(--line);
+}
+[data-theme="dark"] .week-day-link{
+  background:var(--card);
+  border-color:var(--line);
+  color:var(--ink);
+}
+[data-theme="dark"] .week-day-link:hover{
+  border-color:var(--ink);
+}
+
+/* ── export preview dark ── */
+[data-theme="dark"] .export-preview{
+  background:#2a2a2e;
+  border-color:var(--line);
+}
+
+/* ── auto dark mode ── */
+@media(prefers-color-scheme:dark){
+  [data-theme="auto"]{
+    --paper:#1a1a1e;
+    --ink:#e8e4df;
+    --signal:#ff4d58;
+    --concrete:#8a8a8a;
+    --line:#333338;
+    --card:#242428;
+  }
+}
 *{box-sizing:border-box;margin:0}
 body{
   background:var(--paper);
@@ -504,7 +789,10 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 
 <header style="border-bottom:1px solid var(--line)">
   <div class="container" style="padding-top:44px;padding-bottom:44px">
-    <div class="kicker" style="margin-bottom:10px">Body Recomposition — Gongguan, NTU</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+  <div class="kicker">Body Recomposition — Gongguan, NTU</div>
+  <button type="button" id="themeToggle" class="btn" style="font-size:16px;padding:5px 10px;line-height:1" aria-label="切換主題">☀</button>
+</div>
     <h1>公館重組<br>計畫</h1>
     <div class="stat-label-row">
       <span><b>176cm</b> / 75kg / 24y / 男</span>
@@ -2133,6 +2421,42 @@ function initPwa(){
    INIT & EVENT LISTENERS
    ══════════════════════════════════════════════ */
 function initApp(){
+  /* ── Theme ── */
+(function initTheme(){
+  const THEME_KEY = 'recomp_theme';
+  const html = document.documentElement;
+  const btn = document.getElementById('themeToggle');
+
+  const modes = ['auto', 'light', 'dark'];
+  const icons = { auto:'◐', light:'☀', dark:'☾' };
+  const labels = { auto:'跟隨系統', light:'淺色', dark:'深色' };
+
+  function getStored(){
+    return lsGet(THEME_KEY, 'auto');
+  }
+
+  function applyTheme(mode){
+    html.setAttribute('data-theme', mode);
+    if(btn){
+      btn.textContent = icons[mode] || '◐';
+      btn.title = labels[mode] || '';
+    }
+  }
+
+  function cycleTheme(){
+    const current = getStored();
+    const idx = modes.indexOf(current);
+    const next = modes[(idx + 1) % modes.length];
+    lsSet(THEME_KEY, next);
+    applyTheme(next);
+  }
+
+  applyTheme(getStored());
+
+  if(btn){
+    btn.addEventListener('click', cycleTheme);
+  }
+})();
   migrateLegacyExerciseKeys();
 
   const calGrid = document.getElementById('calGrid');
