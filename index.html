@@ -424,7 +424,31 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .export-preview canvas,.export-preview img{
   max-width:100%;height:auto;display:block;margin:0 auto;
 }
-
+#pwaUpdateBanner{
+  position:fixed;
+  left:18px;
+  right:18px;
+  top:calc(18px + env(safe-area-inset-top, 0px));
+  z-index:56;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  background:var(--card);
+  border:1px solid var(--ink);
+  padding:12px 14px;
+  border-radius:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+#pwaUpdateBanner.show{display:flex}
+@media(min-width:768px){
+  #pwaUpdateBanner{
+    left:auto;
+    right:18px;
+    width:420px;
+  }
+}
 #pwaInstallBanner{
   position:fixed;left:18px;right:18px;
   bottom:calc(74px + env(safe-area-inset-bottom, 0px));
@@ -720,7 +744,17 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     </div>
   </div>
 </div>
-
+<!-- PWA update banner -->
+<div id="pwaUpdateBanner" aria-live="polite">
+  <div>
+    <div class="kicker">更新</div>
+    <div style="font-weight:800;font-size:14px;margin-top:2px">已有新版本可用</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button type="button" id="pwaUpdateLaterBtn" class="btn">稍後</button>
+    <button type="button" id="pwaUpdateBtn" class="btn-signal">立即更新</button>
+  </div>
+</div>
 <!-- PWA install banner -->
 <div id="pwaInstallBanner" aria-live="polite">
   <div>
@@ -1987,44 +2021,112 @@ function runSearch(){
    PWA
    ══════════════════════════════════════════════ */
 function initPwa(){
-  const banner = document.getElementById('pwaInstallBanner');
+  const installBanner = document.getElementById('pwaInstallBanner');
   const installBtn = document.getElementById('pwaInstallBtn');
   const dismissBtn = document.getElementById('pwaDismissBtn');
-  if(!banner || !installBtn || !dismissBtn) return;
+
+  const updateBanner = document.getElementById('pwaUpdateBanner');
+  const updateBtn = document.getElementById('pwaUpdateBtn');
+  const updateLaterBtn = document.getElementById('pwaUpdateLaterBtn');
+
+  if(!installBanner || !installBtn || !dismissBtn || !updateBanner || !updateBtn || !updateLaterBtn){
+    return;
+  }
 
   const isStandalone = () =>
     window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 
-  function hideBanner(){ banner.classList.remove('show'); }
-  function showBanner(){ if(!isStandalone()) banner.classList.add('show'); }
+  let deferredPrompt = null;
+  let swReg = null;
+  let refreshing = false;
 
-  if('serviceWorker' in navigator){
-    const register = () => {
-      navigator.serviceWorker.register('./sw.js').catch(err => {
-        console.warn('Service worker register failed:', err);
-      });
-    };
-    if(document.readyState === 'complete') register();
-    else window.addEventListener('load', register, { once:true });
+  function hideInstallBanner(){
+    installBanner.classList.remove('show');
+  }
+  function showInstallBanner(){
+    if(!isStandalone()) installBanner.classList.add('show');
   }
 
-  let deferredPrompt = null;
+  function hideUpdateBanner(){
+    updateBanner.classList.remove('show');
+  }
+  function showUpdateBanner(){
+    updateBanner.classList.add('show');
+  }
+
+  if('serviceWorker' in navigator){
+    window.addEventListener('load', async () => {
+      try{
+        swReg = await navigator.serviceWorker.register('./sw.js');
+
+        /* 如果一打開就已經有 waiting 的新版 */
+        if(swReg.waiting){
+          showUpdateBanner();
+        }
+
+        /* 監聽新版 SW 安裝完成 */
+        swReg.addEventListener('updatefound', () => {
+          const newWorker = swReg.installing;
+          if(!newWorker) return;
+
+          newWorker.addEventListener('statechange', () => {
+            if(newWorker.state === 'installed' && navigator.serviceWorker.controller){
+              showUpdateBanner();
+            }
+          });
+        });
+
+      }catch(err){
+        console.warn('Service worker register failed:', err);
+      }
+    }, { once:true });
+
+    /* SW 控制權切換後，重新載入頁面 */
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(refreshing) return;
+      refreshing = true;
+      window.location.reload();
+    });
+
+    /* 每次回到前景時，主動檢查 SW 有沒有新版 */
+    document.addEventListener('visibilitychange', () => {
+      if(document.visibilityState === 'visible' && swReg){
+        swReg.update().catch(() => {});
+      }
+    });
+  }
+
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
     deferredPrompt = e;
-    showBanner();
+    showInstallBanner();
   });
 
-  installBtn.addEventListener('click', async() => {
-    if(!deferredPrompt){ hideBanner(); return; }
+  installBtn.addEventListener('click', async () => {
+    if(!deferredPrompt){
+      hideInstallBanner();
+      return;
+    }
     deferredPrompt.prompt();
-    try{ await deferredPrompt.userChoice; }catch(e){}
+    try{
+      await deferredPrompt.userChoice;
+    }catch(e){}
     deferredPrompt = null;
-    hideBanner();
+    hideInstallBanner();
   });
 
-  dismissBtn.addEventListener('click', hideBanner);
-  window.addEventListener('appinstalled', hideBanner);
+  dismissBtn.addEventListener('click', hideInstallBanner);
+  window.addEventListener('appinstalled', hideInstallBanner);
+
+  updateBtn.addEventListener('click', () => {
+    if(swReg && swReg.waiting){
+      swReg.waiting.postMessage({ type:'SKIP_WAITING' });
+    }else{
+      window.location.reload();
+    }
+  });
+
+  updateLaterBtn.addEventListener('click', hideUpdateBanner);
 }
 
 /* ══════════════════════════════════════════════
