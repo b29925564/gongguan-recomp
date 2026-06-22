@@ -963,6 +963,96 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 [data-theme="dark"] .rest-grid .swiss-card:hover{
   box-shadow:0 2px 12px rgba(0,0,0,.2);
 }
+/* ══════════════════════════════════════════════
+   CALENDAR HEATMAP v1.4.0
+   ══════════════════════════════════════════════ */
+.cal-cell.heat-partial{
+  background:rgba(42,170,100,.08);
+}
+.cal-cell.heat-full{
+  background:rgba(42,170,100,.18);
+}
+.cal-cell.heat-eaten{
+  background:rgba(42,170,100,.1);
+}
+.cal-cell.heat-full.heat-eaten{
+  background:rgba(42,170,100,.25);
+}
+
+/* ── selected 時覆蓋 heatmap ── */
+.cal-cell.is-selected.heat-partial,
+.cal-cell.is-selected.heat-full,
+.cal-cell.is-selected.heat-eaten{
+  background:#141414;
+}
+
+/* ── hover 時不要被 heatmap 蓋 ── */
+.cal-cell.heat-partial:hover,
+.cal-cell.heat-full:hover,
+.cal-cell.heat-eaten:hover{
+  border-color:#888;
+}
+
+/* ── 完成指標小條 ── */
+.cal-heat-bar{
+  position:absolute;
+  bottom:0;left:0;right:0;
+  height:3px;
+  border-radius:0 0 2px 2px;
+  transition:width .3s;
+}
+.cal-heat-bar.partial{
+  background:rgba(42,170,100,.35);
+}
+.cal-heat-bar.full{
+  background:rgba(42,170,100,.7);
+}
+
+/* ── dark mode heatmap ── */
+[data-theme="dark"] .cal-cell.heat-partial{
+  background:rgba(60,200,120,.08);
+}
+[data-theme="dark"] .cal-cell.heat-full{
+  background:rgba(60,200,120,.16);
+}
+[data-theme="dark"] .cal-cell.heat-eaten{
+  background:rgba(60,200,120,.08);
+}
+[data-theme="dark"] .cal-cell.heat-full.heat-eaten{
+  background:rgba(60,200,120,.22);
+}
+[data-theme="dark"] .cal-cell.is-selected.heat-partial,
+[data-theme="dark"] .cal-cell.is-selected.heat-full,
+[data-theme="dark"] .cal-cell.is-selected.heat-eaten{
+  background:#e8e4df;
+}
+[data-theme="dark"] .cal-heat-bar.partial{
+  background:rgba(60,200,120,.4);
+}
+[data-theme="dark"] .cal-heat-bar.full{
+  background:rgba(60,200,120,.7);
+}
+
+/* ── auto dark ── */
+@media(prefers-color-scheme:dark){
+  [data-theme="auto"] .cal-cell.heat-partial{
+    background:rgba(60,200,120,.08);
+  }
+  [data-theme="auto"] .cal-cell.heat-full{
+    background:rgba(60,200,120,.16);
+  }
+  [data-theme="auto"] .cal-cell.heat-eaten{
+    background:rgba(60,200,120,.08);
+  }
+  [data-theme="auto"] .cal-cell.heat-full.heat-eaten{
+    background:rgba(60,200,120,.22);
+  }
+  [data-theme="auto"] .cal-cell.is-selected.heat-partial,
+  [data-theme="auto"] .cal-cell.is-selected.heat-full,
+  [data-theme="auto"] .cal-cell.is-selected.heat-eaten{
+    background:#e8e4df;
+  }
+}
 </style>
 </head>
 <body>
@@ -1281,7 +1371,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v1.4.0';
+const APP_VERSION = 'v1.5.0';
 
 /* ── visible error banner ── */
 (function(){
@@ -1694,9 +1784,33 @@ function renderCalendar(year, month){
       selectedDateObj.getMonth() === month &&
       selectedDateObj.getDate() === d;
     const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
+    /* heatmap classes */
+const isPast = dateObj <= new Date();
+let heatClass = '';
+let heatBar = '';
+if(isPast){
+  if(plan.train !== '休'){
+    const totalSets = WORKOUTS[plan.train].reduce((s, ex) => s + ex.sets, 0);
+    let doneSets = 0;
+    WORKOUTS[plan.train].forEach(ex => {
+      for(let s = 1; s <= ex.sets; s++){
+        if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') !== '0') doneSets++;
+      }
+    });
+    const pct = totalSets ? Math.round(doneSets / totalSets * 100) : 0;
+    if(pct >= 100){
+      heatClass = ' heat-full';
+      heatBar = `<div class="cal-heat-bar full"></div>`;
+    }else if(pct > 0){
+      heatClass = ' heat-partial';
+      heatBar = `<div class="cal-heat-bar partial" style="width:${pct}%"></div>`;
+    }
+  }
+  if(eaten) heatClass += ' heat-eaten';
+}
 
     html += `<div
-      class="cal-cell${isToday ? ' is-today' : ''}${isSelected ? ' is-selected' : ''}"
+      class="cal-cell${isToday ? ' is-today' : ''}${isSelected ? ' is-selected' : ''}${heatClass}"
       data-ymd="${dateStr}"
       role="button" tabindex="0"
       aria-label="${year}年${month+1}月${d}日 ${plan.train} 訓練"
@@ -1710,6 +1824,7 @@ function renderCalendar(year, month){
         ${eaten ? '<span class="eaten-indicator" style="color:#2a8;font-size:10px">✓</span>' : '<span class="eaten-indicator" style="display:none"></span>'}
         ${plan.junk ? '<span class="junk-dot"></span>' : ''}
       </div>
+      ${heatBar}
     </div>`;
   }
 
@@ -1853,6 +1968,17 @@ function renderBwChart(){
   }
 
   const wPoints = entries.map((e,i) => `${xFor(i)},${yForW(e.w)}`).join(' ');
+  /* 7-day moving average */
+let maPolyline = '';
+if(entries.length >= 3){
+  const maPoints = entries.map((e,i) => {
+    const start = Math.max(0, i - 6);
+    const window = entries.slice(start, i + 1);
+    const avg = window.reduce((s, x) => s + x.w, 0) / window.length;
+    return `${xFor(i)},${yForW(avg)}`;
+  }).join(' ');
+  maPolyline = `<polyline points="${maPoints}" fill="none" stroke="#f0a020" stroke-width="1.5" stroke-dasharray="4,3" opacity=".7"/>`;
+}
   const dots = entries.map((e,i) => {
     const x = xFor(i), y = yForW(e.w);
     return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--signal)" stroke="var(--card)" stroke-width="1.5">
@@ -1883,14 +2009,31 @@ function renderBwChart(){
     return `<text x="${xFor(i)}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--concrete)" font-family="Fragment Mono,monospace">${e.month+1}/${e.day}</text>`;
   }).join('');
 
-  const legend = hasBf ? `
+  /* target zone band (73-77kg) */
+const targetLow = 73, targetHigh = 77;
+let targetBand = '';
+if(minW < targetHigh && maxW > targetLow){
+  const bandTop = yForW(Math.min(targetHigh, maxW));
+  const bandBot = yForW(Math.max(targetLow, minW));
+  const bandH = bandBot - bandTop;
+  if(bandH > 0){
+    targetBand = `<rect x="${padL}" y="${bandTop}" width="${plotW}" height="${bandH}" fill="#2a8" opacity=".06" rx="2"/>
+    <text x="${W-padR-2}" y="${bandTop+10}" text-anchor="end" font-size="9" fill="#2a8" opacity=".5" font-family="Fragment Mono,monospace">目標區間</text>`;
+  }
+}
+  const maLabel = entries.length >= 3
+  ? `<text x="${padL + (hasBf ? 140 : 70)}" y="${padT-4}" font-size="9" fill="#f0a020" opacity=".7" font-family="Fragment Mono,monospace">--- 7日均線</text>`
+  : '';
+const legend = `
     <text x="${padL}" y="${padT-4}" font-size="9" fill="var(--signal)" font-family="Fragment Mono,monospace">— 體重 (kg)</text>
-    <text x="${padL+70}" y="${padT-4}" font-size="9" fill="#2a8" font-family="Fragment Mono,monospace">--- 體脂 (%)</text>` : '';
-
+    ${hasBf ? `<text x="${padL+70}" y="${padT-4}" font-size="9" fill="#2a8" font-family="Fragment Mono,monospace">--- 體脂 (%)</text>` : ''}
+    ${maLabel}`;
   wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;display:block">
     ${legend}
     ${gridLines.join('')}
+    ${targetBand}
     <polyline points="${wPoints}" fill="none" stroke="var(--signal)" stroke-width="2"/>
+    ${maPolyline}
     ${bfPolyline}
     ${dots}
     ${dateLabels}
