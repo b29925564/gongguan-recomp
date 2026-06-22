@@ -6,6 +6,7 @@
 <title>公館重組計畫 — Body Recomposition</title>
 <meta name="theme-color" content="#E30613">
 <link rel="manifest" href="./manifest.json">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;800;900&display=swap" rel="stylesheet">
@@ -1050,9 +1051,19 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   [data-theme="auto"] .cal-cell.is-selected.heat-partial,
   [data-theme="auto"] .cal-cell.is-selected.heat-full,
   [data-theme="auto"] .cal-cell.is-selected.heat-eaten{
+    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
     background:#e8e4df;
   }
 }
+/* ── Phosphor icons ── */
+.icon{
+  display:inline-flex; align-items:center; justify-content:center;
+  line-height:1; vertical-align:-0.12em; font-size:16px; color:currentColor;
+}
+.btn .icon, .btn-signal .icon, .copy-btn .icon, .meal-copy-btn .icon{ margin-right:6px; }
+.icon-only{ display:inline-flex; align-items:center; justify-content:center; }
+.icon-only .icon{ margin-right:0; }
+#searchFab .icon, #orderFab .icon{ margin-right:6px; font-size:15px; }
 </style>
 </head>
 <body>
@@ -1064,7 +1075,9 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   <div class="container" style="padding-top:44px;padding-bottom:44px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
   <div class="kicker">Body Recomposition — Gongguan, NTU</div>
-  <button type="button" id="themeToggle" class="btn" style="font-size:16px;padding:5px 10px;line-height:1" aria-label="切換主題">☀</button>
+  <button type="button" id="themeToggle" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="切換主題">
+    <i class="ph ph-monitor icon" aria-hidden="true"></i>
+  </button>
 </div>
     <h1>公館重組<br>計畫</h1>
     <div class="stat-label-row">
@@ -1161,8 +1174,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   </div>
 
   <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-    <button type="button" id="weekReportBtn" class="btn">週報</button>
-    <button type="button" id="exportCalBtn" class="btn">匯出月曆 PNG</button>
+    <button type="button" id="weekReportBtn" class="btn"><i class="ph ph-chart-bar icon" aria-hidden="true"></i>週報</button>
+    <button type="button" id="exportCalBtn" class="btn"><i class="ph ph-image icon" aria-hidden="true"></i>匯出月曆 PNG</button>
   </div>
 
   <div class="two-col">
@@ -1237,10 +1250,10 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
       打勾與重量紀錄存在這台裝置的瀏覽器裡，清快取或換裝置會遺失。建議定期匯出備份。
     </p>
     <div class="data-tools-row">
-      <button type="button" id="exportBtn" class="btn">⬇ 匯出備份 (JSON)</button>
-      <button type="button" id="importBtn" class="btn">⬆ 匯入備份</button>
+      <button type="button" id="exportBtn" class="btn"><i class="ph ph-download-simple icon" aria-hidden="true"></i>匯出備份 (JSON)</button>
+      <button type="button" id="importBtn" class="btn"><i class="ph ph-upload-simple icon" aria-hidden="true"></i>匯入備份</button>
       <input type="file" id="importFileInput" accept="application/json">
-      <button type="button" id="resetBtn" class="btn btn-danger">清除所有紀錄</button>
+      <button type="button" id="resetBtn" class="btn btn-danger"><i class="ph ph-trash icon" aria-hidden="true"></i>清除所有紀錄</button>
       <span class="small muted" id="dataToolsMsg" aria-live="polite"></span>
     </div>
   </div>
@@ -1271,11 +1284,11 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
         <div class="kicker">週報</div>
         <div class="modal-title" id="weeklyModalTitle">—</div>
       </div>
-      <div class="modal-actions">
+            <div class="modal-actions">
         <button type="button" id="weeklyNewerBtn" class="btn">較新一週</button>
         <button type="button" id="weeklyOlderBtn" class="btn">較早一週</button>
-        <button type="button" id="weeklyCopyBtn" class="btn">複製純文字</button>
-        <button type="button" id="weeklyCloseBtn" class="btn">關閉</button>
+        <button type="button" id="weeklyCopyBtn" class="btn"><i class="ph ph-copy icon" aria-hidden="true"></i>複製純文字</button>
+        <button type="button" id="weeklyCloseBtn" class="btn"><i class="ph ph-x icon" aria-hidden="true"></i>關閉</button>
       </div>
     </div>
     <div class="modal-body">
@@ -1294,8 +1307,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
         <div class="modal-title" id="exportCalTitle">PNG 預覽</div>
       </div>
       <div class="modal-actions">
-        <button type="button" id="downloadCalBtn" class="btn-signal">下載 PNG</button>
-        <button type="button" id="exportCalCloseBtn" class="btn">關閉</button>
+        <button type="button" id="downloadCalBtn" class="btn-signal"><i class="ph ph-download-simple icon" aria-hidden="true"></i>下載 PNG</button>
+        <button type="button" id="exportCalCloseBtn" class="btn"><i class="ph ph-x icon" aria-hidden="true"></i>關閉</button>
       </div>
     </div>
     <div class="modal-body">
@@ -1314,7 +1327,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   </div>
   <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button type="button" id="pwaUpdateLaterBtn" class="btn">稍後</button>
-    <button type="button" id="pwaUpdateBtn" class="btn-signal">立即更新</button>
+    <button type="button" id="pwaUpdateBtn" class="btn-signal"><i class="ph ph-arrow-clockwise icon" aria-hidden="true"></i>立即更新</button>
   </div>
 </div>
 <!-- PWA install banner -->
@@ -1323,18 +1336,18 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     <div class="kicker">PWA</div>
     <div style="font-weight:800;font-size:14px;margin-top:2px">可安裝到手機桌面，支援離線開啟</div>
   </div>
-  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
     <button type="button" id="pwaDismissBtn" class="btn">稍後</button>
-    <button type="button" id="pwaInstallBtn" class="btn-signal">安裝 App</button>
+    <button type="button" id="pwaInstallBtn" class="btn-signal"><i class="ph ph-download-simple icon" aria-hidden="true"></i>安裝 App</button>
   </div>
 </div>
 
 <!-- Search FAB / Drawer -->
-<button type="button" id="searchFab">搜尋 ▸</button>
+<button type="button" id="searchFab"><i class="ph ph-magnifying-glass icon" aria-hidden="true"></i>搜尋</button>
 <div id="searchDrawer" role="dialog" aria-modal="true" aria-label="搜尋訓練與飲食紀錄" aria-hidden="true">
   <div class="drawer-head">
     搜尋 / 篩選
-    <button type="button" id="closeSearchDrawer" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉">×</button>
+    <button type="button" id="closeSearchDrawer" class="icon-only" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉"><i class="ph ph-x icon" aria-hidden="true"></i></button>
   </div>
   <div class="drawer-body">
     <div style="position:relative">
@@ -1359,11 +1372,11 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 </div>
 
 <!-- Order FAB / Drawer -->
-<button type="button" id="orderFab">點餐口令 ▸</button>
+<button type="button" id="orderFab"><i class="ph ph-fork-knife icon" aria-hidden="true"></i>點餐口令</button>
 <div id="orderDrawer" role="dialog" aria-modal="true" aria-label="點餐口令" aria-hidden="true">
   <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-weight:800">
     到店直接唸
-    <button type="button" id="closeDrawer" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉">×</button>
+    <button type="button" id="closeDrawer" class="icon-only" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉"><i class="ph ph-x icon" aria-hidden="true"></i></button>
   </div>
   <div id="orderList" style="padding:14px 18px;overflow-y:auto;height:calc(100% - 56px);font-size:13px"></div>
 </div>
@@ -2139,11 +2152,11 @@ function renderMealSection(plan){
       <div class="meal-block-shop">${escapeHtml(m.shop)}</div>
       <div class="meal-block-item">${escapeHtml(m.item)}</div>
       <div class="meal-block-addr">${escapeHtml(m.addr)} · $${m.price}</div>
-      <div class="meal-block-actions">
+            <div class="meal-block-actions">
         <button type="button" class="meal-copy-btn copy-meal-btn"
-          data-copy="${escapeHtml(m.shop)}：${escapeHtml(m.item)}">複製點餐</button>
+          data-copy="${escapeHtml(m.shop)}：${escapeHtml(m.item)}"><i class="ph ph-copy icon" aria-hidden="true"></i>複製點餐</button>
         <a style="text-decoration:underline" target="_blank" rel="noopener"
-          href="https://www.google.com/maps/search/${encodeURIComponent(m.shop + ' ' + m.addr)}">地圖導航</a>
+          href="https://www.google.com/maps/search/${encodeURIComponent(m.shop + ' ' + m.addr)}"><i class="ph ph-map-pin icon" aria-hidden="true"></i>地圖導航</a>
       </div>
     </div>`;
   }
@@ -2756,7 +2769,7 @@ function initApp(){
   const btn = document.getElementById('themeToggle');
 
   const modes = ['auto', 'light', 'dark'];
-  const icons = { auto:'◐', light:'☀', dark:'☾' };
+  const icons = { auto:'ph-monitor', light:'ph-sun', dark:'ph-moon' };
   const labels = { auto:'跟隨系統', light:'淺色', dark:'深色' };
 
   function getStored(){
@@ -2766,7 +2779,7 @@ function initApp(){
   function applyTheme(mode){
     html.setAttribute('data-theme', mode);
     if(btn){
-      btn.textContent = icons[mode] || '◐';
+      btn.innerHTML = `<i class="ph ${icons[mode] || 'ph-monitor'} icon" aria-hidden="true"></i>`;
       btn.title = labels[mode] || '';
     }
   }
@@ -3018,9 +3031,11 @@ if(navigator.vibrate) navigator.vibrate(50);
       <div class="rest-card-addr">${escapeHtml(r.addr)}</div>
       <div class="rest-card-order">點：${escapeHtml(r.order)}</div>
       <div class="rest-card-footer mono-num"><span>${escapeHtml(r.price)}</span>
-        <div class="rest-card-actions">
-          <button type="button" class="copy-btn" data-copy="${escapeHtml(r.name)}：${escapeHtml(r.order)}">複製</button>
-          <a style="text-decoration:underline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + r.addr)}">地圖</a>
+                <div class="rest-card-actions">
+          <button type="button" class="copy-btn"
+            data-copy="${escapeHtml(r.name)}：${escapeHtml(r.order)}"><i class="ph ph-copy icon" aria-hidden="true"></i>複製</button>
+          <a style="text-decoration:underline" target="_blank" rel="noopener"
+            href="https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + r.addr)}"><i class="ph ph-map-pin icon" aria-hidden="true"></i>地圖</a>
         </div>
       </div>
     </div>`).join('');
@@ -3038,7 +3053,11 @@ if(navigator.vibrate) navigator.vibrate(50);
     <div style="border-bottom:1px dotted var(--line);padding-bottom:10px;margin-bottom:10px">
       <div style="font-weight:700;font-size:13px">${escapeHtml(shop)}</div>
       <div style="color:var(--concrete);font-size:12px;margin-top:2px">${escapeHtml(order)}</div>
-      <button type="button" class="copy-btn" data-copy="${escapeHtml(shop)}：${escapeHtml(order)}" style="font-size:11px;text-decoration:underline;background:none;border:none;padding:0;cursor:pointer;margin-top:4px">複製點餐口令</button>
+      <button type="button" class="copy-btn"
+        data-copy="${escapeHtml(shop)}：${escapeHtml(order)}"
+        style="font-size:11px;text-decoration:underline;background:none;border:none;padding:0;cursor:pointer;margin-top:4px;display:flex;align-items:center;gap:4px">
+        <i class="ph ph-copy" style="font-size:14px" aria-hidden="true"></i>複製點餐口令
+      </button>
     </div>`).join('');
   orderList.addEventListener('click', e => {
     const btn = e.target.closest('.copy-btn');
