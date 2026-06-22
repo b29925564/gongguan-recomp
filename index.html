@@ -1,0 +1,2309 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>公館重組計畫 — Body Recomposition</title>
+<meta name="theme-color" content="#E30613">
+<link rel="manifest" href="./manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fragment+Mono&family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#F5F3F0;
+  --ink:#141414;
+  --signal:#E30613;
+  --concrete:#8A8A8A;
+  --line:#D9D4CE;
+  --card:#FFFCF9;
+}
+*{box-sizing:border-box;margin:0}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Inter','Noto Sans TC',Helvetica,Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.55;
+}
+a{color:inherit}
+button{font-family:inherit;cursor:pointer}
+button:disabled{opacity:.45;cursor:not-allowed}
+
+.mono{font-family:'Fragment Mono',monospace}
+.mono-num{font-family:'Fragment Mono',monospace;font-variant-numeric:tabular-nums}
+.kicker{font-size:11px;text-transform:uppercase;letter-spacing:.14em;color:var(--concrete)}
+.muted{color:var(--concrete)}
+.small{font-size:11px}
+
+.container{max-width:1040px;margin:0 auto;padding:0 20px}
+@media(min-width:768px){.container{padding:0 40px}}
+
+h1{font-size:44px;line-height:.92;letter-spacing:-.028em;font-weight:900}
+@media(min-width:768px){h1{font-size:72px}}
+h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
+@media(min-width:768px){h2{font-size:32px}}
+
+.stat-primary{font-size:21px;font-weight:800}
+.stat-label-row{
+  display:flex;flex-wrap:wrap;gap:6px 20px;
+  margin-top:18px;font-size:13px;color:var(--concrete)
+}
+.stat-label-row b{color:var(--ink)}
+
+.swiss-card{background:var(--card);border:1px solid var(--line);border-radius:4px}
+.swiss-rule{border-top:2px solid var(--ink)}
+.red-bar{background:var(--signal);height:5px;width:100%}
+
+.btn{
+  border:1px solid var(--line);background:var(--card);
+  padding:7px 14px;font-size:12px;border-radius:3px;
+  transition:.13s;color:var(--ink);
+}
+.btn:hover{border-color:var(--ink)}
+.btn.active,.btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.btn-signal{
+  background:var(--signal);color:#fff;border:1px solid var(--signal);
+  padding:11px 16px;font-size:12px;font-weight:700;border-radius:4px;
+}
+.btn-signal:hover{background:#c00510}
+.btn-danger{color:var(--signal);border-color:var(--signal)}
+
+.grid-3{display:grid;gap:16px}
+@media(min-width:860px){.grid-3{grid-template-columns:repeat(3,1fr)}}
+
+.two-col{display:grid;gap:20px}
+@media(min-width:980px){.two-col{grid-template-columns:1.45fr .9fr}}
+
+.rest-grid{display:grid;gap:12px}
+@media(min-width:640px){.rest-grid{grid-template-columns:repeat(2,1fr)}}
+@media(min-width:1024px){.rest-grid{grid-template-columns:repeat(3,1fr)}}
+
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px}
+.cal-cell{
+  background:var(--card);border:1px solid var(--line);
+  min-height:84px;padding:8px;cursor:pointer;
+  transition:border-color .12s,background .12s;
+  position:relative;border-radius:3px;user-select:none;
+}
+.cal-cell:hover{border-color:#999}
+.cal-cell:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.cal-cell.is-other{background:#eeebe6;color:#aaa7a1;cursor:default}
+.cal-cell.is-today{box-shadow:inset 0 0 0 2px var(--signal)}
+.cal-cell.is-selected{background:#141414;color:#F5F3F0;border-color:#141414}
+.cal-cell.is-selected .cal-meta{color:#bdb7b0!important}
+.cal-daynum{font-family:'Fragment Mono',monospace;font-size:12px}
+.cal-tag{font-size:10px;border:1px solid #cfcac3;padding:1px 5px;border-radius:2px}
+.cal-cell.is-selected .cal-tag{border-color:#555;color:#ddd8d1}
+.junk-dot{
+  width:5px;height:5px;background:var(--signal);
+  border-radius:50%;display:inline-block;
+}
+.cal-cell.is-selected .junk-dot{background:#ff5a64}
+@media(max-width:600px){.cal-cell{min-height:66px;padding:6px 5px}}
+
+.set-check{
+  width:21px;height:21px;border:1.5px solid #141414;
+  background:#fff;cursor:pointer;flex-shrink:0;
+  position:relative;border-radius:3px;
+}
+.set-check:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.set-check.done{background:#141414}
+.set-check.done::after{
+  content:'';position:absolute;left:6px;top:2px;
+  width:5px;height:10px;border:solid #fff;
+  border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.set-check.cap{background:var(--signal);border-color:var(--signal)}
+.set-check.cap::after{border-color:#fff}
+
+.bump-badge{
+  display:inline-block;background:var(--signal);color:#fff;
+  font-size:10px;padding:1px 6px;border-radius:3px;
+  margin-left:4px;font-weight:700;animation:popIn .25s ease;
+}
+.bump-undo{
+  display:inline-block;font-size:10px;padding:1px 6px;
+  border-radius:3px;margin-left:4px;cursor:pointer;
+  text-decoration:underline;color:var(--concrete);
+  background:none;border:none;font-family:inherit;
+}
+@keyframes popIn{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+
+.msum-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:560px){.msum-grid{grid-template-columns:repeat(4,1fr)}}
+.msum-cell{padding:10px 12px;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+.msum-num{font-size:22px;font-weight:800}
+.progress-track{height:6px;background:var(--line);border-radius:3px;overflow:hidden;margin-top:6px}
+.progress-fill{height:100%;background:var(--signal)}
+
+.data-tools-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#importFileInput{display:none}
+
+.bw-input-row{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.bw-field{display:flex;flex-direction:column;gap:3px}
+.bw-field label{font-size:10px;color:var(--concrete);text-transform:uppercase;letter-spacing:.08em}
+.bw-field input{
+  border:1px solid var(--line);border-radius:3px;
+  padding:7px 9px;font-size:14px;
+  font-family:'Fragment Mono',monospace;width:96px;background:#fff;
+}
+.bw-field input:focus{outline:none;border-color:var(--ink)}
+.bw-stat{padding:8px 12px;border:1px solid var(--line);border-radius:4px;background:var(--card);min-width:84px}
+.bw-stat-label{font-size:10px;color:var(--concrete);text-transform:uppercase;letter-spacing:.08em}
+.bw-stat-val{font-size:18px;font-weight:800;margin-top:2px}
+.bw-delta-down{color:#2a8}
+.bw-delta-up{color:var(--signal)}
+.bw-chart-wrap{margin-top:14px;overflow-x:auto}
+.bw-empty{font-size:12px;color:var(--concrete);padding:20px 0;text-align:center}
+
+.dp-nav-row{display:flex;gap:8px;margin-top:14px}
+.dp-nav-row .btn{flex:1}
+.dp-hint{font-size:11px;color:var(--concrete);margin-top:10px}
+.dp-section{border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
+.dp-header{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.dp-title{font-size:22px;font-weight:800;margin-top:4px}
+.dp-macros{font-size:11px;color:var(--concrete);text-align:right;line-height:1.6}
+.dp-eaten-row{margin-top:10px}
+
+.meal-block{
+  border:1px solid var(--line);background:var(--card);
+  padding:12px;border-radius:4px;
+}
+.meal-block-label{
+  font-size:10px;text-transform:uppercase;
+  letter-spacing:.1em;color:var(--concrete);
+}
+.meal-block-shop{font-weight:700;font-size:14px;margin-top:3px}
+.meal-block-item{font-size:13px;margin-top:2px}
+.meal-block-addr{font-size:11px;color:var(--concrete);margin-top:2px}
+.meal-block-actions{
+  display:flex;gap:14px;margin-top:7px;font-size:11px;
+}
+.meal-copy-btn{
+  text-decoration:underline;background:none;border:none;
+  padding:0;cursor:pointer;color:inherit;font-size:11px;
+}
+.meal-sup{
+  background:#f0ede8;border:1px solid var(--line);
+  padding:12px;border-radius:4px;font-size:12px;
+}
+
+.ex-row{
+  display:flex;gap:10px;padding:7px 0;
+  border-bottom:1px dotted var(--line);
+}
+.ex-checks{display:flex;gap:5px;flex-shrink:0;padding-top:2px}
+.ex-info{flex:1}
+.ex-name{font-weight:600;font-size:13px}
+.ex-weight-label{color:var(--concrete)}
+.ex-note{font-size:11px;color:var(--concrete)}
+.ex-hint{font-size:11px;color:var(--concrete);padding-top:6px}
+
+.rest-card-header{
+  display:flex;justify-content:space-between;
+  align-items:start;gap:8px;
+}
+.rest-card-name{font-weight:700;font-size:14px}
+.rest-card-p{
+  font-size:10px;padding:2px 6px;border:1px solid var(--line);
+  color:var(--concrete);white-space:nowrap;
+}
+.rest-card-addr{font-size:11px;color:var(--concrete);margin-top:3px}
+.rest-card-order{font-size:12px;margin-top:8px}
+.rest-card-footer{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-top:10px;padding-top:10px;
+  border-top:1px dotted var(--line);font-size:11px;
+}
+.rest-card-actions{display:flex;gap:12px}
+.copy-btn{
+  text-decoration:underline;background:none;border:none;
+  padding:0;cursor:pointer;font-size:11px;color:inherit;
+}
+
+#errorBanner{
+  display:none;background:#fff0f0;border:1px solid #e66;
+  color:#b00;padding:12px 16px;margin:12px auto;
+  max-width:1040px;border-radius:4px;font-size:13px;
+  font-family:'Fragment Mono',monospace;white-space:pre-wrap;
+}
+
+#toast{
+  position:fixed;bottom:24px;left:50%;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);padding:8px 14px;
+  font-size:12px;border-radius:4px;opacity:0;
+  transition:opacity .18s;pointer-events:none;z-index:70;
+}
+
+#orderDrawer{
+  position:fixed;right:0;top:0;height:100%;width:360px;
+  max-width:92vw;background:var(--card);
+  border-left:1px solid var(--ink);z-index:50;
+  transform:translateX(100%);
+  transition:transform .24s cubic-bezier(.16,1,.3,1);
+}
+#orderDrawer.open{transform:translateX(0)}
+#drawerBackdrop{
+  position:fixed;inset:0;background:rgba(0,0,0,.18);
+  z-index:40;display:none;
+}
+#drawerBackdrop.show{display:block}
+#orderFab{
+  position:fixed;right:18px;bottom:18px;z-index:45;
+  background:var(--signal);color:#fff;border:none;
+  padding:11px 16px;font-size:12px;font-weight:700;
+  border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.18);
+  cursor:pointer;letter-spacing:.04em;
+}
+#orderFab:hover{background:#c00510}
+
+#searchFab{
+  position:fixed;left:18px;bottom:18px;z-index:45;
+  background:var(--ink);color:var(--paper);border:none;
+  padding:11px 16px;font-size:12px;font-weight:700;
+  border-radius:4px;box-shadow:0 4px 16px rgba(0,0,0,.18);
+  cursor:pointer;letter-spacing:.04em;
+}
+#searchFab:hover{background:#000}
+#searchDrawer{
+  position:fixed;left:0;top:0;height:100%;width:390px;
+  max-width:92vw;background:var(--card);
+  border-right:1px solid var(--ink);z-index:50;
+  transform:translateX(-100%);
+  transition:transform .24s cubic-bezier(.16,1,.3,1);
+}
+#searchDrawer.open{transform:translateX(0)}
+.drawer-head{
+  padding:16px 18px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:center;
+  font-weight:800;
+}
+.drawer-body{
+  padding:14px 18px;overflow-y:auto;height:calc(100% - 57px);
+}
+.search-input{
+  width:100%;border:1px solid var(--line);background:#fff;
+  border-radius:3px;padding:10px 12px;font-size:14px;
+  font-family:inherit;
+}
+.search-input:focus{outline:none;border-color:var(--ink)}
+.search-filter-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.search-chip{
+  border:1px solid var(--line);background:var(--card);
+  padding:6px 10px;font-size:11px;border-radius:3px;color:var(--ink);
+}
+.search-chip.active{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.search-meta{margin-top:10px;font-size:11px;color:var(--concrete)}
+.search-results{margin-top:14px;display:grid;gap:10px}
+.search-item{
+  width:100%;text-align:left;font-family:inherit;color:inherit;
+  border:1px solid var(--line);background:var(--card);
+  padding:12px;border-radius:4px;cursor:pointer;transition:.12s;
+}
+.search-item:hover{border-color:var(--ink)}
+.search-item:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.search-item-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:8px;
+}
+.search-item-title{font-weight:700;font-size:13px}
+.search-item-sub{font-size:11px;color:var(--concrete);margin-top:3px}
+.search-item-body{font-size:12px;line-height:1.6;margin-top:8px}
+.search-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.search-tag{
+  font-size:10px;padding:2px 6px;border:1px solid var(--line);
+  border-radius:3px;color:var(--concrete);white-space:nowrap;
+}
+.search-tag.ok{color:#2a8;border-color:#2a8}
+.search-tag.warn{color:var(--signal);border-color:var(--signal)}
+
+.modal{
+  position:fixed;inset:0;background:rgba(0,0,0,.26);
+  display:none;align-items:center;justify-content:center;
+  padding:18px;z-index:60;
+}
+.modal.show{display:flex}
+.modal-card{
+  width:min(960px,100%);max-height:90vh;overflow:auto;
+  background:var(--card);border:1px solid var(--ink);border-radius:4px;
+}
+.modal-head{
+  padding:16px 18px;border-bottom:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:12px;flex-wrap:wrap;
+}
+.modal-title{font-weight:800;font-size:18px}
+.modal-body{padding:16px 18px}
+.modal-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+.weekly-grid{display:grid;gap:10px}
+@media(min-width:768px){.weekly-grid{grid-template-columns:repeat(4,1fr)}}
+.week-cell{
+  padding:10px 12px;border:1px solid var(--line);
+  border-radius:4px;background:var(--card);
+}
+.week-change-list{display:grid;gap:8px}
+.week-row{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:10px;padding:10px 0;border-bottom:1px dotted var(--line);
+}
+.week-row:last-child{border-bottom:none}
+.week-day-link{
+  width:100%;text-align:left;font-family:inherit;color:inherit;
+  border:1px solid var(--line);background:var(--card);
+  padding:10px 12px;border-radius:4px;cursor:pointer;
+}
+.week-day-link:hover{border-color:var(--ink)}
+.week-day-link:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+
+.export-preview{
+  border:1px solid var(--line);background:#eeebe6;
+  padding:10px;border-radius:4px;overflow:auto;
+}
+.export-preview canvas,.export-preview img{
+  max-width:100%;height:auto;display:block;margin:0 auto;
+}
+
+#pwaInstallBanner{
+  position:fixed;left:18px;right:18px;bottom:74px;z-index:55;
+  display:none;justify-content:space-between;align-items:center;
+  gap:12px;flex-wrap:wrap;background:var(--card);
+  border:1px solid var(--ink);padding:12px 14px;border-radius:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+#pwaInstallBanner.show{display:flex}
+@media(min-width:768px){
+  #pwaInstallBanner{left:auto;right:18px;width:420px}
+}
+</style>
+</head>
+<body>
+
+<div class="red-bar"></div>
+<div id="errorBanner" role="alert"></div>
+
+<header style="border-bottom:1px solid var(--line)">
+  <div class="container" style="padding-top:44px;padding-bottom:44px">
+    <div class="kicker" style="margin-bottom:10px">Body Recomposition — Gongguan, NTU</div>
+    <h1>公館重組<br>計畫</h1>
+    <div class="stat-label-row">
+      <span><b>176cm</b> / 75kg / 24y / 男</span>
+      <span>Skinny fat · 蠶豆症</span>
+      <span>國青大樓</span>
+      <span style="color:var(--ink)">無乳清 · 無咖啡 · 無四神湯</span>
+      <span>$350 / 天</span>
+      <span>P 130–145g · 2100–2300 kcal</span>
+    </div>
+  </div>
+</header>
+
+<section class="container" style="padding-top:28px;padding-bottom:28px">
+  <div class="grid-3">
+    <div class="swiss-card" style="padding:18px">
+      <div class="kicker" style="margin-bottom:4px">當前查看</div>
+      <div class="stat-primary" id="todayTopLabel">—</div>
+      <div class="small muted" style="margin-top:4px">訓練週期：上 / 下 / 休 / 上 / 下 / 休 / 休</div>
+    </div>
+    <div class="swiss-card" style="padding:18px">
+      <div class="kicker" style="margin-bottom:4px">訓練重量 · 胸推</div>
+      <div>
+        <span class="mono-num" style="font-size:30px;font-weight:800" id="chestWeightNum">36<span class="small muted">kg</span></span>
+        <span class="mono-num" style="color:var(--signal);font-size:12px;margin-left:10px">→ 目標 50kg+</span>
+      </div>
+      <div style="height:5px;background:var(--line);margin-top:8px">
+        <div id="chestWeightBar" style="width:52%;height:100%;background:var(--signal)"></div>
+      </div>
+      <div class="small muted mono-num" style="margin-top:6px">起始 36kg · 4組 x 6-10下 · RPE 7-8</div>
+    </div>
+    <div class="swiss-card" style="padding:18px">
+      <div class="kicker" style="margin-bottom:4px">營養基準</div>
+      <div style="font-size:13px;color:var(--concrete);line-height:1.7">
+        蛋白質 <b style="color:var(--ink)">130–145g</b> / 天<br>
+        熱量 <b style="color:var(--ink)">2100–2300 kcal</b><br>
+        預算 <b style="color:var(--ink)">$ ≤350 TWD</b>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding-bottom:52px">
+  <div class="swiss-rule" style="margin-bottom:22px"></div>
+
+  <div class="swiss-card" style="padding:18px;margin-bottom:22px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div>
+        <div class="kicker">本月摘要</div>
+        <div style="font-weight:800;font-size:16px;margin-top:2px" id="msumMonthLabel">—</div>
+      </div>
+      <div class="small muted">統計依「打勾」與「標記已吃」紀錄計算</div>
+    </div>
+    <div class="msum-grid" id="msumGrid"></div>
+  </div>
+
+  <div class="swiss-card" style="padding:18px;margin-bottom:22px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+      <div>
+        <div class="kicker">體重 / 體脂趨勢</div>
+        <div style="font-weight:800;font-size:16px;margin-top:2px">紀錄真實結果，不只是計畫</div>
+      </div>
+    </div>
+    <div class="bw-input-row">
+      <div class="bw-field">
+        <label for="bwWeightInput">體重 (kg)</label>
+        <input type="number" id="bwWeightInput" step="0.1" min="30" max="200" placeholder="75.0">
+      </div>
+      <div class="bw-field">
+        <label for="bwFatInput">體脂 % (選填)</label>
+        <input type="number" id="bwFatInput" step="0.1" min="3" max="60" placeholder="22.0">
+      </div>
+      <button type="button" id="bwSaveBtn" class="btn">紀錄今日所選日期</button>
+      <span class="small muted" id="bwSaveMsg" aria-live="polite"></span>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px" id="bwStatsRow"></div>
+    <div class="bw-chart-wrap" id="bwChartWrap"></div>
+  </div>
+
+  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px">
+    <div>
+      <h2>訓練・飲食月曆</h2>
+      <div class="small muted" style="margin-top:4px">
+        點選日期查看當日訓練 + 三餐點餐口令 ·
+        <span style="display:inline-block;width:5px;height:5px;background:var(--signal);border-radius:50%;vertical-align:middle"></span>
+        垃圾食物日
+      </div>
+    </div>
+    <div class="small muted">
+      <span style="border:1px solid var(--ink);padding:1px 5px;font-size:10px">A</span> 上肢推　
+      <span style="border:1px solid var(--ink);padding:1px 5px;font-size:10px">B</span> 下肢背　
+      <span style="border:1px solid var(--line);padding:1px 5px;font-size:10px;color:var(--concrete)">休</span> 休息
+    </div>
+  </div>
+
+  <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+    <button type="button" id="weekReportBtn" class="btn">週報</button>
+    <button type="button" id="exportCalBtn" class="btn">匯出月曆 PNG</button>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="swiss-card" style="padding:16px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
+          <button type="button" class="btn" id="calPrev">‹ 上月</button>
+          <div style="font-weight:700" id="calMonthLabel">2026 年 6 月</div>
+          <div style="display:flex;gap:8px">
+            <button type="button" class="btn" id="calToday">今天</button>
+            <button type="button" class="btn" id="calNext">下月 ›</button>
+          </div>
+        </div>
+        <div class="cal-grid small muted mono-num" style="text-align:center;margin-bottom:6px;color:var(--concrete)">
+          <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+        </div>
+        <div id="calGrid" class="cal-grid" role="grid" aria-label="訓練飲食月曆"></div>
+      </div>
+      <div class="swiss-card" style="padding:12px 14px;margin-top:12px;font-size:11px;color:var(--concrete);line-height:1.7">
+        <b style="color:var(--ink)">訓練規則：</b>RPE 7-8 · 組間 90s · 第一組做到次數上限 → 下次 +2.5kg · 睡眠 &lt;6hr 隔天重量 -10%<br>
+        <b style="color:var(--ink)">器材限定：</b>胸推 / 蝴蝶 / 後三角 / 二頭彎舉 / 腿推 / 腹背 / 三頭推舉 / 高拉
+      </div>
+    </div>
+
+    <div>
+      <div class="swiss-card" style="padding:20px;position:sticky;top:16px" id="dayPanel">
+        <div class="dp-header">
+          <div>
+            <div class="kicker" id="dpKicker">—</div>
+            <div class="dp-title" id="dpTitle">—</div>
+          </div>
+          <div class="dp-macros mono-num" id="dpMacros">—</div>
+        </div>
+        <div class="dp-eaten-row">
+          <button type="button" id="dpEatenToggle" class="btn" style="font-size:11px">
+            ☐ 標記今日三餐已照計畫吃
+          </button>
+        </div>
+        <div class="dp-section">
+          <div class="kicker" style="margin-bottom:8px" id="dpWorkoutLabel">訓練</div>
+          <div id="dpWorkout"></div>
+        </div>
+        <div class="dp-section" id="dpMealsWrap">
+          <div id="dpMeals" style="display:grid;gap:10px"></div>
+        </div>
+        <div class="dp-nav-row">
+          <button type="button" id="dpPrev" class="btn">← 前一天</button>
+          <button type="button" id="dpNext" class="btn">後一天 →</button>
+        </div>
+        <div class="dp-hint">
+          蛋白質不夠就多吃 1–2 顆茶葉蛋。臨時換店：女九 ↔ 鳳城 ↔ 大福利 ／ 八方 ↔ Subway ↔ 摩斯
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="background:#ECEAE6;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:48px 0">
+  <div class="container">
+    <h2 style="margin-bottom:6px">公館國青白名單 · 18 家</h2>
+    <p style="font-size:13px;color:var(--concrete);margin-bottom:18px">
+      全部走路 10 分鐘內。已剔除：池先生 / 楽坡 Bon Box / 阿英 / 美而美 / 永和豆漿 / 兄弟鹹酥雞 / 肯德基 / 一弄 / 118巷群。點擊「複製」直接複製點餐口令。
+    </p>
+    <div id="restaurantGrid" class="rest-grid"></div>
+  </div>
+</section>
+
+<section class="container" style="padding:32px 0">
+  <div class="swiss-card" style="padding:18px">
+    <div class="kicker" style="margin-bottom:4px">資料備份</div>
+    <p class="small muted" style="margin-bottom:12px">
+      打勾與重量紀錄存在這台裝置的瀏覽器裡，清快取或換裝置會遺失。建議定期匯出備份。
+    </p>
+    <div class="data-tools-row">
+      <button type="button" id="exportBtn" class="btn">⬇ 匯出備份 (JSON)</button>
+      <button type="button" id="importBtn" class="btn">⬆ 匯入備份</button>
+      <input type="file" id="importFileInput" accept="application/json">
+      <button type="button" id="resetBtn" class="btn btn-danger">清除所有紀錄</button>
+      <span class="small muted" id="dataToolsMsg" aria-live="polite"></span>
+    </div>
+  </div>
+</section>
+
+<footer style="padding:36px 0;font-size:11px;color:var(--concrete)">
+  <div class="container" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
+    <div>
+      Gongguan Recomp Dashboard · Swiss Style<br>
+      176 / 75kg / 24y 男 · Skinny fat · 蠶豆症<br>
+      目標：肚子變小 · 胸部變大
+    </div>
+    <div class="mono-num" style="text-align:right">
+      P 130–145 g / d<br>
+      2100–2300 kcal<br>
+      $ ≤350 TWD / d<br>
+      無乳清 · 無咖啡
+    </div>
+  </div>
+</footer>
+
+<!-- Weekly report modal -->
+<div id="weeklyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="weeklyModalTitle" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="kicker">週報</div>
+        <div class="modal-title" id="weeklyModalTitle">—</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="weeklyNewerBtn" class="btn">較新一週</button>
+        <button type="button" id="weeklyOlderBtn" class="btn">較早一週</button>
+        <button type="button" id="weeklyCopyBtn" class="btn">複製純文字</button>
+        <button type="button" id="weeklyCloseBtn" class="btn">關閉</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="small muted mono-num" id="weeklyRangeLabel">—</div>
+      <div id="weeklyReportBody" style="margin-top:14px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Calendar export modal -->
+<div id="exportCalModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="exportCalTitle" aria-hidden="true">
+  <div class="modal-card" style="width:min(1100px,100%)">
+    <div class="modal-head">
+      <div>
+        <div class="kicker">月曆匯出</div>
+        <div class="modal-title" id="exportCalTitle">PNG 預覽</div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="downloadCalBtn" class="btn-signal">下載 PNG</button>
+        <button type="button" id="exportCalCloseBtn" class="btn">關閉</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div class="small muted" style="margin-bottom:10px">
+        匯出內容以目前顯示月份為準；Canvas 使用系統字體，中文字型會依裝置而異。
+      </div>
+      <div id="exportCalPreview" class="export-preview"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PWA install banner -->
+<div id="pwaInstallBanner" aria-live="polite">
+  <div>
+    <div class="kicker">PWA</div>
+    <div style="font-weight:800;font-size:14px;margin-top:2px">可安裝到手機桌面，支援離線開啟</div>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap">
+    <button type="button" id="pwaDismissBtn" class="btn">稍後</button>
+    <button type="button" id="pwaInstallBtn" class="btn-signal">安裝 App</button>
+  </div>
+</div>
+
+<!-- Search FAB / Drawer -->
+<button type="button" id="searchFab">搜尋 ▸</button>
+<div id="searchDrawer" role="dialog" aria-modal="true" aria-label="搜尋訓練與飲食紀錄" aria-hidden="true">
+  <div class="drawer-head">
+    搜尋 / 篩選
+    <button type="button" id="closeSearchDrawer" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉">×</button>
+  </div>
+  <div class="drawer-body">
+    <input type="search" id="searchInput" class="search-input" placeholder="輸入日期、店名、動作、A/B/休…">
+    <div class="search-filter-row" id="searchFilterRow">
+      <button type="button" class="search-chip active" data-filter="all">全部</button>
+      <button type="button" class="search-chip" data-filter="A">A日</button>
+      <button type="button" class="search-chip" data-filter="B">B日</button>
+      <button type="button" class="search-chip" data-filter="rest">休息</button>
+      <button type="button" class="search-chip" data-filter="trained">已完成訓練</button>
+      <button type="button" class="search-chip" data-filter="eaten">已吃</button>
+      <button type="button" class="search-chip" data-filter="junk">垃圾食物</button>
+    </div>
+    <div class="search-meta" id="searchResultMeta">掃描今天前 365 天與後 31 天…</div>
+    <div id="searchResults" class="search-results"></div>
+  </div>
+</div>
+
+<!-- Order FAB / Drawer -->
+<button type="button" id="orderFab">點餐口令 ▸</button>
+<div id="orderDrawer" role="dialog" aria-modal="true" aria-label="點餐口令" aria-hidden="true">
+  <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-weight:800">
+    到店直接唸
+    <button type="button" id="closeDrawer" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉">×</button>
+  </div>
+  <div id="orderList" style="padding:14px 18px;overflow-y:auto;height:calc(100% - 56px);font-size:13px"></div>
+</div>
+<div id="drawerBackdrop"></div>
+<div id="toast" role="status" aria-live="polite">已複製</div>
+<script>
+'use strict';
+
+/* ── visible error banner ── */
+(function(){
+  const banner = document.getElementById('errorBanner');
+  function showErr(msg){
+    banner.style.display = 'block';
+    banner.textContent   = 'JS Error: ' + msg;
+  }
+  window.addEventListener('error', e =>
+    showErr(e.message + ' @ ' + e.filename + ':' + e.lineno));
+  window.addEventListener('unhandledrejection', e =>
+    showErr('Promise: ' + (e.reason && e.reason.message || e.reason)));
+})();
+
+/* ══════════════════════════════════════════════
+   DATA
+   ══════════════════════════════════════════════ */
+const WORKOUTS = {
+  A: [
+    { id:'chest_press',         name:'合式胸部推舉機',   sets:4, reps:'6-10',  kg:36, note:'肩胛夾緊' },
+    { id:'pec_fly',             name:'蝴蝶機',           sets:3, reps:'10-15', kg:36, note:'' },
+    { id:'triceps_press',       name:'三頭肌推舉機',     sets:3, reps:'8-12',  kg:43, note:'' },
+    { id:'lat_pulldown_narrow', name:'散式高拉訓練機',   sets:3, reps:'8-12',  kg:36, note:'握窄，上背厚度' },
+    { id:'ab_machine',          name:'腹部訓練機',       sets:3, reps:'12-15', kg:63, note:'' },
+  ],
+  B: [
+    { id:'leg_press',           name:'大腿推蹬訓練機',   sets:4, reps:'6-10',  kg:60, note:'' },
+    { id:'calf_press',          name:'小腿推蹬',         sets:3, reps:'12-15', kg:60, note:'' },
+    { id:'lat_pulldown_wide',   name:'散式高拉訓練機',   sets:4, reps:'6-10',  kg:36, note:'握寬，背闊' },
+    { id:'rear_delt',           name:'後三角訓練機',     sets:3, reps:'12-15', kg:36, note:'' },
+    { id:'bicep_curl',          name:'二頭肌彎舉訓練機', sets:3, reps:'8-12',  kg:36, note:'' },
+    { id:'lower_back',          name:'下背訓練機',       sets:2, reps:'12',    kg:63, note:'' },
+  ]
+};
+
+const RESTAURANTS = [
+  { name:'台大女九 小福自助餐',   shortName:'女九自助餐',   addr:'新生南路三段 女九宿舍B1',              order:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗',                    price:'$110', p:'P 45g' },
+  { name:'大福利排骨大王',         shortName:'大福利',       addr:'羅斯福路三段286巷12號',                order:'雞腿飯 1份',                                                    price:'$130', p:'P 38g' },
+  { name:'鳳城燒臘',               shortName:'鳳城燒臘',     addr:'新生南路三段58-3號',                   order:'三寶飯：燒鴨＋油雞＋叉燒',                                     price:'$125', p:'P 40g' },
+  { name:'小鹿亭',                 shortName:'小鹿亭',       addr:'公館商圈 羅斯福路',                    order:'日式咖哩雞肉飯 / 豬排丼',                                       price:'$100-120', p:'P 30g' },
+  { name:'厚宅咖哩',               shortName:'厚宅咖哩',     addr:'羅斯福路四段1號 台大大一女B棟',        order:'雞肉咖哩飯，可免費加飯加醬',                                    price:'$140', p:'P 35g' },
+  { name:'祥記炒燴',               shortName:'祥記炒燴',     addr:'水源市場62號攤 羅斯福路四段92號',      order:'肉片滑蛋燴飯',                                                  price:'$120', p:'P 28g' },
+  { name:'龍記炒燴',               shortName:'龍記炒燴',     addr:'水源市場內',                           order:'干炒牛河 / 滑蛋牛肉燴飯',                                       price:'$130', p:'P 25g' },
+  { name:'藍家割包',               shortName:'藍家割包',     addr:'羅斯福路三段316巷8弄3號',              order:'割包 瘦肉＋茶葉蛋x2＋無糖豆漿',                                price:'$115', p:'P 32g' },
+  { name:'龍哥無骨雞腿排',         shortName:'龍哥雞腿排',   addr:'羅斯福路四段108巷10號',                order:'無骨雞腿排1份＋超商白飯＋茶葉蛋（店內無附飯）',                price:'$115', p:'P 35g' },
+  { name:'京阪豚骨拉麵',           shortName:'京阪拉麵',     addr:'羅斯福路四段136巷6弄6號',              order:'豚骨拉麵 1碗',                                                  price:'$120', p:'P 25g' },
+  { name:'潮味決湯滷專門店',       shortName:'潮味決',       addr:'羅斯福路三段284巷8號',                 order:'滷味套餐 豚骨湯底 選雞肉+豆腐+青菜',                           price:'$140', p:'P 30g' },
+  { name:'uPoke 夏威夷生魚飯',     shortName:'uPoke',        addr:'台大禮客OUTLET內',                     order:'鮭魚Poke碗，飯量正常',                                          price:'$180', p:'P 35g' },
+  { name:'麥當勞 公館店',          shortName:'麥當勞 早',    addr:'羅斯福路四段78號',                     order:'早：豬肉滿福堡加蛋',                                            price:'$65',  p:'P 20g' },
+  { name:'麥當勞 公館店 (晚)',     shortName:'麥當勞 晚',    addr:'羅斯福路四段78號',                     order:'晚：勁辣雞腿堡 單點',                                           price:'$89',  p:'P 25g' },
+  { name:'Subway 公館店',          shortName:'Subway',       addr:'羅斯福路四段119號',                    order:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加',               price:'$129', p:'P 25g' },
+  { name:'八方雲集 公館店',        shortName:'八方雲集',     addr:'羅斯福路四段120號',                    order:'鍋貼10顆＋無糖豆漿1瓶',                                        price:'$105', p:'P 25g' },
+  { name:'摩斯漢堡 公館店',        shortName:'摩斯',         addr:'公館商圈',                             order:'海洋珍珠堡＋無糖紅茶',                                          price:'$85',  p:'P 18g' },
+  { name:'全家 / 7-11',            shortName:'超商補給',     addr:'國青大樓樓下',                         order:'茶葉蛋 $10/7g · 無糖豆漿 $30/15g · 即食雞胸 $55/25g',         price:'–',    p:'補給站' },
+];
+
+const ORDER_DICT = RESTAURANTS.map(r => [r.shortName, r.order]);
+
+const MEALS = [
+  {day:1,  train:'A', junk:false, b:{shop:'麥當勞 公館店',      item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'龍哥無骨雞腿排',   item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',          addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'無糖豆漿1瓶＋茶葉蛋x2',   price:50},  p:138, kcal:2150, total:335},
+  {day:2,  train:'B', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:80},  l:{shop:'鳳城燒臘',           item:'三寶飯：燒鴨＋油雞＋叉燒',                addr:'新生南路三段58-3號',     price:125}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:132, kcal:2100, total:330},
+  {day:3,  train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'小鹿亭',             item:'日式咖哩雞肉飯',                          addr:'公館商圈 羅斯福路',      price:100}, d:{shop:'大福利排骨大王',  item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, sup:{text:'無糖豆漿1瓶＋茶葉蛋1顆', price:35},  p:134, kcal:2200, total:350},
+  {day:4,  train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'厚宅咖哩',           item:'雞肉咖哩飯，可免費加飯加醬',              addr:'羅斯福路四段1號',        price:140}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:131, kcal:2150, total:330},
+  {day:5,  train:'B', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋x2',            addr:'國青樓下',                      price:95},  l:{shop:'祥記炒燴',           item:'肉片滑蛋燴飯',                            addr:'水源市場62號攤 羅斯福路四段92號', price:120}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2100, total:365},
+  {day:6,  train:'休', junk:true,  b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml',                  addr:'國青樓下',                      price:70},  l:{shop:'龍記炒燴',           item:'干炒牛河',                                addr:'水源市場內',             price:130}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋x2',               price:20},  p:133, kcal:2050, total:349},
+  {day:7,  train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',                    addr:'台大禮客OUTLET內',       price:180}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2100, total:384},
+  {day:8,  train:'A', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'藍家割包',        item:'割包 瘦肉＋茶葉蛋x2＋無糖豆漿1瓶',         addr:'羅斯福路三段316巷8弄3號',price:115}, sup:{text:'無糖豆漿1瓶',            price:30},  p:142, kcal:2100, total:320},
+  {day:9,  train:'B', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'鳳城燒臘',           item:'燒臘雙拼飯',                              addr:'新生南路三段58-3號',     price:125}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋1顆',              price:10},  p:140, kcal:2150, total:335},
+  {day:10, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋1顆',           addr:'國青樓下',                      price:65},  l:{shop:'大福利排骨大王',     item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:135, kcal:2150, total:320},
+  {day:11, train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'小鹿亭',             item:'豬排丼',                                  addr:'公館商圈 羅斯福路',      price:120}, d:{shop:'潮味決湯滷專門店', item:'滷味套餐 豚骨湯底 雞肉+豆腐+青菜',        addr:'羅斯福路三段284巷8號',   price:140}, sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2120, total:355},
+  {day:12, train:'B', junk:false, b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'厚宅咖哩',           item:'咖哩牛',                                  addr:'羅斯福路四段1號',        price:140}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'—',                      price:0},   p:130, kcal:2200, total:355},
+  {day:13, train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'祥記炒燴',           item:'肉片滑蛋燴飯',                            addr:'水源市場62號攤',         price:120}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋x2',               price:20},  p:132, kcal:2050, total:354},
+  {day:14, train:'休', junk:true,  b:{shop:'全家 國青門市',       item:'鮮奶500ml＋香蕉1根＋茶葉蛋x2',              addr:'國青樓下',                      price:65},  l:{shop:'龍記炒燴',           item:'干炒牛河',                                addr:'水源市場內',             price:130}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'即食雞胸1包',            price:55},  p:138, kcal:2100, total:339},
+  {day:15, train:'A', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',                    addr:'台大禮客OUTLET內',       price:180}, d:{shop:'摩斯漢堡 公館店', item:'海洋珍珠堡＋無糖紅茶',                    addr:'公館商圈',               price:85},  sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2050, total:360},
+  {day:16, train:'B', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋1顆',              price:10},  p:140, kcal:2120, total:320},
+  {day:17, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋x2',            addr:'國青樓下',                      price:95},  l:{shop:'鳳城燒臘',           item:'三寶飯：燒鴨＋油雞＋叉燒',                addr:'新生南路三段58-3號',     price:125}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋1顆',              price:10},  p:132, kcal:2100, total:335},
+  {day:18, train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'大福利排骨大王',     item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'無糖豆漿1瓶＋茶葉蛋1顆', price:40},  p:135, kcal:2200, total:355},
+  {day:19, train:'B', junk:true,  b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'小鹿亭',             item:'日式咖哩雞肉飯',                          addr:'公館商圈 羅斯福路',      price:100}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋x2',               price:20},  p:137, kcal:2050, total:344},
+  {day:20, train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'厚宅咖哩',           item:'雞肉咖哩飯',                              addr:'羅斯福路四段1號',        price:140}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'無糖豆漿1瓶＋茶葉蛋1顆', price:40},  p:130, kcal:2150, total:354},
+  {day:21, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml',                  addr:'國青樓下',                      price:70},  l:{shop:'祥記炒燴',           item:'廣州炒飯',                                addr:'水源市場62號攤',         price:120}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋x2',               price:20},  p:135, kcal:2100, total:320},
+  {day:22, train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'龍記炒燴',           item:'滑蛋牛肉燴飯',                            addr:'水源市場內',             price:130}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:131, kcal:2080, total:320},
+  {day:23, train:'B', junk:true,  b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋1顆',           addr:'國青樓下',                      price:65},  l:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',                    addr:'台大禮客OUTLET內',       price:180}, d:{shop:'藍家割包',        item:'割包 瘦肉＋茶葉蛋1顆＋無糖豆漿1瓶',        addr:'羅斯福路三段316巷8弄3號',price:105}, sup:{text:'—',                      price:0},   p:132, kcal:2000, total:350},
+  {day:24, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'無糖豆漿1瓶',            price:30},  p:133, kcal:2150, total:350},
+  {day:25, train:'A', junk:true,  b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'鳳城燒臘',           item:'三寶飯：燒鴨＋油雞＋叉燒',                addr:'新生南路三段58-3號',     price:125}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋1顆',              price:10},  p:136, kcal:2050, total:359},
+  {day:26, train:'B', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'大福利排骨大王',     item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, d:{shop:'摩斯漢堡 公館店', item:'海洋珍珠堡＋無糖紅茶',                    addr:'公館商圈',               price:85},  sup:{text:'無糖豆漿1瓶＋茶葉蛋x2',  price:50},  p:132, kcal:2100, total:330},
+  {day:27, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'小鹿亭',             item:'豬排丼',                                  addr:'公館商圈 羅斯福路',      price:120}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋1顆',              price:10},  p:139, kcal:2120, total:335},
+  {day:28, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋x2',            addr:'國青樓下',                      price:95},  l:{shop:'厚宅咖哩',           item:'咖哩牛',                                  addr:'羅斯福路四段1號',        price:140}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'—',                      price:0},   p:125, kcal:2100, total:340},
+  {day:29, train:'A', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'祥記炒燴',           item:'肉片滑蛋燴飯',                            addr:'水源市場62號攤',         price:120}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'無糖豆漿1瓶＋茶葉蛋x2',  price:50},  p:132, kcal:2150, total:324},
+  {day:30, train:'B', junk:true,  b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'龍記炒燴',           item:'干炒牛河',                                addr:'水源市場內',             price:130}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋1顆',              price:10},  p:130, kcal:2050, total:359},
+  {day:31, train:'休', junk:true,  b:{shop:'全家 國青門市',       item:'鮮奶500ml＋香蕉1根＋茶葉蛋x2',              addr:'國青樓下',                      price:65},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',               addr:'台大禮客OUTLET內',       price:180}, sup:{text:'—',                      price:0},   p:132, kcal:2000, total:355},
+];
+
+/* ══════════════════════════════════════════════
+   UTILITIES
+   ══════════════════════════════════════════════ */
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,
+    c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function lsGet(k, fallback){
+  try{ const v = localStorage.getItem(k); return v === null ? fallback : v; }
+  catch(e){ return fallback; }
+}
+function lsSet(k, v){
+  try{ localStorage.setItem(k, v); return true; }
+  catch(e){
+    console.warn('localStorage write failed:', k, e);
+    showStorageWarning();
+    return false;
+  }
+}
+function lsRemove(k){
+  try{ localStorage.removeItem(k); }catch(e){}
+}
+
+let _storageWarnShown = false;
+function showStorageWarning(){
+  if(_storageWarnShown) return;
+  _storageWarnShown = true;
+  const banner = document.getElementById('errorBanner');
+  banner.style.display = 'block';
+  banner.textContent = '⚠ 儲存空間不足，資料可能無法保存。請先匯出備份再清除瀏覽器快取。';
+}
+
+function bwKey(y, m, d){ return `recomp_bw_${y}-${m+1}-${d}`; }
+function getBwEntry(y, m, d){
+  const raw = lsGet(bwKey(y,m,d), null);
+  if(raw === null) return null;
+  try{ return JSON.parse(raw); }catch(e){ return null; }
+}
+function setBwEntry(y, m, d, weight, bodyFat){
+  const payload = {
+    w: weight,
+    bf: (bodyFat === null || bodyFat === undefined || isNaN(bodyFat)) ? null : bodyFat
+  };
+  lsSet(bwKey(y,m,d), JSON.stringify(payload));
+}
+function getAllBwEntries(){
+  const out = [];
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(!k || k.indexOf('recomp_bw_') !== 0) continue;
+      const dateStr = k.slice('recomp_bw_'.length);
+      const parts = dateStr.split('-').map(Number);
+      if(parts.length !== 3 || parts.some(isNaN)) continue;
+      const [y, m, d] = parts;
+      const raw = localStorage.getItem(k);
+      let parsed;
+      try{ parsed = JSON.parse(raw); }catch(e){ continue; }
+      if(!parsed || typeof parsed.w !== 'number' || isNaN(parsed.w)) continue;
+      out.push({ year:y, month:m-1, day:d, date:new Date(y,m-1,d), w:parsed.w, bf:parsed.bf });
+    }
+  }catch(e){}
+  out.sort((a,b) => a.date - b.date);
+  return out;
+}
+
+function getExerciseWeight(ex){
+  const v = lsGet('recomp_weight_id_' + ex.id, null);
+  const n = v === null ? ex.kg : parseFloat(v);
+  return isNaN(n) ? ex.kg : n;
+}
+function setExerciseWeight(ex, kg){
+  lsSet('recomp_weight_id_' + ex.id, String(kg));
+}
+
+function migrateLegacyExerciseKeys(){
+  if(lsGet('recomp_migrated_v2','0') === '1') return;
+  const allExercises = [...WORKOUTS.A, ...WORKOUTS.B];
+  allExercises.forEach(ex => {
+    const legacyKey = 'recomp_weight_' + ex.name;
+    const legacyVal = lsGet(legacyKey, null);
+    if(legacyVal !== null && lsGet('recomp_weight_id_' + ex.id, null) === null){
+      lsSet('recomp_weight_id_' + ex.id, legacyVal);
+    }
+  });
+  try{
+    const allKeys = [];
+    for(let i = 0; i < localStorage.length; i++) allKeys.push(localStorage.key(i));
+    allKeys.forEach(k => {
+      if(!k || k.indexOf('recomp_set_') !== 0) return;
+      allExercises.forEach(ex => {
+        const marker = '_' + ex.name + '_';
+        const idx    = k.indexOf(marker);
+        if(idx === -1) return;
+        const dateStr = k.slice('recomp_set_'.length, idx);
+        const setNum  = k.slice(idx + marker.length);
+        const newKey  = 'recomp_set_id_' + dateStr + '_' + ex.id + '_' + setNum;
+        if(lsGet(newKey, null) === null) lsSet(newKey, localStorage.getItem(k));
+      });
+    });
+  }catch(e){}
+  lsSet('recomp_migrated_v2', '1');
+}
+
+function copyText(t){
+  const done = () => {
+    const el = document.getElementById('toast');
+    el.textContent  = '已複製點餐口令';
+    el.style.opacity = '1';
+    clearTimeout(copyText._t);
+    copyText._t = setTimeout(() => el.style.opacity = '0', 1200);
+  };
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(done).catch(fallback);
+  } else { fallback(); }
+  function fallback(){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){}
+    done();
+  }
+}
+
+const PLAN_START = new Date(2026, 5, 22);
+const PLAN_CYCLE = 31;
+const _planCache = new Map();
+
+function getPlanForDate(dateObj){
+  const cacheKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
+  if(_planCache.has(cacheKey)) return _planCache.get(cacheKey);
+
+  const base = new Date(PLAN_START); base.setHours(12,0,0,0);
+  const d    = new Date(dateObj);    d.setHours(12,0,0,0);
+  const diff = Math.round((d - base) / 86400000);
+  const planDay = ((diff % PLAN_CYCLE) + PLAN_CYCLE) % PLAN_CYCLE + 1;
+  const plan = MEALS.find(m => m.day === planDay) || MEALS[0];
+  _planCache.set(cacheKey, plan);
+  return plan;
+}
+
+/* ══════════════════════════════════════════════
+   EXTRA UTILITIES (Weekly / Search / PDF)
+   ══════════════════════════════════════════════ */
+let calYear, calMonth;
+let selectedDateObj = null;
+let weeklyOffset = 0;
+let SEARCH_INDEX = [];
+let searchFilter = 'all';
+
+function atNoon(dateLike){
+  const d = new Date(dateLike);
+  d.setHours(12,0,0,0);
+  return d;
+}
+function formatDateStr(d){
+  return `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`;
+}
+function formatDateStrPad(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function getTrainText(train){
+  return train === 'A' ? 'A日 上肢推' : train === 'B' ? 'B日 下肢背' : '休息日';
+}
+function weekLabelFromOffset(offset){
+  if(offset === 0) return '本週';
+  if(offset === -1) return '上週';
+  if(offset < -1) return `${Math.abs(offset)} 週前`;
+  return `${offset} 週後`;
+}
+function flashToast(msg){
+  const el = document.getElementById('toast');
+  if(!el) return;
+  el.textContent = msg || '已複製';
+  el.style.opacity = '1';
+  clearTimeout(flashToast._t);
+  flashToast._t = setTimeout(() => el.style.opacity = '0', 1200);
+}
+function copyAnyText(t, msg){
+  const done = () => flashToast(msg || '已複製');
+  if(navigator.clipboard && window.isSecureContext){
+    navigator.clipboard.writeText(t).then(done).catch(fallback);
+  }else{
+    fallback();
+  }
+  function fallback(){
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = t;
+      ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }catch(e){}
+    done();
+  }
+}
+function isDayFullyTrained(dateStr, type){
+  if(type !== 'A' && type !== 'B') return false;
+  return WORKOUTS[type].every(ex => {
+    for(let s = 1; s <= ex.sets; s++){
+      if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') === '0') return false;
+    }
+    return true;
+  });
+}
+function isExerciseAllCapped(dateStr, ex){
+  for(let s = 1; s <= ex.sets; s++){
+    if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') !== '2') return false;
+  }
+  return true;
+}
+
+const _bumpCountCache = new Map();
+function countExerciseBumpsUntil(ex, endDate){
+  const end = atNoon(endDate);
+  const start = atNoon(PLAN_START);
+  if(end < start) return 0;
+
+  const cacheKey = `${ex.id}|${formatDateStr(end)}`;
+  if(_bumpCountCache.has(cacheKey)) return _bumpCountCache.get(cacheKey);
+
+  let count = 0;
+  for(let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)){
+    d.setHours(12,0,0,0);
+    const plan = getPlanForDate(d);
+    if(plan.train !== 'A' && plan.train !== 'B') continue;
+    const target = WORKOUTS[plan.train].find(x => x.id === ex.id);
+    if(!target) continue;
+    if(isExerciseAllCapped(formatDateStr(d), target)) count++;
+  }
+  _bumpCountCache.set(cacheKey, count);
+  return count;
+}
+
+function computeMonthSummaryData(year, month){
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const today = atNoon(new Date());
+
+  let trainDaysTotal = 0, trainDaysDone = 0, restDays = 0,
+      eatenDays = 0, pastDays = 0, spend = 0, junkDays = 0;
+
+  for(let d = 1; d <= daysInMonth; d++){
+    const dateObj = atNoon(new Date(year, month, d));
+    const isPast = dateObj <= today;
+    const plan = getPlanForDate(dateObj);
+    const dateStr = formatDateStr(dateObj);
+
+    if(plan.train !== '休'){
+      trainDaysTotal++;
+      if(isPast && isDayFullyTrained(dateStr, plan.train)) trainDaysDone++;
+    }else{
+      restDays++;
+    }
+
+    if(plan.junk) junkDays++;
+    if(isPast){
+      pastDays++;
+      spend += plan.total;
+      if(lsGet(`recomp_eaten_${dateStr}`, '0') === '1') eatenDays++;
+    }
+  }
+
+  const trainPct = trainDaysTotal ? Math.round(trainDaysDone / trainDaysTotal * 100) : 0;
+  const eatenPct = pastDays ? Math.round(eatenDays / pastDays * 100) : 0;
+  const avgSpend = pastDays ? Math.round(spend / pastDays) : 0;
+
+  return {
+    daysInMonth, trainDaysTotal, trainDaysDone, restDays,
+    eatenDays, pastDays, spend, junkDays, trainPct, eatenPct, avgSpend
+  };
+}
+
+function refreshWeeklyIfOpen(){
+  const modal = document.getElementById('weeklyModal');
+  if(modal && modal.classList.contains('show')) renderWeeklyReport(weeklyOffset);
+}
+function refreshSearchIfOpen(){
+  const drawer = document.getElementById('searchDrawer');
+  if(drawer && drawer.classList.contains('open')){
+    buildSearchIndex();
+    runSearch();
+  }
+}
+
+/* ══════════════════════════════════════════════
+   CALENDAR
+   ══════════════════════════════════════════════ */
+function renderCalendar(year, month){
+  calYear = year; calMonth = month;
+  const grid  = document.getElementById('calGrid');
+  const label = document.getElementById('calMonthLabel');
+  if(!grid) return;
+  label.textContent = `${year} 年 ${month+1} 月`;
+
+  const first       = new Date(year, month, 1);
+  const startDow    = first.getDay();
+  const daysInMonth = new Date(year, month+1, 0).getDate();
+  const today       = new Date();
+  let html = '';
+
+  for(let i = 0; i < startDow; i++){
+    html += `<div class="cal-cell is-other" aria-hidden="true"></div>`;
+  }
+
+  for(let d = 1; d <= daysInMonth; d++){
+    const dateObj = new Date(year, month, d);
+    const dateStr = formatDateStr(dateObj);
+    const plan = getPlanForDate(dateObj);
+    const isToday = year === today.getFullYear() && month === today.getMonth() && d === today.getDate();
+    const isSelected = selectedDateObj &&
+      selectedDateObj.getFullYear() === year &&
+      selectedDateObj.getMonth() === month &&
+      selectedDateObj.getDate() === d;
+    const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
+
+    html += `<div
+      class="cal-cell${isToday ? ' is-today' : ''}${isSelected ? ' is-selected' : ''}"
+      data-ymd="${dateStr}"
+      role="button" tabindex="0"
+      aria-label="${year}年${month+1}月${d}日 ${plan.train} 訓練"
+      aria-pressed="${isSelected ? 'true' : 'false'}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start">
+        <span class="cal-daynum">${d}</span>
+        <span class="cal-tag">${plan.train}</span>
+      </div>
+      <div class="cal-meta mono-num" style="font-size:10px;color:var(--concrete);margin-top:6px;line-height:1.45">P${plan.p}g<br>${plan.kcal}kcal</div>
+      <div style="position:absolute;bottom:7px;right:8px;display:flex;gap:4px;align-items:center">
+        ${eaten ? '<span class="eaten-indicator" style="color:#2a8;font-size:10px">✓</span>' : '<span class="eaten-indicator" style="display:none"></span>'}
+        ${plan.junk ? '<span class="junk-dot"></span>' : ''}
+      </div>
+    </div>`;
+  }
+
+  const remainder = (startDow + daysInMonth) % 7;
+  if(remainder !== 0){
+    for(let i = 0; i < 7 - remainder; i++){
+      html += `<div class="cal-cell is-other" aria-hidden="true"></div>`;
+    }
+  }
+  grid.innerHTML = html;
+  renderMonthSummary();
+}
+
+function renderMonthSummary(){
+  const labelEl = document.getElementById('msumMonthLabel');
+  const gridEl  = document.getElementById('msumGrid');
+  if(!labelEl || !gridEl || calYear === undefined) return;
+
+  labelEl.textContent = `${calYear} 年 ${calMonth+1} 月`;
+  const s = computeMonthSummaryData(calYear, calMonth);
+
+  gridEl.innerHTML = `
+    <div class="msum-cell">
+      <div class="kicker" style="margin-bottom:2px">訓練完成</div>
+      <div class="msum-num mono-num">${s.trainDaysDone}<span style="font-size:13px;color:var(--concrete)">/${s.trainDaysTotal} 天</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${s.trainPct}%"></div></div>
+    </div>
+    <div class="msum-cell">
+      <div class="kicker" style="margin-bottom:2px">飲食達標 (已過天數)</div>
+      <div class="msum-num mono-num">${s.eatenDays}<span style="font-size:13px;color:var(--concrete)">/${s.pastDays} 天</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${s.eatenPct}%"></div></div>
+    </div>
+    <div class="msum-cell">
+      <div class="kicker" style="margin-bottom:2px">本月累積花費</div>
+      <div class="msum-num mono-num">$${s.spend}</div>
+      <div class="small muted" style="margin-top:4px">日均 $${s.avgSpend} · 預算 ≤$350/天</div>
+    </div>
+    <div class="msum-cell">
+      <div class="kicker" style="margin-bottom:2px">休息 / 垃圾食物日</div>
+      <div class="msum-num mono-num">${s.restDays}<span style="font-size:13px;color:var(--concrete)"> 休 · </span>${s.junkDays}<span style="font-size:13px;color:var(--concrete)"> junk</span></div>
+      <div class="small muted" style="margin-top:4px">全月共 ${s.daysInMonth} 天</div>
+    </div>`;
+}
+
+function renderBwStats(){
+  const el = document.getElementById('bwStatsRow');
+  if(!el) return;
+  const entries = getAllBwEntries();
+  if(entries.length === 0){
+    el.innerHTML = `<span class="small muted">還沒有任何紀錄，量完體重後在上面輸入並按「紀錄」。</span>`;
+    return;
+  }
+  const first  = entries[0];
+  const latest = entries[entries.length - 1];
+  const prev   = entries.length > 1 ? entries[entries.length - 2] : null;
+
+  function deltaHtml(curVal, baseVal){
+    if(baseVal === null || baseVal === undefined) return '';
+    const diff = +(curVal - baseVal).toFixed(1);
+    if(diff === 0) return `<span class="small muted">持平</span>`;
+    const cls  = diff < 0 ? 'bw-delta-down' : 'bw-delta-up';
+    const sign = diff > 0 ? '+' : '';
+    return `<span class="small ${cls}">${sign}${diff}kg</span>`;
+  }
+  function fmtDate(e){
+    return `${e.year}-${String(e.month+1).padStart(2,'0')}-${String(e.day).padStart(2,'0')}`;
+  }
+
+  el.innerHTML = `
+    <div class="bw-stat">
+      <div class="bw-stat-label">起始</div>
+      <div class="bw-stat-val mono-num">${first.w}kg</div>
+      <div class="small muted">${fmtDate(first)}</div>
+    </div>
+    <div class="bw-stat">
+      <div class="bw-stat-label">最新</div>
+      <div class="bw-stat-val mono-num">${latest.w}kg</div>
+      <div class="small">${deltaHtml(latest.w, first.w)} 累積</div>
+    </div>
+    ${prev ? `<div class="bw-stat">
+      <div class="bw-stat-label">較上次</div>
+      <div class="bw-stat-val mono-num">${deltaHtml(latest.w, prev.w)}</div>
+      <div class="small muted">共 ${entries.length} 筆紀錄</div>
+    </div>` : ''}
+    ${latest.bf !== null && latest.bf !== undefined ? `<div class="bw-stat">
+      <div class="bw-stat-label">最新體脂</div>
+      <div class="bw-stat-val mono-num">${latest.bf}%</div>
+    </div>` : ''}`;
+}
+
+function renderBwChart(){
+  const wrap = document.getElementById('bwChartWrap');
+  if(!wrap) return;
+  const entries = getAllBwEntries();
+  if(entries.length < 2){
+    wrap.innerHTML = `<div class="bw-empty">${entries.length === 0 ? '尚無資料可繪圖' : '至少需要 2 筆紀錄才能畫趨勢線'}</div>`;
+    return;
+  }
+
+  const W    = Math.max(560, entries.length * 48);
+  const H    = 240;
+  const padL = 44, padR = 44, padT = 16, padB = 32;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const weights = entries.map(e => e.w);
+  let minW = Math.min(...weights), maxW = Math.max(...weights);
+  if(minW === maxW){ minW -= 1; maxW += 1; }
+  const wPad = (maxW - minW) * 0.15 || 1;
+  minW -= wPad; maxW += wPad;
+
+  const bfEntries = entries.filter(e => e.bf !== null && e.bf !== undefined);
+  const hasBf = bfEntries.length >= 2;
+  let minBf = 0, maxBf = 1;
+  if(hasBf){
+    const bfVals = bfEntries.map(e => e.bf);
+    minBf = Math.min(...bfVals); maxBf = Math.max(...bfVals);
+    if(minBf === maxBf){ minBf -= 1; maxBf += 1; }
+    const bfPad = (maxBf - minBf) * 0.15 || 1;
+    minBf -= bfPad; maxBf += bfPad;
+  }
+
+  function xFor(i){ return padL + (entries.length === 1 ? plotW/2 : (i / (entries.length-1)) * plotW); }
+  function yForW(w){ return padT + plotH - ((w - minW) / (maxW - minW)) * plotH; }
+  function yForBf(bf){ return padT + plotH - ((bf - minBf) / (maxBf - minBf)) * plotH; }
+
+  const gridLines = [];
+  for(let i = 0; i <= 3; i++){
+    const val = minW + (maxW - minW) * (i/3);
+    const y   = yForW(val);
+    gridLines.push(
+      `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`,
+      `<text x="${padL-6}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--concrete)" font-family="Fragment Mono,monospace">${val.toFixed(1)}</text>`
+    );
+    if(hasBf){
+      const bfVal = minBf + (maxBf - minBf) * (i/3);
+      gridLines.push(
+        `<text x="${W-padR+6}" y="${y+4}" text-anchor="start" font-size="10" fill="#2a8" font-family="Fragment Mono,monospace">${bfVal.toFixed(1)}%</text>`
+      );
+    }
+  }
+
+  const wPoints = entries.map((e,i) => `${xFor(i)},${yForW(e.w)}`).join(' ');
+  const dots = entries.map((e,i) => {
+    const x = xFor(i), y = yForW(e.w);
+    return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--signal)" stroke="var(--card)" stroke-width="1.5">
+      <title>${e.year}-${String(e.month+1).padStart(2,'0')}-${String(e.day).padStart(2,'0')}: ${e.w}kg</title>
+    </circle>`;
+  }).join('');
+
+  let bfPolyline = '';
+  if(hasBf){
+    const bfPoints = entries
+      .map((e,i) => e.bf !== null && e.bf !== undefined ? `${xFor(i)},${yForBf(e.bf)}` : null)
+      .filter(Boolean).join(' ');
+    const bfDots = entries.map((e,i) => {
+      if(e.bf === null || e.bf === undefined) return '';
+      const x = xFor(i), y = yForBf(e.bf);
+      return `<circle cx="${x}" cy="${y}" r="3" fill="#2a8" stroke="var(--card)" stroke-width="1.5">
+        <title>體脂 ${e.bf}%</title>
+      </circle>`;
+    }).join('');
+    bfPolyline = `
+      <polyline points="${bfPoints}" fill="none" stroke="#2a8" stroke-width="1.5" stroke-dasharray="5,3"/>
+      ${bfDots}`;
+  }
+
+  const labelEvery = Math.max(1, Math.ceil(entries.length / 8));
+  const dateLabels = entries.map((e,i) => {
+    if(i !== 0 && i !== entries.length-1 && i % labelEvery !== 0) return '';
+    return `<text x="${xFor(i)}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--concrete)" font-family="Fragment Mono,monospace">${e.month+1}/${e.day}</text>`;
+  }).join('');
+
+  const legend = hasBf ? `
+    <text x="${padL}" y="${padT-4}" font-size="9" fill="var(--signal)" font-family="Fragment Mono,monospace">— 體重 (kg)</text>
+    <text x="${padL+70}" y="${padT-4}" font-size="9" fill="#2a8" font-family="Fragment Mono,monospace">--- 體脂 (%)</text>` : '';
+
+  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;display:block">
+    ${legend}
+    ${gridLines.join('')}
+    <polyline points="${wPoints}" fill="none" stroke="var(--signal)" stroke-width="2"/>
+    ${bfPolyline}
+    ${dots}
+    ${dateLabels}
+  </svg>`;
+}
+
+/* ══════════════════════════════════════════════
+   DAY PANEL
+   ══════════════════════════════════════════════ */
+function selectDate(dateObj){
+  selectedDateObj = new Date(dateObj);
+  if(selectedDateObj.getFullYear() !== calYear || selectedDateObj.getMonth() !== calMonth){
+    renderCalendar(selectedDateObj.getFullYear(), selectedDateObj.getMonth());
+  }
+
+  document.querySelectorAll('#calGrid .cal-cell').forEach(c => {
+    c.classList.remove('is-selected');
+    c.setAttribute('aria-pressed','false');
+  });
+
+  const key = formatDateStr(selectedDateObj);
+  const activeCell = document.querySelector(`#calGrid .cal-cell[data-ymd="${key}"]`);
+  if(activeCell){
+    activeCell.classList.add('is-selected');
+    activeCell.setAttribute('aria-pressed','true');
+  }
+
+  const plan = getPlanForDate(selectedDateObj);
+  const dateStr = formatDateStr(selectedDateObj);
+
+  renderDayHeader(plan, dateStr);
+  renderWorkoutSection(plan, dateStr);
+  renderEatenToggle(dateStr);
+  renderMealSection(plan);
+  prefillBwInputs();
+  refreshChestWeightStat();
+}
+
+function renderDayHeader(plan, dateStr){
+  const wdays = ['週日','週一','週二','週三','週四','週五','週六'];
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(y, m-1, d);
+
+  document.getElementById('dpKicker').textContent =
+    `${String(y)}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')} · ${wdays[dateObj.getDay()]} · Day ${plan.day} / 31`;
+  document.getElementById('dpTitle').textContent = `Day ${plan.day} — ${getTrainText(plan.train)}`;
+  document.getElementById('dpMacros').innerHTML = `P ${plan.p}g<br>${plan.kcal} kcal<br>$${plan.total}`;
+  document.getElementById('todayTopLabel').textContent = `Day ${plan.day} — ${getTrainText(plan.train)}`;
+}
+
+function renderWorkoutSection(plan, dateStr){
+  const workoutLabel = document.getElementById('dpWorkoutLabel');
+  const workoutDiv = document.getElementById('dpWorkout');
+
+  if(plan.train === '休'){
+    workoutLabel.textContent = '休息 · 恢復';
+    workoutDiv.innerHTML = `<div style="font-size:13px;color:var(--concrete)">
+      休息日。不做重訓。<br>目標：走路 8000 步 · 睡滿 6.5hr+ · 水 2500ml
+    </div>`;
+    return;
+  }
+
+  workoutLabel.textContent = `訓練 · ${getTrainText(plan.train)}`;
+  const list = WORKOUTS[plan.train];
+
+  workoutDiv.innerHTML = list.map(ex => {
+    const liveKg = getExerciseWeight(ex);
+    const setsHtml = Array.from({length: ex.sets}, (_, s) => {
+      const k = `recomp_set_id_${dateStr}_${ex.id}_${s+1}`;
+      const state = lsGet(k, '0');
+      const cls = state === '2' ? 'done cap' : state === '1' ? 'done' : '';
+      return `<button type="button" class="set-check ${cls}" data-k="${k}" data-exid="${escapeHtml(ex.id)}" aria-label="第 ${s+1} 組"></button>`;
+    }).join('');
+
+    return `<div class="ex-row" data-ex-row="${escapeHtml(ex.id)}">
+      <div class="ex-checks">${setsHtml}</div>
+      <div class="ex-info">
+        <div class="ex-name">${escapeHtml(ex.name)}
+          <span class="mono-num ex-weight-label weight-display" data-ex-weight="${escapeHtml(ex.id)}"> ${liveKg}kg · ${ex.reps}</span>
+        </div>
+        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
+      </div>
+    </div>`;
+  }).join('') +
+  `<div class="ex-hint">RPE 7-8 · 組間 90s · 點兩下變紅 = 該組做到次數上限 → 全組都紅燈時自動 +2.5kg</div>`;
+}
+
+function renderEatenToggle(dateStr){
+  const eatenKey = `recomp_eaten_${dateStr}`;
+  const eatenBtn = document.getElementById('dpEatenToggle');
+  const isEaten = lsGet(eatenKey, '0') === '1';
+  eatenBtn.textContent = isEaten ? '☑ 今日三餐已照計畫吃' : '☐ 標記今日三餐已照計畫吃';
+  eatenBtn.classList.toggle('on', isEaten);
+  eatenBtn.dataset.k = eatenKey;
+}
+
+function renderMealSection(plan){
+  const mealsEl = document.getElementById('dpMeals');
+
+  function mealBlock(label, m){
+    return `<div class="meal-block">
+      <div class="meal-block-label">${label}</div>
+      <div class="meal-block-shop">${escapeHtml(m.shop)}</div>
+      <div class="meal-block-item">${escapeHtml(m.item)}</div>
+      <div class="meal-block-addr">${escapeHtml(m.addr)} · $${m.price}</div>
+      <div class="meal-block-actions">
+        <button type="button" class="meal-copy-btn copy-meal-btn"
+          data-copy="${escapeHtml(m.shop)}：${escapeHtml(m.item)}">複製點餐</button>
+        <a style="text-decoration:underline" target="_blank" rel="noopener"
+          href="https://www.google.com/maps/search/${encodeURIComponent(m.shop + ' ' + m.addr)}">地圖導航</a>
+      </div>
+    </div>`;
+  }
+
+  mealsEl.innerHTML =
+    mealBlock('早餐', plan.b) +
+    mealBlock('午餐', plan.l) +
+    mealBlock('晚餐', plan.d) +
+    `<div class="meal-sup">
+      <b>補充：</b>${escapeHtml(plan.sup.text)} · $${plan.sup.price}<br>
+      <span style="color:var(--concrete)">蛋白質外掛：茶葉蛋 $10/7g · 無糖豆漿 $30/15g · 即食雞胸 $55/25g</span>
+    </div>`;
+}
+
+function prefillBwInputs(){
+  const bwWeightInput = document.getElementById('bwWeightInput');
+  const bwFatInput = document.getElementById('bwFatInput');
+  const bwSaveBtn = document.getElementById('bwSaveBtn');
+  if(!bwWeightInput || !bwFatInput || !selectedDateObj) return;
+
+  const existing = getBwEntry(
+    selectedDateObj.getFullYear(),
+    selectedDateObj.getMonth(),
+    selectedDateObj.getDate()
+  );
+  bwWeightInput.value = existing ? existing.w : '';
+  bwFatInput.value = (existing && existing.bf !== null && existing.bf !== undefined) ? existing.bf : '';
+
+  if(bwSaveBtn){
+    bwSaveBtn.textContent = `紀錄 ${selectedDateObj.getMonth()+1}/${selectedDateObj.getDate()} 的體重`;
+  }
+}
+
+function refreshChestWeightStat(){
+  const chestEx = WORKOUTS.A.find(ex => ex.id === 'chest_press');
+  if(!chestEx) return;
+  const kg = getExerciseWeight(chestEx);
+  const numEl = document.getElementById('chestWeightNum');
+  const barEl = document.getElementById('chestWeightBar');
+  if(numEl) numEl.innerHTML = `${kg}<span class="small muted">kg</span>`;
+  if(barEl) barEl.style.width = Math.max(4, Math.min(100, (kg / 50) * 100)) + '%';
+}
+
+/* ══════════════════════════════════════════════
+   WEEKLY REPORT
+   ══════════════════════════════════════════════ */
+function computeWeeklyReport(offset){
+  const today = atNoon(new Date());
+  const start = atNoon(new Date(today));
+  const mondayOffset = (start.getDay() + 6) % 7;
+  start.setDate(start.getDate() - mondayOffset + offset * 7);
+  const end = atNoon(new Date(start));
+  end.setDate(end.getDate() + 6);
+
+  let trainPlanned = 0, trainDone = 0, eatenDays = 0, junkDays = 0;
+  let totalSpend = 0, totalProtein = 0, totalKcal = 0;
+  const days = [];
+
+  for(let i = 0; i < 7; i++){
+    const d = atNoon(new Date(start));
+    d.setDate(start.getDate() + i);
+    const plan = getPlanForDate(d);
+    const dateStr = formatDateStr(d);
+    const fullyTrained = isDayFullyTrained(dateStr, plan.train);
+    const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
+    const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
+    const exerciseText = plan.train === '休'
+      ? '休息 / 恢復'
+      : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
+
+    if(plan.train !== '休') trainPlanned++;
+    if(fullyTrained) trainDone++;
+    if(eaten) eatenDays++;
+    if(plan.junk) junkDays++;
+
+    totalSpend += plan.total;
+    totalProtein += plan.p;
+    totalKcal += plan.kcal;
+
+    days.push({ date: d, dateStr, plan, fullyTrained, eaten, bw, exerciseText });
+  }
+
+  const avgProtein = Math.round(totalProtein / 7);
+  const avgKcal = Math.round(totalKcal / 7);
+  const avgSpend = Math.round(totalSpend / 7);
+
+  const allBw = getAllBwEntries();
+  const bwEntries = allBw.filter(e => {
+    const d = atNoon(e.date);
+    return d >= start && d <= end;
+  });
+
+  let bwSummary = '無體重紀錄', bwDelta = null;
+  if(bwEntries.length === 1){
+    bwSummary = `${bwEntries[0].w}kg（單筆）`;
+  }else if(bwEntries.length >= 2){
+    const first = bwEntries[0];
+    const last = bwEntries[bwEntries.length - 1];
+    bwDelta = +(last.w - first.w).toFixed(1);
+    const sign = bwDelta > 0 ? '+' : '';
+    bwSummary = `${first.w} → ${last.w}kg（${sign}${bwDelta}kg）`;
+  }
+
+  const dayBeforeStart = atNoon(new Date(start));
+  dayBeforeStart.setDate(dayBeforeStart.getDate() - 1);
+
+  const exercisesThisWeek = new Map();
+  days.forEach(day => {
+    if(day.plan.train === 'A' || day.plan.train === 'B'){
+      WORKOUTS[day.plan.train].forEach(ex => exercisesThisWeek.set(ex.id, ex));
+    }
+  });
+
+  const weightChanges = [];
+  exercisesThisWeek.forEach(ex => {
+    const before = +(ex.kg + countExerciseBumpsUntil(ex, dayBeforeStart) * 2.5).toFixed(1);
+    const after = +(ex.kg + countExerciseBumpsUntil(ex, end) * 2.5).toFixed(1);
+    if(after > before){
+      weightChanges.push({ id: ex.id, name: ex.name, before, after });
+    }
+  });
+
+  return {
+    offset, start, end, days, trainPlanned, trainDone, eatenDays, junkDays,
+    totalSpend, avgSpend, avgProtein, avgKcal, bwEntries, bwSummary, bwDelta, weightChanges
+  };
+}
+
+function buildWeeklyReportText(offset){
+  const r = computeWeeklyReport(offset);
+  const lines = [];
+
+  lines.push(`公館重組計畫 週報｜${weekLabelFromOffset(offset)}`);
+  lines.push(`${formatDateStrPad(r.start)} ~ ${formatDateStrPad(r.end)}`);
+  lines.push(`訓練完成：${r.trainDone}/${r.trainPlanned} 天`);
+  lines.push(`飲食達標：${r.eatenDays}/7 天`);
+  lines.push(`垃圾食物日：${r.junkDays} 天`);
+  lines.push(`平均攝取：P ${r.avgProtein}g / ${r.avgKcal} kcal`);
+  lines.push(`花費：$${r.totalSpend}（日均 $${r.avgSpend}）`);
+  lines.push(`體重：${r.bwSummary}`);
+  lines.push(`升重：${r.weightChanges.length ? r.weightChanges.map(x => `${x.name} ${x.before}→${x.after}kg`).join('；') : '無升級'}`);
+  lines.push('');
+  lines.push('每日明細：');
+
+  r.days.forEach(day => {
+    const flags = [
+      day.plan.train,
+      day.fullyTrained ? '訓練✓' : '訓練—',
+      day.eaten ? '飲食✓' : '飲食—',
+      day.plan.junk ? 'junk' : ''
+    ].filter(Boolean).join(' · ');
+    const bwText = day.bw ? ` · BW ${day.bw.w}kg${day.bw.bf !== null && day.bw.bf !== undefined ? ` / BF ${day.bw.bf}%` : ''}` : '';
+    lines.push(`${formatDateStrPad(day.date)}｜${flags}｜P${day.plan.p}g / ${day.plan.kcal} kcal / $${day.plan.total}${bwText}`);
+  });
+
+  return lines.join('\n');
+}
+
+function renderWeeklyReport(offset){
+  weeklyOffset = offset;
+  const r = computeWeeklyReport(offset);
+  const body = document.getElementById('weeklyReportBody');
+  const title = document.getElementById('weeklyModalTitle');
+  const range = document.getElementById('weeklyRangeLabel');
+  const newerBtn = document.getElementById('weeklyNewerBtn');
+
+  title.textContent = `${weekLabelFromOffset(offset)} · 訓練 / 飲食週報`;
+  range.textContent = `${formatDateStrPad(r.start)} → ${formatDateStrPad(r.end)} · Mon–Sun`;
+  newerBtn.disabled = offset >= 0;
+
+  const weightChangeHtml = r.weightChanges.length
+    ? r.weightChanges.map(ch => `
+        <div class="week-row">
+          <div style="font-weight:600">${escapeHtml(ch.name)}</div>
+          <div class="mono-num">${ch.before} → ${ch.after}kg</div>
+        </div>`).join('')
+    : `<div class="small muted">無升級</div>`;
+
+  const dailyHtml = r.days.map(day => {
+    const bwTag = day.bw
+      ? `<span class="search-tag">BW ${day.bw.w}kg${day.bw.bf !== null && day.bw.bf !== undefined ? ` / BF ${day.bw.bf}%` : ''}</span>`
+      : '';
+    return `<button type="button" class="week-day-link" data-week-open="${day.dateStr}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+        <div>
+          <div style="font-weight:700;font-size:13px">${formatDateStrPad(day.date)} · ${getTrainText(day.plan.train)}</div>
+          <div class="small muted" style="margin-top:3px">Day ${day.plan.day} · P ${day.plan.p}g · ${day.plan.kcal} kcal · $${day.plan.total}</div>
+        </div>
+        <div class="mono-num small">$${day.plan.total}</div>
+      </div>
+      <div style="font-size:12px;line-height:1.6;margin-top:8px">${escapeHtml(day.exerciseText)}</div>
+      <div class="search-tags">
+        ${day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`}
+        ${day.eaten ? `<span class="search-tag ok">已吃</span>` : `<span class="search-tag">未打勾</span>`}
+        ${day.plan.junk ? `<span class="search-tag warn">垃圾食物日</span>` : ''}
+        ${bwTag}
+      </div>
+    </button>`;
+  }).join('');
+
+  body.innerHTML = `
+    <div class="weekly-grid">
+      <div class="week-cell">
+        <div class="kicker" style="margin-bottom:2px">訓練完成</div>
+        <div class="msum-num mono-num">${r.trainDone}<span style="font-size:13px;color:var(--concrete)">/${r.trainPlanned} 天</span></div>
+      </div>
+      <div class="week-cell">
+        <div class="kicker" style="margin-bottom:2px">飲食達標</div>
+        <div class="msum-num mono-num">${r.eatenDays}<span style="font-size:13px;color:var(--concrete)">/7 天</span></div>
+      </div>
+      <div class="week-cell">
+        <div class="kicker" style="margin-bottom:2px">平均蛋白 / 熱量</div>
+        <div class="msum-num mono-num" style="font-size:18px">P${r.avgProtein}g</div>
+        <div class="small muted" style="margin-top:4px">${r.avgKcal} kcal / day</div>
+      </div>
+      <div class="week-cell">
+        <div class="kicker" style="margin-bottom:2px">花費</div>
+        <div class="msum-num mono-num">$${r.totalSpend}</div>
+        <div class="small muted" style="margin-top:4px">日均 $${r.avgSpend}</div>
+      </div>
+      <div class="week-cell">
+        <div class="kicker" style="margin-bottom:2px">垃圾食物日</div>
+        <div class="msum-num mono-num">${r.junkDays}<span style="font-size:13px;color:var(--concrete)"> 天</span></div>
+      </div>
+      <div class="week-cell">
+        <div class="kicker" style="margin-bottom:2px">體重摘要</div>
+        <div class="small mono-num" style="margin-top:3px">${escapeHtml(r.bwSummary)}</div>
+      </div>
+    </div>
+    <div class="dp-section">
+      <div class="kicker" style="margin-bottom:8px">本週升重</div>
+      <div class="week-change-list">${weightChangeHtml}</div>
+    </div>
+    <div class="dp-section">
+      <div class="kicker" style="margin-bottom:8px">每日明細</div>
+      <div class="week-change-list">${dailyHtml}</div>
+    </div>
+  `;
+}
+
+/* ══════════════════════════════════════════════
+   CALENDAR EXPORT
+   ══════════════════════════════════════════════ */
+function drawCalendarToCanvas(){
+  if(calYear === undefined || calMonth === undefined) return null;
+
+  const first = new Date(calYear, calMonth, 1);
+  const startDow = first.getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const rows = Math.ceil((startDow + daysInMonth) / 7);
+
+  const ratio = 2;
+  const W = 1400;
+  const headerH = 180;
+  const cellH = 150;
+  const footerH = 44;
+  const padX = 52;
+  const gap = 10;
+  const H = headerH + rows * cellH + footerH;
+  const cellW = (W - padX * 2) / 7;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W * ratio;
+  canvas.height = H * ratio;
+  canvas.style.width = W + 'px';
+  canvas.style.height = H + 'px';
+
+  const ctx = canvas.getContext('2d');
+  if(!ctx) return null;
+  ctx.scale(ratio, ratio);
+  ctx.textBaseline = 'top';
+
+  const colors = {
+    paper:'#F5F3F0', ink:'#141414', signal:'#E30613',
+    concrete:'#8A8A8A', line:'#D9D4CE', card:'#FFFCF9',
+    other:'#EEEBE6', ok:'#2A8'
+  };
+
+  ctx.fillStyle = colors.paper;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = colors.signal;
+  ctx.fillRect(0, 0, W, 8);
+
+  ctx.fillStyle = colors.ink;
+  ctx.font = '900 54px sans-serif';
+  ctx.fillText(`${calYear} 年 ${calMonth+1} 月`, padX, 28);
+
+  ctx.font = '13px sans-serif';
+  ctx.fillStyle = colors.concrete;
+  ctx.fillText('公館重組計畫 · 訓練 / 飲食月曆匯出', padX, 96);
+
+  const s = computeMonthSummaryData(calYear, calMonth);
+  ctx.font = '12px monospace';
+  ctx.fillText(
+    `訓練 ${s.trainDaysDone}/${s.trainDaysTotal} · 飲食 ${s.eatenDays}/${s.pastDays} · 花費 $${s.spend} · junk ${s.junkDays}`,
+    padX, 118
+  );
+
+  const weekNames = ['日','一','二','三','四','五','六'];
+  ctx.font = '12px sans-serif';
+  ctx.fillStyle = colors.concrete;
+  for(let i = 0; i < 7; i++){
+    const x = padX + i * cellW + cellW / 2;
+    ctx.textAlign = 'center';
+    ctx.fillText(weekNames[i], x, 145);
+  }
+  ctx.textAlign = 'left';
+
+  const totalSlots = rows * 7;
+  const today = new Date();
+
+  for(let slot = 0; slot < totalSlots; slot++){
+    const row = Math.floor(slot / 7);
+    const col = slot % 7;
+    const dayNum = slot - startDow + 1;
+
+    const x = padX + col * cellW + gap / 2;
+    const y = headerH + row * cellH + gap / 2;
+    const boxW = cellW - gap;
+    const boxH = cellH - gap;
+
+    const isOther = dayNum < 1 || dayNum > daysInMonth;
+    let fill = colors.card, text = colors.ink, muted = colors.concrete, border = colors.line;
+    let plan = null, dateObj = null, dateStr = '', eaten = false, isToday = false, isSelected = false;
+
+    if(isOther){
+      fill = colors.other; text = '#AAA7A1'; muted = '#AAA7A1';
+    }else{
+      dateObj = new Date(calYear, calMonth, dayNum);
+      dateStr = formatDateStr(dateObj);
+      plan = getPlanForDate(dateObj);
+      eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
+      isToday = calYear === today.getFullYear() && calMonth === today.getMonth() && dayNum === today.getDate();
+      isSelected = selectedDateObj &&
+        selectedDateObj.getFullYear() === calYear &&
+        selectedDateObj.getMonth() === calMonth &&
+        selectedDateObj.getDate() === dayNum;
+      if(isSelected){
+        fill = colors.ink; text = colors.paper; muted = '#CFC8C1'; border = colors.ink;
+      }
+    }
+
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, boxW, boxH);
+    ctx.strokeStyle = border;
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, boxW, boxH);
+
+    if(isToday && !isOther){
+      ctx.strokeStyle = colors.signal;
+      ctx.lineWidth = 3;
+      ctx.strokeRect(x + 3, y + 3, boxW - 6, boxH - 6);
+      ctx.lineWidth = 1;
+    }
+
+    if(isOther) continue;
+
+    ctx.fillStyle = text;
+    ctx.font = '700 24px monospace';
+    ctx.fillText(String(dayNum), x + 12, y + 10);
+
+    const tagX = x + boxW - 44, tagY = y + 10;
+    ctx.strokeStyle = isSelected ? '#555' : '#CFCAC3';
+    ctx.strokeRect(tagX, tagY, 32, 18);
+    ctx.fillStyle = isSelected ? '#DDD8D1' : colors.ink;
+    ctx.font = '700 12px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(plan.train, tagX + 16, tagY + 3);
+    ctx.textAlign = 'left';
+
+    ctx.fillStyle = muted;
+    ctx.font = '12px monospace';
+    ctx.fillText(`P${plan.p}g`, x + 12, y + 46);
+    ctx.fillText(`${plan.kcal}kcal`, x + 12, y + 64);
+    ctx.fillText(`$${plan.total}`, x + 12, y + 82);
+
+    if(plan.junk){
+      ctx.fillStyle = colors.signal;
+      ctx.beginPath();
+      ctx.arc(x + boxW - 38, y + boxH - 16, 4, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    if(eaten){
+      ctx.fillStyle = colors.ok;
+      ctx.font = '700 16px sans-serif';
+      ctx.fillText('✓', x + boxW - 22, y + boxH - 28);
+    }
+  }
+
+  ctx.fillStyle = colors.concrete;
+  ctx.font = '11px sans-serif';
+  ctx.fillText(`Exported ${formatDateStrPad(new Date())}`, padX, H - 24);
+
+  return canvas;
+}
+
+/* ══════════════════════════════════════════════
+   SEARCH
+   ══════════════════════════════════════════════ */
+function buildSearchIndex(){
+  SEARCH_INDEX = [];
+  const base = atNoon(new Date());
+
+  for(let i = -365; i <= 30; i++){
+    const d = atNoon(new Date(base));
+    d.setDate(base.getDate() + i);
+
+    const plan = getPlanForDate(d);
+    const dateStr = formatDateStr(d);
+    const trainText = getTrainText(plan.train);
+    const fullyTrained = isDayFullyTrained(dateStr, plan.train);
+    const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
+    const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
+    const exercises = plan.train === '休'
+      ? '休息 / 恢復'
+      : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
+    const mealText = [
+      plan.b.shop, plan.b.item, plan.l.shop, plan.l.item, plan.d.shop, plan.d.item, plan.sup.text
+    ].join(' ');
+
+    const searchText = [
+      formatDateStrPad(d), dateStr, `day ${plan.day}`, plan.train, trainText, exercises, mealText,
+      fullyTrained ? '已完成訓練' : '', eaten ? '已吃' : '', plan.junk ? '垃圾食物日' : '',
+      bw ? `體重 ${bw.w} 體脂 ${bw.bf === null || bw.bf === undefined ? '' : bw.bf}` : ''
+    ].join(' ').toLowerCase();
+
+    SEARCH_INDEX.push({ date: d, dateStr, plan, fullyTrained, eaten, bw, exercises, searchText });
+  }
+  SEARCH_INDEX.sort((a,b) => b.date - a.date);
+}
+
+function runSearch(){
+  const input = document.getElementById('searchInput');
+  const resultsEl = document.getElementById('searchResults');
+  const metaEl = document.getElementById('searchResultMeta');
+  if(!input || !resultsEl || !metaEl) return;
+
+  const q = input.value.trim().toLowerCase();
+
+  let results = SEARCH_INDEX.filter(item => {
+    if(q && !item.searchText.includes(q)) return false;
+    switch(searchFilter){
+      case 'A': return item.plan.train === 'A';
+      case 'B': return item.plan.train === 'B';
+      case 'rest': return item.plan.train === '休';
+      case 'trained': return item.fullyTrained;
+      case 'eaten': return item.eaten;
+      case 'junk': return item.plan.junk;
+      default: return true;
+    }
+  });
+
+  const total = results.length;
+  const shown = results.slice(0, 120);
+  metaEl.textContent = `找到 ${total} 筆${total > 120 ? '（顯示前 120 筆）' : ''} · 掃描今天前 365 天與後 31 天`;
+
+  if(shown.length === 0){
+    resultsEl.innerHTML = `<div class="small muted" style="padding:8px 0">沒有符合結果。</div>`;
+    return;
+  }
+
+  resultsEl.innerHTML = shown.map(item => {
+    const bwTag = item.bw
+      ? `<span class="search-tag">BW ${item.bw.w}kg${item.bw.bf !== null && item.bw.bf !== undefined ? ` / ${item.bw.bf}%` : ''}</span>`
+      : '';
+
+    return `<button type="button" class="search-item" data-open-date="${item.dateStr}">
+      <div class="search-item-head">
+        <div>
+          <div class="search-item-title">${formatDateStrPad(item.date)} · ${getTrainText(item.plan.train)}</div>
+          <div class="search-item-sub">Day ${item.plan.day} · P ${item.plan.p}g · ${item.plan.kcal} kcal · $${item.plan.total}</div>
+        </div>
+        <div class="mono-num small">$${item.plan.total}</div>
+      </div>
+      <div class="search-item-body">${escapeHtml(item.exercises)}</div>
+      <div class="search-item-sub" style="margin-top:6px">
+        ${escapeHtml(item.plan.b.shop)} / ${escapeHtml(item.plan.l.shop)} / ${escapeHtml(item.plan.d.shop)}
+      </div>
+      <div class="search-tags">
+        <span class="search-tag">${item.plan.train}</span>
+        ${item.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : ''}
+        ${item.eaten ? `<span class="search-tag ok">已吃</span>` : ''}
+        ${item.plan.junk ? `<span class="search-tag warn">垃圾食物日</span>` : ''}
+        ${bwTag}
+      </div>
+    </button>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════════════
+   PWA
+   ══════════════════════════════════════════════ */
+function initPwa(){
+  const banner = document.getElementById('pwaInstallBanner');
+  const installBtn = document.getElementById('pwaInstallBtn');
+  const dismissBtn = document.getElementById('pwaDismissBtn');
+  if(!banner || !installBtn || !dismissBtn) return;
+
+  const isStandalone = () =>
+    window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+
+  function hideBanner(){ banner.classList.remove('show'); }
+  function showBanner(){ if(!isStandalone()) banner.classList.add('show'); }
+
+  if('serviceWorker' in navigator){
+    const register = () => {
+      navigator.serviceWorker.register('./sw.js').catch(err => {
+        console.warn('Service worker register failed:', err);
+      });
+    };
+    if(document.readyState === 'complete') register();
+    else window.addEventListener('load', register, { once:true });
+  }
+
+  let deferredPrompt = null;
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    showBanner();
+  });
+
+  installBtn.addEventListener('click', async() => {
+    if(!deferredPrompt){ hideBanner(); return; }
+    deferredPrompt.prompt();
+    try{ await deferredPrompt.userChoice; }catch(e){}
+    deferredPrompt = null;
+    hideBanner();
+  });
+
+  dismissBtn.addEventListener('click', hideBanner);
+  window.addEventListener('appinstalled', hideBanner);
+}
+
+/* ══════════════════════════════════════════════
+   INIT & EVENT LISTENERS
+   ══════════════════════════════════════════════ */
+function initApp(){
+  migrateLegacyExerciseKeys();
+
+  const calGrid = document.getElementById('calGrid');
+  const weeklyModal = document.getElementById('weeklyModal');
+  const exportCalModal = document.getElementById('exportCalModal');
+  const drawer = document.getElementById('orderDrawer');
+  const searchDrawer = document.getElementById('searchDrawer');
+  const backdrop = document.getElementById('drawerBackdrop');
+
+  function syncBackdrop(){
+    backdrop.classList.toggle('show', drawer.classList.contains('open') || searchDrawer.classList.contains('open'));
+  }
+
+  function openOrderDrawer(){
+    closeSearchDrawer(false);
+    drawer.classList.add('open');
+    drawer.setAttribute('aria-hidden','false');
+    syncBackdrop();
+    document.getElementById('closeDrawer').focus();
+  }
+  function closeOrderDrawer(restoreFocus = true){
+    drawer.classList.remove('open');
+    drawer.setAttribute('aria-hidden','true');
+    syncBackdrop();
+    if(restoreFocus) document.getElementById('orderFab').focus();
+  }
+
+  function openSearchDrawer(){
+    closeOrderDrawer(false);
+    searchDrawer.classList.add('open');
+    searchDrawer.setAttribute('aria-hidden','false');
+    syncBackdrop();
+    buildSearchIndex();
+    runSearch();
+    document.getElementById('searchInput').focus();
+  }
+  function closeSearchDrawer(restoreFocus = true){
+    searchDrawer.classList.remove('open');
+    searchDrawer.setAttribute('aria-hidden','true');
+    syncBackdrop();
+    if(restoreFocus) document.getElementById('searchFab').focus();
+  }
+
+  function openWeeklyModal(){
+    weeklyModal.classList.add('show');
+    weeklyModal.setAttribute('aria-hidden','false');
+    document.getElementById('weeklyCloseBtn').focus();
+  }
+  function closeWeeklyModal(restoreFocus = true){
+    weeklyModal.classList.remove('show');
+    weeklyModal.setAttribute('aria-hidden','true');
+    if(restoreFocus) document.getElementById('weekReportBtn').focus();
+  }
+
+  let exportCanvasRef = null;
+  function openExportCalModal(){
+    const preview = document.getElementById('exportCalPreview');
+    exportCanvasRef = drawCalendarToCanvas();
+    preview.innerHTML = '';
+    if(exportCanvasRef) preview.appendChild(exportCanvasRef);
+    else preview.innerHTML = `<div class="small muted">無法產生預覽</div>`;
+    exportCalModal.classList.add('show');
+    exportCalModal.setAttribute('aria-hidden','false');
+    document.getElementById('exportCalCloseBtn').focus();
+  }
+  function closeExportCalModal(restoreFocus = true){
+    exportCalModal.classList.remove('show');
+    exportCalModal.setAttribute('aria-hidden','true');
+    if(restoreFocus) document.getElementById('exportCalBtn').focus();
+  }
+
+  calGrid.addEventListener('click', e => {
+    const cell = e.target.closest('.cal-cell[data-ymd]');
+    if(!cell) return;
+    const [y,m,d] = cell.dataset.ymd.split('-').map(Number);
+    selectDate(new Date(y, m-1, d));
+  });
+  calGrid.addEventListener('keydown', e => {
+    if(e.key !== 'Enter' && e.key !== ' ') return;
+    const cell = e.target.closest('.cal-cell[data-ymd]');
+    if(cell){ e.preventDefault(); cell.click(); }
+  });
+
+  document.getElementById('calPrev').addEventListener('click', () => {
+    const nd = new Date(calYear, calMonth - 1, 1);
+    renderCalendar(nd.getFullYear(), nd.getMonth());
+  });
+  document.getElementById('calNext').addEventListener('click', () => {
+    const nd = new Date(calYear, calMonth + 1, 1);
+    renderCalendar(nd.getFullYear(), nd.getMonth());
+  });
+  document.getElementById('calToday').addEventListener('click', () => {
+    const t = new Date();
+    renderCalendar(t.getFullYear(), t.getMonth());
+    selectDate(t);
+  });
+
+  document.getElementById('dpPrev').addEventListener('click', () => {
+    if(!selectedDateObj) return;
+    const d = new Date(selectedDateObj); d.setDate(d.getDate() - 1); selectDate(d);
+  });
+  document.getElementById('dpNext').addEventListener('click', () => {
+    if(!selectedDateObj) return;
+    const d = new Date(selectedDateObj); d.setDate(d.getDate() + 1); selectDate(d);
+  });
+
+  document.getElementById('dpWorkout').addEventListener('click', e => {
+    const btn = e.target.closest('.set-check');
+    if(!btn) return;
+
+    const k = btn.dataset.k;
+    const current = lsGet(k, '0');
+    const next = current === '0' ? '1' : current === '1' ? '2' : '0';
+    lsSet(k, next);
+    btn.classList.toggle('done', next !== '0');
+    btn.classList.toggle('cap', next === '2');
+    _bumpCountCache.clear();
+    renderMonthSummary();
+    refreshWeeklyIfOpen();
+    refreshSearchIfOpen();
+
+    const exId = btn.dataset.exid;
+    const row = btn.closest('[data-ex-row]');
+    if(!row || !exId) return;
+
+    const allChecks = row.querySelectorAll('.set-check');
+    const allCapped = allChecks.length > 0 && Array.from(allChecks).every(c => lsGet(c.dataset.k, '0') === '2');
+
+    if(allCapped){
+      const ex = [...WORKOUTS.A, ...WORKOUTS.B].find(x => x.id === exId);
+      if(!ex) return;
+
+      const prevKg = getExerciseWeight(ex);
+      const bumpedKg = +(prevKg + 2.5).toFixed(1);
+      setExerciseWeight(ex, bumpedKg);
+
+      const weightSpan = row.querySelector('[data-ex-weight]');
+      if(weightSpan){
+        weightSpan.querySelectorAll('.bump-badge,.bump-undo').forEach(el => el.remove());
+        const textNode = weightSpan.firstChild;
+        if(textNode && textNode.nodeType === Node.TEXT_NODE) textNode.textContent = ` ${bumpedKg}kg · ${ex.reps} `;
+        else weightSpan.prepend(document.createTextNode(` ${bumpedKg}kg · ${ex.reps} `));
+
+        const badge = document.createElement('span');
+        badge.className = 'bump-badge'; badge.textContent = `+2.5kg ▲`;
+        weightSpan.append(badge);
+
+        const undoBtn = document.createElement('button');
+        undoBtn.type = 'button'; undoBtn.className = 'bump-undo'; undoBtn.textContent = '撤銷';
+        weightSpan.append(undoBtn);
+
+        const undoTimer = setTimeout(() => undoBtn.remove(), 10000);
+        undoBtn.addEventListener('click', () => {
+          clearTimeout(undoTimer);
+          setExerciseWeight(ex, prevKg);
+          weightSpan.innerHTML = ` ${prevKg}kg · ${ex.reps}`;
+          _bumpCountCache.clear();
+          refreshChestWeightStat();
+          refreshWeeklyIfOpen();
+        }, { once:true });
+      }
+      refreshChestWeightStat();
+      refreshWeeklyIfOpen();
+    }
+  });
+
+  document.getElementById('dpEatenToggle').addEventListener('click', e => {
+    const btn = e.target;
+    const k = btn.dataset.k;
+    const isOn = lsGet(k, '0') === '1';
+    const next = isOn ? '0' : '1';
+    lsSet(k, next);
+    btn.textContent = next === '1' ? '☑ 今日三餐已照計畫吃' : '☐ 標記今日三餐已照計畫吃';
+    btn.classList.toggle('on', next === '1');
+
+    if(selectedDateObj){
+      const key = formatDateStr(selectedDateObj);
+      const cell = document.querySelector(`#calGrid .cal-cell[data-ymd="${key}"]`);
+      if(cell){
+        const indicator = cell.querySelector('.eaten-indicator');
+        if(indicator){
+          indicator.style.display = next === '1' ? '' : 'none';
+          indicator.style.color = '#2a8'; indicator.style.fontSize = '10px'; indicator.textContent = '✓';
+        }
+      }
+    }
+    renderMonthSummary(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+  });
+
+  const bwSaveMsg = document.getElementById('bwSaveMsg');
+  function showBwMsg(msg, isError){
+    bwSaveMsg.textContent = msg; bwSaveMsg.style.color = isError ? 'var(--signal)' : 'var(--concrete)';
+    clearTimeout(showBwMsg._t); showBwMsg._t = setTimeout(() => bwSaveMsg.textContent = '', 3000);
+  }
+  document.getElementById('bwSaveBtn').addEventListener('click', () => {
+    if(!selectedDateObj){ showBwMsg('請先在月曆選擇日期', true); return; }
+    const wInput = document.getElementById('bwWeightInput');
+    const bfInput = document.getElementById('bwFatInput');
+    const w = parseFloat(wInput.value);
+    if(isNaN(w) || w < 30 || w > 200){ showBwMsg('體重需介於 30–200kg 之間', true); return; }
+    let bf = parseFloat(bfInput.value);
+    if(bfInput.value.trim() !== '' && (isNaN(bf) || bf < 3 || bf > 60)){ showBwMsg('體脂需介於 3–60% 之間', true); return; }
+    if(bfInput.value.trim() === '') bf = null;
+
+    setBwEntry(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate(), w, bf);
+    showBwMsg('已紀錄');
+    renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+  });
+
+  document.getElementById('dpMeals').addEventListener('click', e => {
+    const btn = e.target.closest('.copy-meal-btn');
+    if(btn) copyText(btn.dataset.copy);
+  });
+
+  const rGrid = document.getElementById('restaurantGrid');
+  rGrid.innerHTML = RESTAURANTS.map(r => `
+    <div class="swiss-card" style="padding:14px">
+      <div class="rest-card-header"><div class="rest-card-name">${escapeHtml(r.name)}</div><span class="rest-card-p mono-num">${escapeHtml(r.p)}</span></div>
+      <div class="rest-card-addr">${escapeHtml(r.addr)}</div>
+      <div class="rest-card-order">點：${escapeHtml(r.order)}</div>
+      <div class="rest-card-footer mono-num"><span>${escapeHtml(r.price)}</span>
+        <div class="rest-card-actions">
+          <button type="button" class="copy-btn" data-copy="${escapeHtml(r.name)}：${escapeHtml(r.order)}">複製</button>
+          <a style="text-decoration:underline" target="_blank" rel="noopener" href="https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + r.addr)}">地圖</a>
+        </div>
+      </div>
+    </div>`).join('');
+  rGrid.addEventListener('click', e => {
+    const btn = e.target.closest('.copy-btn');
+    if(btn) copyText(btn.dataset.copy);
+  });
+
+  document.getElementById('orderFab').addEventListener('click', openOrderDrawer);
+  document.getElementById('closeDrawer').addEventListener('click', () => closeOrderDrawer());
+  backdrop.addEventListener('click', () => { closeOrderDrawer(false); closeSearchDrawer(false); });
+
+  const orderList = document.getElementById('orderList');
+  orderList.innerHTML = ORDER_DICT.map(([shop, order]) => `
+    <div style="border-bottom:1px dotted var(--line);padding-bottom:10px;margin-bottom:10px">
+      <div style="font-weight:700;font-size:13px">${escapeHtml(shop)}</div>
+      <div style="color:var(--concrete);font-size:12px;margin-top:2px">${escapeHtml(order)}</div>
+      <button type="button" class="copy-btn" data-copy="${escapeHtml(shop)}：${escapeHtml(order)}" style="font-size:11px;text-decoration:underline;background:none;border:none;padding:0;cursor:pointer;margin-top:4px">複製點餐口令</button>
+    </div>`).join('');
+  orderList.addEventListener('click', e => {
+    const btn = e.target.closest('.copy-btn');
+    if(btn) copyText(btn.dataset.copy);
+  });
+
+  document.getElementById('searchFab').addEventListener('click', openSearchDrawer);
+  document.getElementById('closeSearchDrawer').addEventListener('click', () => closeSearchDrawer());
+  document.getElementById('searchInput').addEventListener('input', runSearch);
+  document.getElementById('searchFilterRow').addEventListener('click', e => {
+    const btn = e.target.closest('[data-filter]');
+    if(!btn) return;
+    searchFilter = btn.dataset.filter;
+    document.querySelectorAll('#searchFilterRow [data-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    runSearch();
+  });
+  document.getElementById('searchResults').addEventListener('click', e => {
+    const btn = e.target.closest('[data-open-date]');
+    if(!btn) return;
+    const [y,m,d] = btn.dataset.openDate.split('-').map(Number);
+    closeSearchDrawer(false); selectDate(new Date(y, m-1, d));
+  });
+
+  document.getElementById('weekReportBtn').addEventListener('click', () => { renderWeeklyReport(0); openWeeklyModal(); });
+  document.getElementById('weeklyOlderBtn').addEventListener('click', () => renderWeeklyReport(weeklyOffset - 1));
+  document.getElementById('weeklyNewerBtn').addEventListener('click', () => { if(weeklyOffset < 0) renderWeeklyReport(weeklyOffset + 1); });
+  document.getElementById('weeklyCopyBtn').addEventListener('click', () => copyAnyText(buildWeeklyReportText(weeklyOffset), '已複製週報'));
+  document.getElementById('weeklyCloseBtn').addEventListener('click', () => closeWeeklyModal());
+  weeklyModal.addEventListener('click', e => { if(e.target === weeklyModal) closeWeeklyModal(); });
+  document.getElementById('weeklyReportBody').addEventListener('click', e => {
+    const btn = e.target.closest('[data-week-open]');
+    if(!btn) return;
+    const [y,m,d] = btn.dataset.weekOpen.split('-').map(Number);
+    closeWeeklyModal(false); selectDate(new Date(y, m-1, d));
+  });
+
+  document.getElementById('exportCalBtn').addEventListener('click', openExportCalModal);
+  document.getElementById('exportCalCloseBtn').addEventListener('click', () => closeExportCalModal());
+  exportCalModal.addEventListener('click', e => { if(e.target === exportCalModal) closeExportCalModal(); });
+  document.getElementById('downloadCalBtn').addEventListener('click', () => {
+    if(!exportCanvasRef) return;
+    const a = document.createElement('a');
+    a.href = exportCanvasRef.toDataURL('image/png');
+    a.download = `gongguan-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    flashToast('已下載 PNG');
+  });
+
+  document.addEventListener('keydown', e => {
+    if(e.key !== 'Escape') return;
+    if(weeklyModal.classList.contains('show')) closeWeeklyModal();
+    else if(exportCalModal.classList.contains('show')) closeExportCalModal();
+    else if(searchDrawer.classList.contains('open')) closeSearchDrawer();
+    else if(drawer.classList.contains('open')) closeOrderDrawer();
+  });
+
+  function allRecompKeys(){
+    const keys = [];
+    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.indexOf('recomp_') === 0) keys.push(k); } }catch(e){}
+    return keys;
+  }
+  function showDataMsg(msg, isError){
+    const el = document.getElementById('dataToolsMsg');
+    if(!el) return;
+    el.textContent = msg; el.style.color = isError ? 'var(--signal)' : 'var(--concrete)';
+    clearTimeout(showDataMsg._t); showDataMsg._t = setTimeout(() => el.textContent = '', 4000);
+  }
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    try{
+      const data = {};
+      allRecompKeys().forEach(k => data[k] = localStorage.getItem(k));
+      const payload = { exportedAt: new Date().toISOString(), data };
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url;
+      a.download = `gongguan-recomp-backup-${new Date().toISOString().slice(0,10)}.json`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+      showDataMsg(`已匯出 ${allRecompKeys().length} 筆紀錄`);
+    }catch(e){ showDataMsg('匯出失敗：' + e.message, true); }
+  });
+
+  document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
+
+  const VALID_IMPORT_KEY = /^recomp_(set_id|weight_id|eaten|bw|migrated)_/;
+  document.getElementById('importFileInput').addEventListener('change', e => {
+    const file = e.target.files && e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      try{
+        const parsed = JSON.parse(reader.result);
+        const data = parsed && parsed.data ? parsed.data : parsed;
+        if(!data || typeof data !== 'object') throw new Error('檔案格式不正確');
+        let count = 0;
+        Object.keys(data).forEach(k => {
+          if(VALID_IMPORT_KEY.test(k) && typeof data[k] === 'string'){ lsSet(k, data[k]); count++; }
+        });
+        _bumpCountCache.clear();
+        showDataMsg(`已匯入 ${count} 筆紀錄，正在重新整理畫面…`);
+        renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
+        refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+      }catch(err){ showDataMsg('匯入失敗：檔案格式不正確', true); }
+    };
+    reader.onerror = () => showDataMsg('匯入失敗：無法讀取檔案', true);
+    reader.readAsText(file); e.target.value = '';
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if(!confirm('確定要清除所有訓練打勾、重量進度、體重紀錄與飲食打勾嗎？此動作無法復原。')) return;
+    allRecompKeys().forEach(k => lsRemove(k));
+    _bumpCountCache.clear();
+    showDataMsg('已清除所有紀錄');
+    renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
+    refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+  });
+
+  const initDate = new Date();
+  renderCalendar(initDate.getFullYear(), initDate.getMonth());
+  selectDate(initDate);
+  renderBwStats();
+  renderBwChart();
+  initPwa();
+}
+
+try{
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp);
+  else initApp();
+}catch(err){
+  const b = document.getElementById('errorBanner');
+  b.style.display = 'block'; b.textContent = 'Init error: ' + err.message;
+}
+</script>
+</body>
+</html>
