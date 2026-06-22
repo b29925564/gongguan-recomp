@@ -571,9 +571,14 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 #orderDrawer.open{transform:translateX(0)}
 #drawerBackdrop{
   position:fixed;inset:0;background:rgba(0,0,0,.18);
-  z-index:40;display:none;
+  z-index:40;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
 }
-#drawerBackdrop.show{display:block}
+#drawerBackdrop.show{
+  opacity:1;
+  pointer-events:auto;
+}
 #orderFab{
   position:fixed;right:18px;z-index:45;
   bottom:calc(18px + env(safe-area-inset-bottom, 0px));
@@ -665,10 +670,15 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 
 .modal{
   position:fixed;inset:0;background:rgba(0,0,0,.26);
-  display:none;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;
   padding:18px;z-index:60;
+  opacity:0;pointer-events:none;
+  transition:opacity .2s;
 }
-.modal.show{display:flex}
+.modal.show{
+  opacity:1;
+  pointer-events:auto;
+}
 .modal-card{
   width:min(960px,100%);max-height:90vh;overflow:auto;
   background:var(--card);border:1px solid var(--ink);border-radius:4px;
@@ -781,250 +791,178 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   background:#1a1a1a!important;
 }
 /* ══════════════════════════════════════════════
-   DESIGN RHYTHM — spacing & typography system
+   MICRO-INTERACTIONS v1.4.0
    ══════════════════════════════════════════════ */
 
-/* ── spacing scale: 4 / 8 / 12 / 16 / 24 / 32 / 48 ── */
-
-/* section 之間的間距統一 */
-section{
-  --section-py:48px;
-}
-section.container{
-  padding-top:var(--section-py);
-  padding-bottom:var(--section-py);
-}
-
-/* 所有 swiss-card 內部 padding 統一 */
-.swiss-card{
-  padding:20px;
-}
-
-/* kicker + 標題的固定節奏 */
-.kicker{
-  margin-bottom:4px;
-  line-height:1.3;
-}
-
-/* ── 字級系統統一 ── */
-
-/* 大標題下方的副資訊 */
-.stat-label-row{
-  margin-top:16px;
-  font-size:13px;
-  gap:8px 20px;
-}
-
-/* 月摘要格子統一 */
-.msum-cell{
-  padding:12px 14px;
-}
-.msum-num{
-  font-size:24px;
-  line-height:1.2;
-}
-
-/* 體重統計格子 */
-.bw-stat{
-  padding:10px 14px;
-}
-.bw-stat-val{
-  font-size:20px;
-  margin-top:4px;
-}
-
-/* ── 卡片內部節奏 ── */
-
-/* 卡片內的 kicker + content 間距 */
-.swiss-card .kicker{
-  margin-bottom:6px;
-}
-
-/* 卡片群組之間的間距 */
-.grid-3{
-  gap:16px;
-}
-
-/* 月曆和日期面板之間 */
-.two-col{
-  gap:24px;
-}
-
-/* ── 日期面板內部節奏 ── */
-.dp-header{
-  gap:12px;
-}
-.dp-title{
-  font-size:22px;
-  margin-top:6px;
-  line-height:1.2;
-}
-.dp-macros{
-  font-size:11px;
-  line-height:1.7;
-}
-.dp-section{
-  margin-top:16px;
-  padding-top:16px;
-}
-.dp-eaten-row{
-  margin-top:12px;
-}
-.dp-nav-row{
-  margin-top:16px;
-  gap:10px;
-}
-.dp-hint{
-  margin-top:12px;
-  line-height:1.6;
-}
-
-/* ── 訓練組數行 ── */
-.ex-row{
-  padding:8px 0;
-  gap:12px;
-}
-.ex-name{
-  font-size:13px;
-  line-height:1.4;
-}
-.ex-hint{
-  padding-top:8px;
-  line-height:1.5;
-}
-
-/* ── 餐廳卡片 ── */
-.rest-grid{
-  gap:14px;
-}
-.rest-card-order{
-  margin-top:10px;
-  line-height:1.6;
-}
-.rest-card-footer{
-  margin-top:12px;
-  padding-top:12px;
-}
-
-/* ── 三餐卡片 ── */
-#dpMeals{
-  gap:12px;
-}
-.meal-block{
-  padding:14px;
-}
-.meal-block-shop{
-  margin-top:4px;
-}
-.meal-block-item{
-  margin-top:3px;
-  line-height:1.5;
-}
-.meal-block-addr{
-  margin-top:4px;
-}
-.meal-block-actions{
-  margin-top:8px;
-  gap:16px;
-}
-.meal-sup{
-  padding:14px;
-  line-height:1.7;
-}
-
-/* ── 搜尋結果 ── */
-.search-results{
-  gap:12px;
-}
-.search-item{
-  padding:14px;
-}
-.search-item-body{
-  margin-top:10px;
-  line-height:1.65;
-}
-.search-tags{
-  margin-top:10px;
-  gap:8px;
-}
-
-/* ── 週報 ── */
-.weekly-grid{
-  gap:12px;
-}
-.week-cell{
-  padding:12px 14px;
-}
-.week-change-list{
-  gap:10px;
-}
+/* ── 全域過渡基底 ── */
+.swiss-card,
+.meal-block,
+.meal-sup,
+.msum-cell,
+.bw-stat,
+.search-item,
+.week-cell,
 .week-day-link{
-  padding:12px 14px;
+  transition:border-color .15s, background .15s, box-shadow .15s;
 }
 
-/* ── Modal ── */
-.modal-head{
-  padding:18px 20px;
-  gap:14px;
+/* ── 月曆格子 ── */
+.cal-cell{
+  transition:border-color .15s, background .15s, box-shadow .15s, transform .1s;
 }
-.modal-title{
-  font-size:20px;
-}
-.modal-body{
-  padding:18px 20px;
+.cal-cell:active:not(.is-other){
+  transform:scale(.97);
 }
 
-/* ── Drawer ── */
-.drawer-head{
-  padding:18px 20px;
+/* ── tri-state 打勾 ── */
+.set-check{
+  transition:background .12s, border-color .12s, transform .1s;
 }
-.drawer-body{
-  padding:16px 20px;
-}
-
-/* ── 搜尋篩選 ── */
-.search-filter-row{
-  margin-top:14px;
-  gap:10px;
-}
-.search-chip{
-  padding:7px 12px;
-}
-.search-meta{
-  margin-top:12px;
+.set-check:active{
+  transform:scale(.85);
 }
 
-/* ── 資料備份區 ── */
-.data-tools-row{
-  gap:10px;
+/* ── 按鈕群組 ── */
+.btn,
+.btn-signal,
+.search-chip,
+.copy-btn,
+.meal-copy-btn{
+  transition:background .12s, color .12s, border-color .12s, transform .08s, box-shadow .12s;
 }
 
-/* ── 進度條 ── */
-.progress-track{
-  margin-top:8px;
+/* ── FAB 按鈕 ── */
+#orderFab,
+#searchFab{
+  transition:background .15s, transform .1s, box-shadow .15s;
+}
+#orderFab:active,
+#searchFab:active{
+  transform:scale(.94);
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
 }
 
-/* ── footer ── */
-footer{
-  padding:40px 0;
-  line-height:1.7;
+/* ── Modal 開關 ── */
+.modal{
+  transition:opacity .2s;
+  opacity:0;
+  pointer-events:none;
+}
+.modal.show{
+  opacity:1;
+  pointer-events:auto;
+}
+.modal-card{
+  transition:transform .22s cubic-bezier(.16,1,.3,1), opacity .18s;
+  transform:translateY(12px) scale(.98);
+  opacity:0;
+}
+.modal.show .modal-card{
+  transform:translateY(0) scale(1);
+  opacity:1;
 }
 
-/* ── 體重輸入 ── */
-.bw-input-row{
-  gap:10px;
+/* ── Drawer 滑入 ── */
+#orderDrawer{
+  transition:transform .28s cubic-bezier(.16,1,.3,1);
+}
+#searchDrawer{
+  transition:transform .28s cubic-bezier(.16,1,.3,1);
 }
 
-/* ── 通用 small text 行高 ── */
-.small{
-  line-height:1.5;
+/* ── Backdrop 淡入 ── */
+#drawerBackdrop{
+  transition:opacity .2s;
+  opacity:0;
 }
-.muted{
-  line-height:1.5;
+#drawerBackdrop.show{
+  opacity:1;
 }
 
-/* ── dark mode 下這些節奏也一樣生效 ── */
-/* 不需要額外處理，因為上面都用 var() 和 class */
+/* ── Toast 滑入 ── */
+#toast{
+  transition:opacity .2s, transform .2s;
+  transform:translateX(-50%) translateY(-8px);
+}
+#toast[style*="opacity: 1"],
+#toast[style*="opacity:1"]{
+  transform:translateX(-50%) translateY(0);
+}
+
+/* ── 飲食達標按鈕 ── */
+#dpEatenToggle{
+  transition:background .15s, color .15s, border-color .15s, transform .1s;
+}
+#dpEatenToggle:active{
+  transform:scale(.97);
+}
+#dpEatenToggle.on{
+  animation:eatenPop .25s ease;
+}
+@keyframes eatenPop{
+  0%{transform:scale(1)}
+  50%{transform:scale(1.03)}
+  100%{transform:scale(1)}
+}
+
+/* ── 升重 badge（已有 popIn，補強） ── */
+.bump-badge{
+  animation:popIn .3s cubic-bezier(.16,1,.3,1);
+}
+
+/* ── 體重儲存成功閃爍 ── */
+@keyframes savedFlash{
+  0%{box-shadow:0 0 0 0 rgba(42,136,85,.4)}
+  50%{box-shadow:0 0 0 6px rgba(42,136,85,.15)}
+  100%{box-shadow:0 0 0 0 rgba(42,136,85,0)}
+}
+.bw-field input.saved-flash{
+  animation:savedFlash .6s ease;
+}
+
+/* ── 搜尋結果項目 hover 提升 ── */
+.search-item:hover,
+.week-day-link:hover{
+  box-shadow:0 2px 8px rgba(0,0,0,.06);
+  transform:translateY(-1px);
+  transition:all .15s;
+}
+
+/* ── 餐廳卡片 hover ── */
+.rest-grid .swiss-card{
+  transition:border-color .15s, box-shadow .15s, transform .12s;
+}
+.rest-grid .swiss-card:hover{
+  box-shadow:0 2px 12px rgba(0,0,0,.06);
+  transform:translateY(-1px);
+}
+
+/* ── progress bar 填充動畫 ── */
+.progress-fill{
+  transition:width .4s cubic-bezier(.16,1,.3,1);
+}
+
+/* ── PWA 提示條滑入 ── */
+#pwaInstallBanner,
+#pwaUpdateBanner{
+  transition:opacity .2s, transform .25s cubic-bezier(.16,1,.3,1);
+  opacity:0;
+  transform:translateY(10px);
+}
+#pwaInstallBanner.show,
+#pwaUpdateBanner.show{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ── dark mode 微互動相容 ── */
+[data-theme="dark"] .search-item:hover,
+[data-theme="dark"] .week-day-link:hover{
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+[data-theme="dark"] .rest-grid .swiss-card:hover{
+  box-shadow:0 2px 12px rgba(0,0,0,.2);
+}
 </style>
 </head>
 <body>
@@ -1223,7 +1161,8 @@ footer{
     <div>
       Gongguan Recomp Dashboard · Swiss Style<br>
       176 / 75kg / 24y 男 · Skinny fat · 蠶豆症<br>
-      目標：肚子變小 · 胸部變大
+      目標：肚子變小 · 胸部變大<br>
+<span class="mono-num" id="appVersionLabel"></span>
     </div>
     <div class="mono-num" style="text-align:right">
       P 130–145 g / d<br>
@@ -1342,6 +1281,7 @@ footer{
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
+const APP_VERSION = 'v1.4.0';
 
 /* ── visible error banner ── */
 (function(){
@@ -2818,6 +2758,7 @@ function initApp(){
     lsSet(k, next);
     btn.classList.toggle('done', next !== '0');
     btn.classList.toggle('cap', next === '2');
+    if(navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
     _bumpCountCache.clear();
     renderMonthSummary();
     refreshWeeklyIfOpen();
@@ -2847,6 +2788,7 @@ function initApp(){
 
         const badge = document.createElement('span');
         badge.className = 'bump-badge'; badge.textContent = `+2.5kg ▲`;
+        if(navigator.vibrate) navigator.vibrate([50, 50, 100]);
         weightSpan.append(badge);
 
         const undoBtn = document.createElement('button');
@@ -2908,6 +2850,16 @@ function initApp(){
 
     setBwEntry(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate(), w, bf);
     showBwMsg('已紀錄');
+    /* saved flash animation */
+const bwFlashInput = document.getElementById('bwWeightInput');
+if(bwFlashInput){
+  bwFlashInput.classList.remove('saved-flash');
+  void bwFlashInput.offsetWidth;
+  bwFlashInput.classList.add('saved-flash');
+  setTimeout(() => bwFlashInput.classList.remove('saved-flash'), 700);
+}
+/* haptic feedback */
+if(navigator.vibrate) navigator.vibrate(50);
     renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
   });
 
@@ -3081,6 +3033,10 @@ searchClearBtn.addEventListener('click', () => {
   renderBwStats();
   renderBwChart();
   initPwa();
+  /* version label */
+const verLabel = document.getElementById('appVersionLabel');
+if(verLabel) verLabel.textContent = APP_VERSION;
+console.log('公館重組計畫', APP_VERSION);
 }
 /* iOS Safari :active fix */
 document.addEventListener('touchstart', function(){}, true);
