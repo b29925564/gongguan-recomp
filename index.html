@@ -113,7 +113,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 @media(max-width:600px){
   .cal-cell{min-height:66px;padding:6px 5px}
 }
-@media(max-width:390px){
+@media(max-width:480px){
   .cal-cell{min-height:52px!important;padding:4px!important}
   .cal-daynum{font-size:10px!important}
   .cal-tag{font-size:9px!important;padding:1px 3px!important}
@@ -121,14 +121,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   .junk-dot{width:4px!important;height:4px!important}
   .eaten-indicator{font-size:9px!important}
 }
-@media(max-width:390px){
-  .cal-cell{min-height:56px;padding:4px}
-  .cal-daynum{font-size:10px}
-  .cal-tag{font-size:9px;padding:1px 3px}
-  .cal-meta{font-size:9px!important}
-  .junk-dot{width:4px;height:4px}
-}
-
 .set-check{
   width:21px;height:21px;border:1.5px solid #141414;
   background:#fff;cursor:pointer;flex-shrink:0;
@@ -2380,7 +2372,8 @@ searchClearBtn.addEventListener('click', () => {
   renderBwChart();
   initPwa();
 }
-
+/* iOS Safari :active fix */
+document.addEventListener('touchstart', function(){}, true);
 try{
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', initApp);
   else initApp();
