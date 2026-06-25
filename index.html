@@ -1384,7 +1384,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v1.6.1';
+const APP_VERSION = 'v1.6.2';
+const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
 (function(){
@@ -1580,6 +1581,40 @@ function migrateLegacyExerciseKeys(){
   lsSet('recomp_migrated_v2', '1');
 }
 
+function cleanupDeprecatedExerciseKeys(ids, legacyNames){
+  try{
+    const keysToRemove = [];
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(!k || k.indexOf('recomp_') !== 0) continue;
+
+      if(ids.some(id => k === `recomp_weight_id_${id}` || k.indexOf(`_${id}_`) !== -1)){
+        keysToRemove.push(k);
+        continue;
+      }
+
+      if(legacyNames.some(name => k === `recomp_weight_${name}` || k.indexOf(`_${name}_`) !== -1)){
+        keysToRemove.push(k);
+      }
+    }
+
+    [...new Set(keysToRemove)].forEach(lsRemove);
+  }catch(e){}
+}
+
+function migrateSchema(){
+  const current = parseInt(lsGet('recomp_schema_version', '2'), 10) || 2;
+
+  if(current < 3){
+    cleanupDeprecatedExerciseKeys(
+      ['calf_press', 'rear_delt'],
+      ['小腿推蹬', '後三角訓練機']
+    );
+  }
+
+  lsSet('recomp_schema_version', String(SCHEMA_VERSION));
+}
+  
 function copyText(t){
   const done = () => {
     const el = document.getElementById('toast');
@@ -2797,6 +2832,7 @@ function initApp(){
   }
 })();
   migrateLegacyExerciseKeys();
+  migrateSchema();
 
   const calGrid = document.getElementById('calGrid');
   const weeklyModal = document.getElementById('weeklyModal');
@@ -3154,7 +3190,7 @@ searchClearBtn.addEventListener('click', () => {
 
   document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
 
-  const VALID_IMPORT_KEY = /^recomp_(set_id|weight_id|eaten|bw|migrated)_/;
+  const VALID_IMPORT_KEY = /^(recomp_(set_id|weight_id|eaten|bw|migrated)_|recomp_(schema_version|theme)$)/;
   document.getElementById('importFileInput').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -3196,7 +3232,7 @@ searchClearBtn.addEventListener('click', () => {
   /* version label */
 const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
-console.log('公館重組計畫', APP_VERSION);
+console.log('公館重組計畫', APP_VERSION, 'schema', SCHEMA_VERSION);
 }
 /* iOS Safari :active fix */
 document.addEventListener('touchstart', function(){}, true);
