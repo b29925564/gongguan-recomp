@@ -738,6 +738,31 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   box-shadow:0 8px 24px rgba(0,0,0,.08);
 }
 #pwaUpdateBanner.show{display:flex}
+#versionUpdateBanner{
+  position:fixed;
+  left:18px;
+  right:18px;
+  top:calc(18px + env(safe-area-inset-top, 0px));
+  z-index:57;
+  display:none;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  background:var(--card);
+  border:1px solid var(--ink);
+  padding:12px 14px;
+  border-radius:4px;
+  box-shadow:0 8px 24px rgba(0,0,0,.08);
+}
+#versionUpdateBanner.show{display:flex}
+@media(min-width:768px){
+  #versionUpdateBanner{left:auto;right:18px;width:420px}
+}
+[data-theme="dark"] #versionUpdateBanner{
+  background:var(--card);
+  border-color:var(--ink);
+}
 @media(min-width:768px){
   #pwaUpdateBanner{
     left:auto;
@@ -2791,6 +2816,56 @@ function initPwa(){
   updateLaterBtn.addEventListener('click', hideUpdateBanner);
 }
 
+function checkRemoteVersion(){
+  fetch('./version.json?t=' + Date.now(), { cache:'no-store' })
+    .then(res => res.ok ? res.json() : null)
+    .then(data => {
+      if(!data || !data.version) return;
+      if(data.version !== APP_VERSION){
+        showVersionUpdateBanner(data.version);
+      }
+    })
+    .catch(() => {});
+}
+
+function showVersionUpdateBanner(remoteVer){
+  let banner = document.getElementById('versionUpdateBanner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'versionUpdateBanner';
+    banner.innerHTML = `
+      <div>
+        <div class="kicker">版本更新</div>
+        <div style="font-weight:800;font-size:14px;margin-top:2px">有新版本 ${escapeHtml(remoteVer)}</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button type="button" id="versionLaterBtn" class="btn">稍後</button>
+        <button type="button" id="versionReloadBtn" class="btn-signal">重新載入</button>
+      </div>`;
+    document.body.appendChild(banner);
+
+    document.getElementById('versionLaterBtn').addEventListener('click', () => {
+      banner.classList.remove('show');
+    });
+    document.getElementById('versionReloadBtn').addEventListener('click', () => {
+      if('serviceWorker' in navigator){
+        navigator.serviceWorker.getRegistrations().then(regs => {
+          regs.forEach(r => r.unregister());
+          if('caches' in window){
+            caches.keys().then(keys => keys.forEach(k => caches.delete(k)))
+              .finally(() => window.location.reload(true));
+          }else{
+            window.location.reload(true);
+          }
+        });
+      }else{
+        window.location.reload(true);
+      }
+    });
+  }
+  banner.classList.add('show');
+}
+  
 /* ══════════════════════════════════════════════
    INIT & EVENT LISTENERS
    ══════════════════════════════════════════════ */
@@ -3229,6 +3304,7 @@ searchClearBtn.addEventListener('click', () => {
   renderBwStats();
   renderBwChart();
   initPwa();
+  checkRemoteVersion();
   /* version label */
 const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
