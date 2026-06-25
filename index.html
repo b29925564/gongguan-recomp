@@ -756,6 +756,39 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   box-shadow:0 8px 24px rgba(0,0,0,.08);
 }
 #versionUpdateBanner.show{display:flex}
+  /* ── Settings ── */
+.settings-list{
+  display:grid;gap:0;
+}
+.settings-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:14px 0;
+  border-bottom:1px solid var(--line);
+}
+.settings-row:last-child{
+  border-bottom:none;
+}
+.settings-label{
+  font-size:13px;
+  font-weight:600;
+}
+.settings-desc{
+  font-size:11px;
+  color:var(--concrete);
+  margin-top:2px;
+}
+.settings-toggle{
+  display:flex;gap:4px;flex-shrink:0;
+}
+.settings-toggle .btn{
+  padding:5px 10px;
+  font-size:11px;
+  min-width:40px;
+  text-align:center;
+}
 @media(min-width:768px){
   #versionUpdateBanner{left:auto;right:18px;width:420px}
 }
@@ -1100,9 +1133,14 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   <div class="container" style="padding-top:44px;padding-bottom:44px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
   <div class="kicker">Body Recomposition — Gongguan, NTU</div>
-  <button type="button" id="themeToggle" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="切換主題">
-    <i class="ph ph-monitor icon" aria-hidden="true"></i>
-  </button>
+  <div style="display:flex;gap:6px">
+    <button type="button" id="themeToggle" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="切換主題">
+      <i class="ph ph-monitor icon" aria-hidden="true"></i>
+    </button>
+    <button type="button" id="settingsBtn" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="設定">
+      <i class="ph ph-gear icon" aria-hidden="true"></i>
+    </button>
+  </div>
 </div>
     <h1>公館重組<br>計畫</h1>
     <div class="stat-label-row">
@@ -1300,7 +1338,26 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     </div>
   </div>
 </footer>
-
+<!-- Settings modal -->
+<div id="settingsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
+  <div class="modal-card" style="width:min(480px,100%)">
+    <div class="modal-head">
+      <div>
+        <div class="kicker">設定</div>
+        <div class="modal-title" id="settingsTitle">偏好設定</div>
+      </div>
+      <button type="button" id="settingsCloseBtn" class="btn icon-only" style="padding:5px 8px">
+        <i class="ph ph-x icon" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="settings-list" id="settingsList"></div>
+      <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--line)">
+        <div class="small muted mono-num" id="settingsVersionInfo"></div>
+      </div>
+    </div>
+  </div>
+</div>
 <!-- Weekly report modal -->
 <div id="weeklyModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="weeklyModalTitle" aria-hidden="true">
   <div class="modal-card">
@@ -1409,7 +1466,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v1.6.2';
+const APP_VERSION = 'v1.7.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -1855,11 +1912,11 @@ function renderCalendar(year, month){
       selectedDateObj.getMonth() === month &&
       selectedDateObj.getDate() === d;
     const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
-    /* heatmap classes */
+/* heatmap classes */
 const isPast = dateObj <= new Date();
 let heatClass = '';
 let heatBar = '';
-if(isPast){
+if(isPast && getPref('heatmap')){
   if(plan.train !== '休'){
     const totalSets = WORKOUTS[plan.train].reduce((s, ex) => s + ex.sets, 0);
     let doneSets = 0;
@@ -2039,9 +2096,9 @@ function renderBwChart(){
   }
 
   const wPoints = entries.map((e,i) => `${xFor(i)},${yForW(e.w)}`).join(' ');
-  /* 7-day moving average */
+/* 7-day moving average */
 let maPolyline = '';
-if(entries.length >= 3){
+if(entries.length >= 3 && getPref('chartMA')){
   const maPoints = entries.map((e,i) => {
     const start = Math.max(0, i - 6);
     const window = entries.slice(start, i + 1);
@@ -2080,10 +2137,10 @@ if(entries.length >= 3){
     return `<text x="${xFor(i)}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--concrete)" font-family="Fragment Mono,monospace">${e.month+1}/${e.day}</text>`;
   }).join('');
 
-  /* target zone band (73-77kg) */
+/* target zone band (73-77kg) */
 const targetLow = 73, targetHigh = 77;
 let targetBand = '';
-if(minW < targetHigh && maxW > targetLow){
+if(getPref('chartTarget') && minW < targetHigh && maxW > targetLow){
   const bandTop = yForW(Math.min(targetHigh, maxW));
   const bandBot = yForW(Math.max(targetLow, minW));
   const bandH = bandBot - bandTop;
@@ -2815,7 +2872,100 @@ function initPwa(){
 
   updateLaterBtn.addEventListener('click', hideUpdateBanner);
 }
+/* ══════════════════════════════════════════════
+   SETTINGS
+   ══════════════════════════════════════════════ */
+const PREFS = {
+  vibration:  { key:'recomp_pref_vibration',  label:'震動回饋',       desc:'訓練打勾、升重、體重儲存時震動', default:'1' },
+  heatmap:    { key:'recomp_pref_heatmap',    label:'月曆 Heatmap',  desc:'根據完成度顯示月曆格子底色',     default:'1' },
+  chartMA:    { key:'recomp_pref_chart_ma',   label:'圖表 7日均線',  desc:'體重圖表顯示 7 日移動平均線',    default:'1' },
+  chartTarget:{ key:'recomp_pref_chart_zone', label:'圖表目標區間',  desc:'體重圖表顯示 73–77kg 目標帶',    default:'1' },
+};
 
+function getPref(id){
+  const pref = PREFS[id];
+  if(!pref) return true;
+  return lsGet(pref.key, pref.default) === '1';
+}
+
+function setPref(id, val){
+  const pref = PREFS[id];
+  if(!pref) return;
+  lsSet(pref.key, val ? '1' : '0');
+}
+
+function renderSettings(){
+  const list = document.getElementById('settingsList');
+  const info = document.getElementById('settingsVersionInfo');
+  if(!list) return;
+
+  list.innerHTML = Object.entries(PREFS).map(([id, pref]) => {
+    const isOn = getPref(id);
+    return `<div class="settings-row">
+      <div>
+        <div class="settings-label">${escapeHtml(pref.label)}</div>
+        <div class="settings-desc">${escapeHtml(pref.desc)}</div>
+      </div>
+      <div class="settings-toggle">
+        <button type="button" class="btn ${isOn ? '' : 'on'}" data-pref="${id}" data-val="0">關</button>
+        <button type="button" class="btn ${isOn ? 'on' : ''}" data-pref="${id}" data-val="1">開</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  if(info){
+    info.textContent = `${APP_VERSION} · schema ${SCHEMA_VERSION}`;
+  }
+}
+
+function initSettings(){
+  const modal = document.getElementById('settingsModal');
+  const openBtn = document.getElementById('settingsBtn');
+  const closeBtn = document.getElementById('settingsCloseBtn');
+  if(!modal || !openBtn || !closeBtn) return;
+
+  function openSettings(){
+    renderSettings();
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+    closeBtn.focus();
+  }
+  function closeSettings(){
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden', 'true');
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener('click', openSettings);
+  closeBtn.addEventListener('click', closeSettings);
+  modal.addEventListener('click', e => {
+    if(e.target === modal) closeSettings();
+  });
+
+  document.getElementById('settingsList').addEventListener('click', e => {
+    const btn = e.target.closest('[data-pref]');
+    if(!btn) return;
+
+    const prefId = btn.dataset.pref;
+    const val = btn.dataset.val === '1';
+    setPref(prefId, val);
+    renderSettings();
+
+    /* 即時生效 */
+    if(prefId === 'heatmap'){
+      renderCalendar(calYear, calMonth);
+      if(selectedDateObj) selectDate(selectedDateObj);
+    }
+    if(prefId === 'chartMA' || prefId === 'chartTarget'){
+      renderBwChart();
+    }
+  });
+
+  /* Escape 關閉 */
+  document.addEventListener('keydown', e => {
+    if(e.key === 'Escape' && modal.classList.contains('show')) closeSettings();
+  });
+}
 function checkRemoteVersion(){
   fetch('./version.json?t=' + Date.now(), { cache:'no-store' })
     .then(res => res.ok ? res.json() : null)
@@ -3023,7 +3173,7 @@ function initApp(){
     lsSet(k, next);
     btn.classList.toggle('done', next !== '0');
     btn.classList.toggle('cap', next === '2');
-    if(navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
+    if(getPref('vibration') && navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
     _bumpCountCache.clear();
     renderMonthSummary();
     refreshWeeklyIfOpen();
@@ -3053,7 +3203,7 @@ function initApp(){
 
         const badge = document.createElement('span');
         badge.className = 'bump-badge'; badge.textContent = `+2.5kg ▲`;
-        if(navigator.vibrate) navigator.vibrate([50, 50, 100]);
+        if(getPref('vibration') && navigator.vibrate) navigator.vibrate([50, 50, 100]);
         weightSpan.append(badge);
 
         const undoBtn = document.createElement('button');
@@ -3124,7 +3274,7 @@ if(bwFlashInput){
   setTimeout(() => bwFlashInput.classList.remove('saved-flash'), 700);
 }
 /* haptic feedback */
-if(navigator.vibrate) navigator.vibrate(50);
+if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
     renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
   });
 
@@ -3265,7 +3415,7 @@ searchClearBtn.addEventListener('click', () => {
 
   document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
 
-  const VALID_IMPORT_KEY = /^(recomp_(set_id|weight_id|eaten|bw|migrated)_|recomp_(schema_version|theme)$)/;
+  const VALID_IMPORT_KEY = /^(recomp_(set_id|weight_id|eaten|bw|migrated)_|recomp_(schema_version|theme|pref_\w+)$)/;
   document.getElementById('importFileInput').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -3305,6 +3455,7 @@ searchClearBtn.addEventListener('click', () => {
   renderBwChart();
   initPwa();
   checkRemoteVersion();
+  initSettings();
   /* version label */
 const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
