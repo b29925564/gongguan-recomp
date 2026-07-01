@@ -1122,6 +1122,67 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .icon-only{ display:inline-flex; align-items:center; justify-content:center; }
 .icon-only .icon{ margin-right:0; }
 #searchFab .icon, #orderFab .icon{ margin-right:6px; font-size:15px; }
+
+/* ── Tab navigation ── */
+.tab-bar{
+  display:flex;
+  gap:0;
+  border-bottom:2px solid var(--ink);
+  margin-bottom:0;
+}
+.tab-btn{
+  flex:1;
+  padding:12px 16px;
+  font-size:13px;
+  font-weight:700;
+  text-align:center;
+  cursor:pointer;
+  border:none;
+  background:transparent;
+  color:var(--concrete);
+  font-family:inherit;
+  transition:color .15s, background .15s;
+  border-bottom:3px solid transparent;
+  margin-bottom:-2px;
+}
+.tab-btn:hover{
+  color:var(--ink);
+}
+.tab-btn.active{
+  color:var(--ink);
+  border-bottom-color:var(--signal);
+}
+.tab-panel{
+  display:none;
+}
+.tab-panel.active{
+  display:block;
+}
+[data-theme="dark"] .tab-bar{
+  border-bottom-color:var(--ink);
+}
+[data-theme="dark"] .tab-btn.active{
+  color:var(--ink);
+  border-bottom-color:var(--signal);
+}
+
+/* ── Makeup reminder ── */
+.makeup-banner{
+  background:rgba(227,6,19,.06);
+  border:1px solid rgba(227,6,19,.2);
+  border-radius:4px;
+  padding:10px 12px;
+  margin-bottom:12px;
+  font-size:12px;
+  line-height:1.6;
+}
+.makeup-banner b{
+  color:var(--signal);
+}
+[data-theme="dark"] .makeup-banner{
+  background:rgba(255,77,88,.08);
+  border-color:rgba(255,77,88,.2);
+}
 </style>
 </head>
 <body>
@@ -1184,8 +1245,15 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 </section>
 
 <section class="container" style="padding-bottom:52px">
-  <div class="swiss-rule" style="margin-bottom:22px"></div>
-
+  <div class="tab-bar" style="margin-bottom:22px">
+    <button type="button" class="tab-btn active" data-tab="main">
+      <i class="ph ph-barbell icon" aria-hidden="true"></i> 訓練 / 飲食
+    </button>
+    <button type="button" class="tab-btn" data-tab="restaurants">
+      <i class="ph ph-fork-knife icon" aria-hidden="true"></i> 餐廳白名單
+    </button>
+  </div>
+  <div id="tabMain" class="tab-panel active">
   <div class="swiss-card" style="padding:18px;margin-bottom:22px">
     <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:12px">
       <div>
@@ -1284,6 +1352,11 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
         <div class="dp-section" id="dpMealsWrap">
           <div id="dpMeals" style="display:grid;gap:10px"></div>
         </div>
+        <div class="dp-section" id="dpExportCard" style="display:none">
+          <button type="button" id="exportTrainCardBtn" class="btn" style="width:100%">
+            <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）
+          </button>
+        </div>
         <div class="dp-nav-row">
           <button type="button" id="dpPrev" class="btn">← 前一天</button>
           <button type="button" id="dpNext" class="btn">後一天 →</button>
@@ -1295,8 +1368,9 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     </div>
   </div>
 </section>
-
-<section style="background:#ECEAE6;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:48px 0">
+  </div><!-- end tabMain -->
+  <div id="tabRestaurants" class="tab-panel">
+<div style="padding:24px 0">
   <div class="container">
     <h2 style="margin-bottom:6px">公館國青白名單 · 18 家</h2>
     <p style="font-size:13px;color:var(--concrete);margin-bottom:18px">
@@ -1306,6 +1380,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   </div>
 </section>
 
+  </div><!-- end tabRestaurants -->
 <footer style="padding:36px 0;font-size:11px;color:var(--concrete)">
   <div class="container" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
     <div>
@@ -1463,7 +1538,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v2.0.0';
+const APP_VERSION = 'v2.1.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -2195,6 +2270,12 @@ function selectDate(dateObj){
   renderMealSection(plan);
   prefillBwInputs();
   refreshChestWeightStat();
+  /* show/hide training card export */
+const exportCardDiv = document.getElementById('dpExportCard');
+if(exportCardDiv){
+  const p = getPlanForDate(selectedDateObj);
+  exportCardDiv.style.display = (p.train !== '休') ? '' : 'none';
+}
 }
 
 function renderDayHeader(plan, dateStr){
@@ -2222,9 +2303,21 @@ function renderWorkoutSection(plan, dateStr){
   }
 
   workoutLabel.textContent = `訓練 · ${getTrainText(plan.train)}`;
-  const list = WORKOUTS[plan.train];
+    /* makeup reminder */
+  const reminders = findMakeupReminders(new Date(dateStr.split('-')[0], dateStr.split('-')[1]-1, dateStr.split('-')[2]));
+  let makeupHtml = '';
+  if(reminders.length > 0){
+    const r = reminders[0];
+    const missedText = r.missed.map(m => `${escapeHtml(m.name)}（${m.done}/${m.total} 組）`).join('、');
+    makeupHtml = `<div class="makeup-banner">
+      <b>⚠ 補回提醒</b>：上次 ${r.type} 日（${formatDateStrPad(r.date)}）有 ${r.missed.length} 個動作未完成：<br>
+      ${missedText}<br>
+      <span class="muted">建議今天優先補回這些動作</span>
+    </div>`;
+  }
+    const list = WORKOUTS[plan.train];
 
-  workoutDiv.innerHTML = list.map(ex => {
+    workoutDiv.innerHTML = makeupHtml + list.map(ex => {
     const liveKg = getExerciseWeight(ex);
     const setsHtml = Array.from({length: ex.sets}, (_, s) => {
       const k = `recomp_set_id_${dateStr}_${ex.id}_${s+1}`;
@@ -2512,6 +2605,172 @@ function renderWeeklyReport(offset){
 /* ══════════════════════════════════════════════
    CALENDAR EXPORT
    ══════════════════════════════════════════════ */
+function findMakeupReminders(dateObj){
+  const plan = getPlanForDate(dateObj);
+  if(plan.train !== 'A' && plan.train !== 'B') return [];
+
+  const reminders = [];
+  const lookback = 14;
+
+  for(let i = 1; i <= lookback; i++){
+    const prev = new Date(dateObj);
+    prev.setDate(prev.getDate() - i);
+    const prevPlan = getPlanForDate(prev);
+
+    if(prevPlan.train !== plan.train) continue;
+
+    const prevDateStr = formatDateStr(prev);
+    const prevDate = prev;
+
+    const missed = [];
+    WORKOUTS[prevPlan.train].forEach(ex => {
+      let done = 0;
+      for(let s = 1; s <= ex.sets; s++){
+        if(lsGet(`recomp_set_id_${prevDateStr}_${ex.id}_${s}`, '0') !== '0') done++;
+      }
+      if(done < ex.sets && done > 0){
+        missed.push({ name:ex.name, done, total:ex.sets });
+      }else if(done === 0){
+        missed.push({ name:ex.name, done:0, total:ex.sets });
+      }
+    });
+
+    if(missed.length > 0 && missed.length < WORKOUTS[prevPlan.train].length){
+      reminders.push({
+        date: prevDate,
+        dateStr: prevDateStr,
+        type: prevPlan.train,
+        missed
+      });
+    }
+
+    break;
+  }
+
+  return reminders;
+}
+function drawTrainingCard(){
+  if(!selectedDateObj) return null;
+
+  const plan = getPlanForDate(selectedDateObj);
+  const dateStr = formatDateStr(selectedDateObj);
+
+  if(plan.train === '休') return null;
+
+  const list = WORKOUTS[plan.train];
+  const ratio = 2;
+  const W = 540;
+  const rowH = 44;
+  const headerH = 120;
+  const footerH = 50;
+  const padX = 28;
+  const H = headerH + list.length * rowH + footerH + 20;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = W * ratio;
+  canvas.height = H * ratio;
+
+  const ctx = canvas.getContext('2d');
+  if(!ctx) return null;
+  ctx.scale(ratio, ratio);
+  ctx.textBaseline = 'top';
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
+    (document.documentElement.getAttribute('data-theme') === 'auto' &&
+     window.matchMedia('(prefers-color-scheme:dark)').matches);
+
+  const bg = isDark ? '#1a1a1e' : '#F5F3F0';
+  const fg = isDark ? '#e8e4df' : '#141414';
+  const muted = '#8A8A8A';
+  const accent = isDark ? '#ff4d58' : '#E30613';
+  const cardBg = isDark ? '#242428' : '#FFFCF9';
+  const ok = '#2a8';
+
+  /* background */
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = accent;
+  ctx.fillRect(0, 0, W, 5);
+
+  /* header */
+  ctx.fillStyle = fg;
+  ctx.font = '900 28px sans-serif';
+  ctx.fillText('RECOMP', padX, 22);
+
+  ctx.fillStyle = muted;
+  ctx.font = '12px sans-serif';
+  ctx.fillText(formatDateStrPad(selectedDateObj) + ' · ' + getTrainText(plan.train), padX, 58);
+
+  /* completion stats */
+  const totalSets = list.reduce((s, ex) => s + ex.sets, 0);
+  let doneSets = 0;
+  list.forEach(ex => {
+    for(let s = 1; s <= ex.sets; s++){
+      if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') !== '0') doneSets++;
+    }
+  });
+  const pct = totalSets ? Math.round(doneSets / totalSets * 100) : 0;
+
+  ctx.fillStyle = fg;
+  ctx.font = '700 16px monospace';
+  ctx.fillText(`${doneSets}/${totalSets} sets · ${pct}%`, padX, 82);
+
+  /* progress bar */
+  const barY = 104;
+  const barW = W - padX * 2;
+  ctx.fillStyle = isDark ? '#333338' : '#D9D4CE';
+  ctx.fillRect(padX, barY, barW, 5);
+  ctx.fillStyle = accent;
+  ctx.fillRect(padX, barY, barW * pct / 100, 5);
+
+  /* exercise rows */
+  list.forEach((ex, i) => {
+    const y = headerH + i * rowH;
+    const liveKg = getExerciseWeight(ex);
+
+    /* row bg */
+    if(i % 2 === 0){
+      ctx.fillStyle = cardBg;
+      ctx.fillRect(padX - 8, y, W - padX * 2 + 16, rowH);
+    }
+
+    /* set indicators */
+    for(let s = 0; s < ex.sets; s++){
+      const state = lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s+1}`, '0');
+      const cx = padX + s * 18;
+      const cy = y + 12;
+      ctx.fillStyle = state === '2' ? accent : state === '1' ? fg : (isDark ? '#444' : '#ddd');
+      ctx.beginPath();
+      ctx.arc(cx + 6, cy + 6, 5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    /* exercise name + weight */
+    ctx.fillStyle = fg;
+    ctx.font = '600 12px sans-serif';
+    ctx.fillText(ex.name, padX + ex.sets * 18 + 8, y + 6);
+
+    ctx.fillStyle = muted;
+    ctx.font = '12px monospace';
+    ctx.fillText(`${liveKg}kg · ${ex.reps}`, padX + ex.sets * 18 + 8, y + 24);
+  });
+
+  /* footer */
+  const fy = headerH + list.length * rowH + 16;
+  ctx.fillStyle = muted;
+  ctx.font = '10px sans-serif';
+  ctx.fillText(`RECOMP ${APP_VERSION} · ${formatDateStrPad(new Date())}`, padX, fy);
+
+  /* body weight if available */
+  const bw = getBwEntry(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate());
+  if(bw){
+    ctx.textAlign = 'right';
+    ctx.fillText(`BW ${bw.w}kg${bw.bf !== null && bw.bf !== undefined ? ` · BF ${bw.bf}%` : ''}`, W - padX, fy);
+    ctx.textAlign = 'left';
+  }
+
+  return canvas;
+}
 function drawCalendarToCanvas(){
   if(calYear === undefined || calMonth === undefined) return null;
 
@@ -3511,6 +3770,34 @@ searchClearBtn.addEventListener('click', () => {
   initPwa();
   checkRemoteVersion();
   initSettings();
+  /* ── Training card export ── */
+document.getElementById('exportTrainCardBtn').addEventListener('click', () => {
+  const canvas = drawTrainingCard();
+  if(!canvas){
+    flashToast('休息日無訓練可匯出');
+    return;
+  }
+  const a = document.createElement('a');
+  a.href = canvas.toDataURL('image/png');
+  a.download = `recomp-training-${formatDateStrPad(selectedDateObj)}.png`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  flashToast('已下載訓練卡');
+});
+  /* ── Tab switching ── */
+document.querySelector('.tab-bar').addEventListener('click', e => {
+  const btn = e.target.closest('[data-tab]');
+  if(!btn) return;
+  const tabId = btn.dataset.tab;
+
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById(tabId === 'main' ? 'tabMain' : 'tabRestaurants');
+  if(panel) panel.classList.add('active');
+});
   /* version label */
 const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
