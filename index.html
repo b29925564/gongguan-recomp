@@ -1306,22 +1306,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   </div>
 </section>
 
-<section class="container" style="padding:32px 0">
-  <div class="swiss-card" style="padding:18px">
-    <div class="kicker" style="margin-bottom:4px">資料備份</div>
-    <p class="small muted" style="margin-bottom:12px">
-      打勾與重量紀錄存在這台裝置的瀏覽器裡，清快取或換裝置會遺失。建議定期匯出備份。
-    </p>
-    <div class="data-tools-row">
-      <button type="button" id="exportBtn" class="btn"><i class="ph ph-download-simple icon" aria-hidden="true"></i>匯出備份 (JSON)</button>
-      <button type="button" id="importBtn" class="btn"><i class="ph ph-upload-simple icon" aria-hidden="true"></i>匯入備份</button>
-      <input type="file" id="importFileInput" accept="application/json">
-      <button type="button" id="resetBtn" class="btn btn-danger"><i class="ph ph-trash icon" aria-hidden="true"></i>清除所有紀錄</button>
-      <span class="small muted" id="dataToolsMsg" aria-live="polite"></span>
-    </div>
-  </div>
-</section>
-
 <footer style="padding:36px 0;font-size:11px;color:var(--concrete)">
   <div class="container" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
     <div>
@@ -1353,6 +1337,19 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     <div class="modal-body">
       <div class="settings-list" id="settingsList"></div>
       <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--line)">
+        <div class="kicker" style="margin-bottom:8px">資料管理</div>
+        <p class="small muted" style="margin-bottom:10px">
+          紀錄存在這台裝置的瀏覽器裡，清快取或換裝置會遺失。建議定期匯出備份。
+        </p>
+        <div class="data-tools-row">
+          <button type="button" id="exportBtn" class="btn"><i class="ph ph-download-simple icon" aria-hidden="true"></i>匯出備份</button>
+          <button type="button" id="importBtn" class="btn"><i class="ph ph-upload-simple icon" aria-hidden="true"></i>匯入備份</button>
+          <input type="file" id="importFileInput" accept="application/json">
+          <button type="button" id="resetBtn" class="btn btn-danger"><i class="ph ph-trash icon" aria-hidden="true"></i>清除所有紀錄</button>
+        </div>
+        <span class="small muted" id="dataToolsMsg" aria-live="polite" style="display:block;margin-top:8px"></span>
+      </div>
+      <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--line)">
         <div class="small muted mono-num" id="settingsVersionInfo"></div>
       </div>
     </div>
@@ -1466,7 +1463,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v1.7.0';
+const APP_VERSION = 'v2.0.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -2882,6 +2879,19 @@ const PREFS = {
   chartTarget:{ key:'recomp_pref_chart_zone', label:'圖表目標區間',  desc:'體重圖表顯示 73–77kg 目標帶',    default:'1' },
 };
 
+/* ── Exercise increment ── */
+function getIncrement(exId){
+  const v = lsGet('recomp_pref_increment_' + exId, null);
+  if(v !== null){
+    const n = parseFloat(v);
+    if(!isNaN(n) && n > 0) return n;
+  }
+  return 2.5;
+}
+function setIncrement(exId, val){
+  lsSet('recomp_pref_increment_' + exId, String(val));
+}
+
 function getPref(id){
   const pref = PREFS[id];
   if(!pref) return true;
@@ -2899,7 +2909,10 @@ function renderSettings(){
   const info = document.getElementById('settingsVersionInfo');
   if(!list) return;
 
-  list.innerHTML = Object.entries(PREFS).map(([id, pref]) => {
+  /* 偏好開關 */
+  let html = '<div class="kicker" style="margin-bottom:8px">偏好設定</div>';
+
+  html += Object.entries(PREFS).map(([id, pref]) => {
     const isOn = getPref(id);
     return `<div class="settings-row">
       <div>
@@ -2912,6 +2925,36 @@ function renderSettings(){
       </div>
     </div>`;
   }).join('');
+
+  /* 訓練器材加重設定 */
+  const allExercises = [...WORKOUTS.A, ...WORKOUTS.B];
+  html += '<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--line)">';
+  html += '<div class="kicker" style="margin-bottom:8px">每次加重量設定</div>';
+  html += '<div class="settings-desc" style="margin-bottom:10px">做滿全部組數時，該動作自動增加的重量（kg）</div>';
+
+  html += allExercises.map(ex => {
+    const inc = getIncrement(ex.id);
+    return `<div class="settings-row">
+      <div>
+        <div class="settings-label">${escapeHtml(ex.name)}</div>
+        <div class="settings-desc mono-num">目前重量：${getExerciseWeight(ex)}kg</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <span class="small muted">+</span>
+        <input type="number" class="increment-input" data-exid="${ex.id}"
+          value="${inc}" step="0.5" min="0.5" max="20"
+          style="width:64px;padding:5px 7px;font-size:13px;
+          font-family:'Fragment Mono',monospace;
+          border:1px solid var(--line);border-radius:3px;
+          background:var(--card);color:var(--ink);text-align:center">
+        <span class="small muted">kg</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  html += '</div>';
+
+  list.innerHTML = html;
 
   if(info){
     info.textContent = `${APP_VERSION} · schema ${SCHEMA_VERSION}`;
@@ -2942,9 +2985,17 @@ function initSettings(){
     if(e.target === modal) closeSettings();
   });
 
-  document.getElementById('settingsList').addEventListener('click', e => {
-    const btn = e.target.closest('[data-pref]');
-    if(!btn) return;
+  document.getElementById('settingsList').addEventListener('change', e => {
+  const input = e.target.closest('.increment-input');
+  if(!input) return;
+  const exId = input.dataset.exid;
+  const val = parseFloat(input.value);
+  if(!isNaN(val) && val >= 0.5 && val <= 20){
+    setIncrement(exId, val);
+  }else{
+    input.value = getIncrement(exId);
+  }
+});
 
     const prefId = btn.dataset.pref;
     const val = btn.dataset.val === '1';
@@ -3191,7 +3242,7 @@ function initApp(){
       if(!ex) return;
 
       const prevKg = getExerciseWeight(ex);
-      const bumpedKg = +(prevKg + 2.5).toFixed(1);
+      const bumpedKg = +(prevKg + getIncrement(exId)).toFixed(1);
       setExerciseWeight(ex, bumpedKg);
 
       const weightSpan = row.querySelector('[data-ex-weight]');
@@ -3202,7 +3253,8 @@ function initApp(){
         else weightSpan.prepend(document.createTextNode(` ${bumpedKg}kg · ${ex.reps} `));
 
         const badge = document.createElement('span');
-        badge.className = 'bump-badge'; badge.textContent = `+2.5kg ▲`;
+        badge.className = 'bump-badge'; 
+        badge.textContent = `+${getIncrement(exId)}kg ▲`;
         if(getPref('vibration') && navigator.vibrate) navigator.vibrate([50, 50, 100]);
         weightSpan.append(badge);
 
@@ -3415,7 +3467,8 @@ searchClearBtn.addEventListener('click', () => {
 
   document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
 
-  const VALID_IMPORT_KEY = /^(recomp_(set_id|weight_id|eaten|bw|migrated)_|recomp_(schema_version|theme|pref_\w+)$)/;
+  const VALID_IMPORT_KEY = 
+    /^(recomp_(set_id|weight_id|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|pref_\w+)$)/;
   document.getElementById('importFileInput').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
