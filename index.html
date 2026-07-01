@@ -2996,7 +2996,9 @@ function initSettings(){
     input.value = getIncrement(exId);
   }
 });
-
+document.getElementById('settingsList').addEventListener('click', e => {
+  const btn = e.target.closest('[data-pref]');
+  if(!btn) return;
     const prefId = btn.dataset.pref;
     const val = btn.dataset.val === '1';
     setPref(prefId, val);
