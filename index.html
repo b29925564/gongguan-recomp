@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>公館重組計畫 — Body Recomposition</title>
+<title>RECOMP — Body Recomposition</title>
 <meta name="theme-color" content="#E30613">
 <link rel="manifest" href="./manifest.json">
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
@@ -1132,7 +1132,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <header style="border-bottom:1px solid var(--line)">
   <div class="container" style="padding-top:44px;padding-bottom:44px">
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-  <div class="kicker">Body Recomposition — Gongguan, NTU</div>
+  <div class="kicker">Body Recomposition Dashboard — Gongguan, NTU</div>
   <div style="display:flex;gap:6px">
     <button type="button" id="themeToggle" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="切換主題">
       <i class="ph ph-monitor icon" aria-hidden="true"></i>
@@ -1142,7 +1142,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     </button>
   </div>
 </div>
-    <h1>公館重組<br>計畫</h1>
+    <h1>RECOMP</h1>
     <div class="stat-label-row">
       <span><b>176cm</b> / 75kg / 24y / 男</span>
       <span>Skinny fat · 蠶豆症</span>
@@ -1325,7 +1325,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <footer style="padding:36px 0;font-size:11px;color:var(--concrete)">
   <div class="container" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
     <div>
-      Gongguan Recomp Dashboard · Swiss Style<br>
+      RECOMP · Body Recomposition Dashboard<br>
       176 / 75kg / 24y 男 · Skinny fat · 蠶豆症<br>
       目標：肚子變小 · 胸部變大<br>
 <span class="mono-num" id="appVersionLabel"></span>
@@ -2404,7 +2404,7 @@ function buildWeeklyReportText(offset){
   const r = computeWeeklyReport(offset);
   const lines = [];
 
-  lines.push(`公館重組計畫 週報｜${weekLabelFromOffset(offset)}`);
+  lines.push(`RECOMP 週報｜${weekLabelFromOffset(offset)}`);
   lines.push(`${formatDateStrPad(r.start)} ~ ${formatDateStrPad(r.end)}`);
   lines.push(`訓練完成：${r.trainDone}/${r.trainPlanned} 天`);
   lines.push(`飲食達標：${r.eatenDays}/7 天`);
@@ -2561,7 +2561,7 @@ function drawCalendarToCanvas(){
 
   ctx.font = '13px sans-serif';
   ctx.fillStyle = colors.concrete;
-  ctx.fillText('公館重組計畫 · 訓練 / 飲食月曆匯出', padX, 96);
+  ctx.fillText('RECOMP · Training / Meal Calendar Export', padX, 96);
 
   const s = computeMonthSummaryData(calYear, calMonth);
   ctx.font = '12px monospace';
@@ -3374,7 +3374,7 @@ searchClearBtn.addEventListener('click', () => {
     if(!exportCanvasRef) return;
     const a = document.createElement('a');
     a.href = exportCanvasRef.toDataURL('image/png');
-    a.download = `gongguan-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`;
+    a.download = `recomp-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`;
     document.body.appendChild(a); a.click(); document.body.removeChild(a);
     flashToast('已下載 PNG');
   });
@@ -3407,7 +3407,7 @@ searchClearBtn.addEventListener('click', () => {
       const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url;
-      a.download = `gongguan-recomp-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `recomp-backup-${new Date().toISOString().slice(0,10)}.json`;
       document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
       showDataMsg(`已匯出 ${allRecompKeys().length} 筆紀錄`);
     }catch(e){ showDataMsg('匯出失敗：' + e.message, true); }
@@ -3459,7 +3459,7 @@ searchClearBtn.addEventListener('click', () => {
   /* version label */
 const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
-console.log('公館重組計畫', APP_VERSION, 'schema', SCHEMA_VERSION);
+console.log('RECOMP', APP_VERSION, 'schema', SCHEMA_VERSION);
 }
 /* iOS Safari :active fix */
 document.addEventListener('touchstart', function(){}, true);
