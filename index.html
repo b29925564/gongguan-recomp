@@ -1183,6 +1183,32 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   background:rgba(255,77,88,.08);
   border-color:rgba(255,77,88,.2);
 }
+/* ── Editable weight ── */
+.ex-weight-display{
+  cursor:pointer;
+  border-bottom:1px dashed var(--concrete);
+  transition:border-color .15s;
+}
+.ex-weight-display:hover{
+  border-bottom-color:var(--ink);
+}
+.ex-weight-input{
+  width:60px;
+  padding:2px 5px;
+  font-size:13px;
+  font-family:'Fragment Mono',monospace;
+  border:1px solid var(--signal);
+  border-radius:3px;
+  background:var(--card);
+  color:var(--ink);
+  text-align:center;
+  outline:none;
+}
+[data-theme="dark"] .ex-weight-input{
+  background:var(--card);
+  color:var(--ink);
+  border-color:var(--signal);
+}
 </style>
 </head>
 <body>
@@ -2329,14 +2355,15 @@ function renderWorkoutSection(plan, dateStr){
     return `<div class="ex-row" data-ex-row="${escapeHtml(ex.id)}">
       <div class="ex-checks">${setsHtml}</div>
       <div class="ex-info">
-        <div class="ex-name">${escapeHtml(ex.name)}
-          <span class="mono-num ex-weight-label weight-display" data-ex-weight="${escapeHtml(ex.id)}"> ${liveKg}kg · ${ex.reps}</span>
-        </div>
-        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
+<div class="ex-name">${escapeHtml(ex.name)}
+          <span class="mono-num ex-weight-label weight-display" data-ex-weight="${escapeHtml(ex.id)}">
+            <span class="ex-weight-display" data-edit-weight="${escapeHtml(ex.id)}" title="點擊修改重量">${liveKg}kg</span> · ${ex.reps}
+          </span>
+        </div>        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
       </div>
     </div>`;
   }).join('') +
-  `<div class="ex-hint">RPE 7-8 · 組間 90s · 點兩下變紅 = 該組做到次數上限 → 全組都紅燈時自動 +2.5kg</div>`;
+  `<div class="ex-hint">RPE 7-8 · 組間 90s · 點兩下變紅 = 達上限 → 全紅自動加重 · 點擊重量數字可手動調整</div>`;
 }
 
 function renderEatenToggle(dateStr){
@@ -3474,7 +3501,53 @@ function initApp(){
     if(!selectedDateObj) return;
     const d = new Date(selectedDateObj); d.setDate(d.getDate() + 1); selectDate(d);
   });
+/* ── Editable weight — click to edit ── */
+document.getElementById('dpWorkout').addEventListener('click', e => {
+  const weightSpan = e.target.closest('[data-edit-weight]');
+  if(!weightSpan) return;
 
+  /* 如果已經在編輯中，不重複觸發 */
+  if(weightSpan.querySelector('.ex-weight-input')) return;
+
+  const exId = weightSpan.dataset.editWeight;
+  const ex = [...WORKOUTS.A, ...WORKOUTS.B].find(x => x.id === exId);
+  if(!ex) return;
+
+  const currentKg = getExerciseWeight(ex);
+
+  /* 替換成 input */
+  const originalHtml = weightSpan.innerHTML;
+  weightSpan.innerHTML = `<input type="number" class="ex-weight-input" value="${currentKg}" step="0.5" min="0" max="500">`;
+
+  const input = weightSpan.querySelector('.ex-weight-input');
+  input.focus();
+  input.select();
+
+  function save(){
+    const newKg = parseFloat(input.value);
+    if(!isNaN(newKg) && newKg >= 0 && newKg <= 500){
+      setExerciseWeight(ex, newKg);
+      weightSpan.innerHTML = `${newKg}kg`;
+      refreshChestWeightStat();
+      if(getPref('vibration') && navigator.vibrate) navigator.vibrate(25);
+    }else{
+      weightSpan.innerHTML = `${currentKg}kg`;
+    }
+  }
+
+  input.addEventListener('blur', save, { once:true });
+  input.addEventListener('keydown', e2 => {
+    if(e2.key === 'Enter'){
+      e2.preventDefault();
+      input.blur();
+    }
+    if(e2.key === 'Escape'){
+      e2.preventDefault();
+      input.removeEventListener('blur', save);
+      weightSpan.innerHTML = `${currentKg}kg`;
+    }
+  });
+});
   document.getElementById('dpWorkout').addEventListener('click', e => {
     const btn = e.target.closest('.set-check');
     if(!btn) return;
