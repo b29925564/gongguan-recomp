@@ -1378,11 +1378,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
         <div class="dp-section" id="dpMealsWrap">
           <div id="dpMeals" style="display:grid;gap:10px"></div>
         </div>
-        <div class="dp-section" id="dpExportCard" style="display:none">
-          <button type="button" id="exportTrainCardBtn" class="btn" style="width:100%">
-            <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）
-          </button>
-        </div>
         <div class="dp-nav-row">
           <button type="button" id="dpPrev" class="btn">← 前一天</button>
           <button type="button" id="dpNext" class="btn">後一天 →</button>
@@ -2296,12 +2291,6 @@ function selectDate(dateObj){
   renderMealSection(plan);
   prefillBwInputs();
   refreshChestWeightStat();
-  /* show/hide training card export */
-const exportCardDiv = document.getElementById('dpExportCard');
-if(exportCardDiv){
-  const p = getPlanForDate(selectedDateObj);
-  exportCardDiv.style.display = (p.train !== '休') ? '' : 'none';
-}
 }
 
 function renderDayHeader(plan, dateStr){
@@ -2363,7 +2352,7 @@ function renderWorkoutSection(plan, dateStr){
       </div>
     </div>`;
   }).join('') +
-  `<div class="ex-hint">RPE 7-8 · 組間 90s · 點兩下變紅 = 達上限 → 全紅自動加重 · 點擊重量數字可手動調整</div>`;
+  `<div class="ex-hint">RPE 7-8 · 組間 90s · 點兩下變紅 = 達上限 → 全紅自動加重 · 點擊重量數字可手動調整</div>` +   `<button type="button" id="exportTrainCardBtn" class="btn" style="width:100%;margin-top:12px">     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）   </button>`;
 }
 
 function renderEatenToggle(dateStr){
@@ -3843,8 +3832,11 @@ searchClearBtn.addEventListener('click', () => {
   initPwa();
   checkRemoteVersion();
   initSettings();
-  /* ── Training card export ── */
-document.getElementById('exportTrainCardBtn').addEventListener('click', () => {
+/* ── Training card export (delegated) ── */
+document.getElementById('dpWorkout').addEventListener('click', e => {
+  const exportBtn = e.target.closest('#exportTrainCardBtn');
+  if(!exportBtn) return;
+
   const canvas = drawTrainingCard();
   if(!canvas){
     flashToast('休息日無訓練可匯出');
@@ -3857,8 +3849,7 @@ document.getElementById('exportTrainCardBtn').addEventListener('click', () => {
   a.click();
   document.body.removeChild(a);
   flashToast('已下載訓練卡');
-});
-  /* ── Tab switching ── */
+});  /* ── Tab switching ── */
 document.querySelector('.tab-bar').addEventListener('click', e => {
   const btn = e.target.closest('[data-tab]');
   if(!btn) return;
