@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'recomp-v2';
+const CACHE_NAME = 'recomp-v5';
 const CORE_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 /* 安裝：先把核心資源存起來 */
