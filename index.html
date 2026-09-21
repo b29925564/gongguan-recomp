@@ -1228,8 +1228,8 @@ body{
 }
 .app-bar-lead{display:flex;align-items:baseline;gap:var(--s3);min-width:0}
 .wordmark{
-  font-weight:900;font-size:var(--fs-lead);
-  letter-spacing:-.02em;flex-shrink:0;
+  font-weight:var(--fw-display);font-size:var(--fs-lead);
+  letter-spacing:var(--tr-title);flex-shrink:0;
 }
 .app-bar-sub{
   font-size:var(--fs-small);color:var(--concrete);
@@ -1274,7 +1274,7 @@ body{
   display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
   background:none;border:none;border-radius:0;
   color:var(--concrete);
-  font-family:inherit;font-size:var(--fs-micro);font-weight:600;
+  font-family:inherit;font-size:var(--fs-micro);font-weight:var(--fw-medium);
   cursor:pointer;
   transition:color .15s;
 }
@@ -1316,7 +1316,7 @@ body{
 
 .progress-strip{display:grid;gap:var(--s2)}
 .progress-strip-label{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3)}
-.progress-strip-val{font-size:var(--fs-lead);font-weight:800}
+.progress-strip-val{font-size:var(--fs-lead);font-weight:var(--fw-strong)}
 .progress-strip-val .unit{font-size:var(--fs-small);color:var(--concrete);margin-left:1px}
 .progress-strip-goal{font-size:var(--fs-small);color:var(--concrete);font-weight:500;margin-left:var(--s2)}
 .progress-track{height:3px;background:var(--line)}
@@ -1417,7 +1417,7 @@ body{
   display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
   border:1px solid var(--line);
   background:var(--card);color:var(--ink);
-  font-family:inherit;font-size:var(--fs-small);font-weight:700;
+  font-family:inherit;font-size:var(--fs-small);font-weight:var(--fw-medium);
   border-radius:0;box-shadow:none;
   cursor:pointer;
   transition:background .15s,border-color .15s,opacity .12s;
@@ -1427,6 +1427,7 @@ body{
 .btn-quiet{background:none}
 .btn-primary{
   background:var(--ink);color:var(--paper);border-color:var(--ink);
+  font-weight:var(--fw-strong);
 }
 .btn-primary:hover{opacity:.85}
 .btn.icon-only{min-height:38px;padding:0 var(--s2)}
@@ -1496,7 +1497,7 @@ body{
   padding:var(--s3);display:grid;gap:2px;
 }
 .stat-cell-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--concrete)}
-.stat-cell-val{font-size:var(--fs-title);font-weight:800;letter-spacing:-.02em}
+.stat-cell-val{font-size:var(--fs-title);font-weight:var(--fw-strong);letter-spacing:var(--tr-title)}
 .stat-cell-val .unit{font-size:var(--fs-small);color:var(--concrete);font-weight:600;margin-left:1px}
 .stat-cell-val.is-down{color:#2a8}
 .stat-cell-val.is-up{color:var(--signal)}
@@ -1523,13 +1524,12 @@ body{
 .week-dot.is-miss{border-color:var(--line)}
 .week-dot.is-miss .week-dot-mark{color:var(--signal)}
 .week-dot.is-future .week-dot-mark{color:var(--ink)}
-.week-dot.is-rest{background:none;border-style:dashed}
 .week-dot:active{opacity:.6}
 .week-sum{
   display:flex;gap:var(--s4);margin-bottom:var(--s2);
   font-size:var(--fs-small);color:var(--concrete);
 }
-.week-sum b{color:var(--ink);font-size:var(--fs-lead);font-weight:800}
+.week-sum b{color:var(--ink);font-size:var(--fs-lead);font-weight:var(--fw-strong)}
 .week-next{
   margin-top:var(--s3);padding-top:var(--s3);
   border-top:1px solid var(--line);
@@ -1582,6 +1582,359 @@ body{
   font-size:var(--fs-micro);color:var(--concrete);
   margin-top:var(--s2);line-height:1.5;
 }
+
+
+/* ══════════════════════════════════════════════════════════════
+   DESIGN TOKENS v4
+   ──────────────────────────────────────────────────────────────
+   稽核發現的問題：
+   · font-size 有 96 處，其中 61 處寫死，尺標形同虛設
+   · 28 種硬編碼色票散落 62 處
+   · 表示「變好」的綠 #2a8 在淺色模式只有 2.64:1，讀不到
+   · font-weight 用了 6 種，700 以上佔了大半 ——
+     全部都粗就等於沒有重點。瑞士風的層級靠的是尺寸與留白，
+     字重是最後才動用的工具
+   · 過場時間有 .12/.15/.2/.22/.24/.3/.4 七種，緩動各自為政
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  /* ── 語意色 ──
+     文字用的與填色用的分開：文字要 4.5:1，
+     色塊只要 3:1，硬要同一支會讓色塊變得死沉 */
+  --positive:#0F7A5A;          /* 4.80:1 on --paper */
+  --positive-fill:#22AA88;     /* 色塊、長條、打勾底 */
+  --signal-text:#C70510;       /* 5.48:1；紅字專用 */
+  --signal-fill:#E30613;       /* 品牌紅，色塊與圖形 */
+
+  /* ── 字級：每一級都綁定行高與字距 ──
+     單獨給 font-size 而讓行高各自發揮，是版面失去節奏的主因 */
+  --lh-tight:1.08;
+  --lh-snug:1.32;
+  --lh-normal:1.55;
+  --lh-loose:1.72;
+  --tr-display:-0.028em;
+  --tr-title:-0.018em;
+  --tr-body:0em;
+  --tr-caps:0.14em;
+
+  /* ── 字重：收斂成四級，900 只留給主標與英雄數字 ── */
+  --fw-regular:400;
+  --fw-medium:500;
+  --fw-strong:700;
+  --fw-display:900;
+
+  /* ── 髮絲線：1px CSS 在二倍螢幕上是 2 個實體像素，
+         看起來就是一條粗邊。這才是「廉價」的來源之一 ── */
+  --hairline:1px;
+
+  /* ── 動態：三段時長、兩條緩動曲線 ── */
+  --dur-fast:120ms;
+  --dur-base:220ms;
+  --dur-slow:340ms;
+  --ease-out:cubic-bezier(.22,1,.36,1);
+  --ease-in-out:cubic-bezier(.65,0,.35,1);
+
+  /* ── 疊層 ── */
+  --z-nav:45;
+  --z-drawer:50;
+  --z-banner:57;
+  --z-timer:58;
+  --z-nag:60;
+  --z-modal:66;
+  --z-overlay:78;
+  --z-toast:80;
+}
+
+@media (min-resolution:2dppx){
+  :root{ --hairline:0.5px; }
+}
+
+[data-theme="dark"]{
+  --positive:#3cc88c;          /* 8.12:1 on --paper(dark) */
+  --positive-fill:#35d195;
+  --signal-text:#ff6b74;
+  --signal-fill:#ff4d58;
+}
+@media(prefers-color-scheme:dark){
+  [data-theme="auto"]{
+    --positive:#3cc88c;
+    --positive-fill:#35d195;
+    --signal-text:#ff6b74;
+    --signal-fill:#ff4d58;
+  }
+}
+
+/* ══════════════════════════════════════════════
+   排版基礎
+   ══════════════════════════════════════════════ */
+body{
+  font-weight:var(--fw-regular);
+  line-height:var(--lh-normal);
+  letter-spacing:var(--tr-body);
+  text-rendering:optimizeLegibility;
+  /* 等寬數字：這是資料型 app，數字要能上下對齊。
+     少了這行，7 和 1 的寬度不同，整欄數字就會歪 */
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum' 1,'cv05' 1;
+}
+.mono-num,
+.chart-axis,.chart-note,.chart-value,
+.stat-cell-val,.progress-strip-val,.week-sum b,
+.rest-timer-num,.storage-value{
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:'tnum' 1;
+}
+
+/* 標題層級：尺寸與留白先行，字重最後 */
+.day-title{
+  font-size:var(--fs-display);
+  font-weight:var(--fw-display);
+  line-height:var(--lh-tight);
+  letter-spacing:var(--tr-display);
+}
+.cal-head-label,.modal-title,.dp-title{
+  font-size:var(--fs-lead);
+  font-weight:var(--fw-strong);
+  line-height:var(--lh-snug);
+  letter-spacing:var(--tr-title);
+}
+.kicker{
+  font-size:10px;
+  font-weight:var(--fw-strong);
+  line-height:1.4;
+  letter-spacing:var(--tr-caps);
+  text-transform:uppercase;
+  color:var(--concrete);
+}
+.day-kicker{
+  font-size:var(--fs-small);
+  font-weight:var(--fw-medium);
+  letter-spacing:.01em;
+  color:var(--concrete);
+}
+/* 只有「今天」才配得上紅色 —— 其餘日期用次要色。
+   強調色靠稀有取得力量，到處都紅等於沒有重點 */
+.day-kicker.is-today{color:var(--signal-text);font-weight:var(--fw-strong)}
+
+/* 髮絲線與語意色的實際套用 */
+.card,.disclosure,.stat-cell,.bw-input-shell,.range-switch,
+.week-dot,.tag-chip,.btn{
+  border-width:var(--hairline);
+}
+.app-bar{border-bottom-width:var(--hairline)}
+.tabbar{border-top-width:var(--hairline)}
+
+.bw-delta-down,.chart-foot-delta.is-down,
+.stat-cell-val.is-down,.ex-last.is-better,
+.storage-value.ok{color:var(--positive)}
+.search-tag.ok{color:var(--positive);border-color:var(--positive)}
+.week-dot.is-full{background:var(--positive-fill);border-color:var(--positive-fill)}
+.week-dot.is-partial{
+  background:color-mix(in srgb,var(--positive-fill) 20%,transparent);
+  border-color:color-mix(in srgb,var(--positive-fill) 50%,transparent);
+}
+.eaten-indicator{color:var(--positive)}
+.chart-foot-delta.is-up,.stat-cell-val.is-up{color:var(--signal-text)}
+
+/* 過場統一 */
+.btn,.icon-btn,.tabbar-btn,.range-btn,.week-dot,
+.cal-cell,.set-check,.search-chip{
+  transition:background var(--dur-fast) var(--ease-out),
+             border-color var(--dur-fast) var(--ease-out),
+             color var(--dur-fast) var(--ease-out),
+             opacity var(--dur-fast) linear;
+}
+.progress-fill{transition:width var(--dur-slow) var(--ease-out)}
+.screen.is-active{animation-duration:var(--dur-base);animation-timing-function:var(--ease-out)}
+
+
+/* ══════════════════════════════════════════════
+   對比修正（實測值，不是目測）
+   ══════════════════════════════════════════════ */
+
+/* 補回提醒：紅字落在紅色淡底上只有 4.30:1 */
+.makeup-banner b{color:var(--signal-text)}
+.makeup-banner{
+  color:var(--ink);
+  border-radius:0;
+  border-width:var(--hairline);
+}
+/* 紅色淡底把有效背景壓暗了一點，--concrete 在上面是 4.42:1，
+   差一點點。這個情境單獨壓深一階。 */
+.makeup-banner .muted{color:#5E5E5E}
+[data-theme="dark"] .makeup-banner .muted{color:#a3a3a3}
+[data-theme="dark"] .makeup-banner b{color:var(--signal-text)}
+
+/* 本週方塊的星期字：落在淡綠底上只有 3.07:1 */
+.week-dot-day{
+  color:var(--ink);
+  opacity:.55;
+  font-size:11px;
+  font-weight:var(--fw-medium);
+}
+.week-dot.is-full .week-dot-day{color:#fff;opacity:.85}
+.week-dot-mark{font-weight:var(--fw-strong)}
+
+/* 深色模式的紅底按鈕：白字落在偏亮的紅上只有 3.25:1。
+   底色變亮就該換深色字，而不是硬撐白字。 */
+.btn-signal{
+  background:var(--signal-fill);
+  border-color:var(--signal-fill);
+  border-radius:0;
+  font-weight:var(--fw-strong);
+}
+[data-theme="dark"] .btn-signal{color:#18181b}
+@media(prefers-color-scheme:dark){
+  [data-theme="auto"] .btn-signal{color:#18181b}
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   編排式版面 v4
+   ──────────────────────────────────────────────────────────────
+   原本每一段內容都包在一個有框有底的卡片裡，於是出現盒中盒，
+   而且所有區塊的視覺重量一模一樣 —— 沒有層級，只有格子。
+   瑞士編排靠的是留白與一條細規線來分組，不是畫矩形。
+   這裡把主畫面的卡片拆掉，只留下真正需要「浮起來」的東西
+   （計時器、彈窗、提示）還保有表面。
+   ══════════════════════════════════════════════════════════════ */
+.screen-inner{
+  padding:var(--s5) 20px calc(var(--s7) + var(--s5));
+  display:grid;
+  gap:var(--s6);              /* 區塊之間放大到 32px，靠距離分組 */
+}
+
+/* 卡片退化成「一段內容」：沒有框、沒有底，
+   用一條規線起頭 */
+.card{
+  background:none;
+  border:none;
+  padding:0;
+  border-top:var(--hairline) solid var(--line);
+  padding-top:var(--s4);
+}
+.card-tight{padding:0;padding-top:var(--s4)}
+
+/* 第一段不需要規線 —— 它上面就是標題了 */
+.screen-inner > .card:first-child{border-top:none;padding-top:0}
+
+.card-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s3);margin-bottom:var(--s4);
+}
+
+/* 需要浮起來的東西才保留表面 */
+.disclosure{
+  background:none;
+  border:none;
+  border-top:var(--hairline) solid var(--line);
+}
+.disclosure summary{padding:var(--s4) 0}
+.disclosure-body{padding:0 0 var(--s4)}
+
+/* 統計格：去掉三個並排的小盒子，改成共用一條底線的欄 */
+.stat-row{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  gap:0;
+  border-top:var(--hairline) solid var(--line);
+  padding-top:var(--s4);
+}
+.stat-cell{
+  background:none;border:none;padding:0 var(--s3);
+  border-left:var(--hairline) solid var(--line);
+}
+.stat-cell:first-child{border-left:none;padding-left:0}
+.stat-cell:last-child{padding-right:0}
+
+/* 補回提醒：從盒中盒改成左側一條紅規線 */
+.makeup-banner{
+  background:none;
+  border:none;
+  border-left:2px solid var(--signal-fill);
+  border-radius:0;
+  padding:2px 0 2px var(--s3);
+  margin-bottom:var(--s4);
+}
+
+/* 動作列：同時有虛線分隔、方框與外框是三種線在打架。
+   只留一條最淡的規線，其餘交給留白 */
+.ex-row{
+  border-bottom:var(--hairline) solid var(--line);
+  border-top:none;
+  padding:var(--s3) 0;
+}
+.ex-row:last-of-type{border-bottom:none}
+
+/* 本週方塊：拿掉每格的外框，改為共用底線的七欄 */
+/* 間距太小的話七條底線會連成一條長規線，狀態就讀不出來了 */
+.week-dots{
+  grid-template-columns:repeat(7,1fr);
+  gap:var(--s2);
+  margin-bottom:var(--s4);
+}
+.week-dot{
+  /* 只保留底線。用 border-width 明確歸零，不能只寫 border:none ——
+     前面的 token 區塊會把 .week-dot 的 border-width 統一設成髮絲線，
+     舊的 is-rest 又設了 dashed，兩者相加就變成四邊的黑色虛線框 */
+  border-style:solid;
+  border-color:var(--line);
+  border-width:0 0 2px;
+  background:none;
+  padding:var(--s2) 0;
+}
+.week-dot.is-full{
+  background:none;
+  border-bottom-width:3px;
+  border-bottom-color:var(--positive-fill);
+}
+.week-dot.is-full .week-dot-day{color:var(--ink);opacity:.55}
+.week-dot.is-full .week-dot-mark{color:var(--positive)}
+.week-dot.is-partial{
+  background:none;
+  border-bottom-width:3px;
+  border-bottom-color:color-mix(in srgb,var(--positive-fill) 50%,transparent);
+}
+.week-dot.is-miss{
+  border-bottom-width:3px;
+  border-bottom-color:color-mix(in srgb,var(--signal-fill) 50%,transparent);
+}
+.week-dot.is-miss .week-dot-mark{color:var(--signal-text)}
+.week-dot.is-future .week-dot-mark{color:var(--ink);opacity:.45}
+.week-dot.is-rest{border-bottom-style:dotted;border-bottom-width:1px}
+
+/* 月曆格子本來就是格線系統，留著它的框，但收細 */
+.cal-cell{border-width:var(--hairline)}
+
+/* 主畫面標題與內容之間的節奏 */
+.day-head{margin-bottom:calc(var(--s2) * -1)}
+/* 日期導覽：下一段已經有自己的規線了，這裡不需要再畫一條。
+   箭頭也不該是有框的方塊 —— 版面已經不用框了 */
+.day-nav{
+  display:flex;gap:var(--s2);align-items:center;
+}
+.day-nav .btn{
+  min-height:40px;
+  border:none;background:none;
+  color:var(--concrete);
+}
+.day-nav .btn:hover{color:var(--ink)}
+.day-nav .btn:first-child,.day-nav .btn:last-child{
+  flex:0 0 40px;padding:0;font-size:18px;
+}
+.day-nav #dpToday{
+  flex:1;
+  border:var(--hairline) solid var(--line);
+  color:var(--ink);
+}
+
+/* 休息日的底線用淡實線，dotted 在窄格子上會碎成不規則的點 */
+.week-dot.is-rest{
+  border-bottom-width:1px;
+  border-bottom-color:var(--line);
+}
+.week-dot.is-rest .week-dot-mark{color:var(--concrete);font-weight:var(--fw-medium)}
+
+/* 匯出按鈕不必整塊反白，細框就夠 */
+#exportTrainCardBtn{margin-top:var(--s4)!important}
 
 </style>
 </head>
@@ -1953,7 +2306,7 @@ body{
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v3.1.0';
+const APP_VERSION = 'v3.2.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -2859,7 +3212,7 @@ function renderBwWeekly(){
     const cx = padL + slot * i + slot / 2;
     const h = Math.abs(x.d) * scale;
     const y = x.d <= 0 ? zeroY : zeroY - h;
-    const color = x.d < 0 ? '#2a8' : x.d > 0 ? 'var(--signal)' : 'var(--concrete)';
+    const color = x.d < 0 ? 'var(--positive-fill)' : x.d > 0 ? 'var(--signal-fill)' : 'var(--concrete)';
     bars += `<rect x="${(cx - barW/2).toFixed(1)}" y="${y.toFixed(1)}"
                width="${barW.toFixed(1)}" height="${Math.max(2, h).toFixed(1)}"
                fill="${color}"/>`;
@@ -3094,8 +3447,10 @@ function renderDayHeader(plan, dateStr){
   const dateObj = new Date(y, m-1, d);
 
   const isToday = formatDateStr(new Date()) === dateStr;
-  document.getElementById('dpKicker').textContent =
+  const kicker = document.getElementById('dpKicker');
+  kicker.textContent =
     `${isToday ? '今天 · ' : ''}${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} ${wdays[dateObj.getDay()]}`;
+  kicker.classList.toggle('is-today', isToday);
   document.getElementById('dpTitle').textContent = getTrainText(plan.train);
   document.getElementById('todayTopLabel').textContent =
     `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} · ${getTrainText(plan.train)}`;
@@ -3641,7 +3996,7 @@ function drawTrainingCard(){
   ctx.fillText(`${doneSets}/${totalSets}`, W - PAD - 40, heroY + 92);
   /* 全部做完就把標籤換成綠色，讓「完成」在縮圖上一眼看得出來 */
   const allDone = pct === 100;
-  ctx.fillStyle = allDone ? '#2a8' : muted;
+  ctx.fillStyle = allDone ? (isDark ? '#35d195' : '#0F7A5A') : muted;
   ctx.font = font(allDone ? 800 : 600, 22);
   ctx.fillText(allDone ? '✓ 全部完成' : '組完成', W - PAD - 40, heroY + 154);
   ctx.textAlign = 'left';
@@ -3650,7 +4005,7 @@ function drawTrainingCard(){
   const barX = PAD + 40, barY = heroY + heroH - 52, barW = W - PAD * 2 - 80, barH = 20;
   ctx.fillStyle = track;
   ctx.fillRect(barX, barY, barW, barH);
-  ctx.fillStyle = pct === 100 ? '#2a8' : accent;
+  ctx.fillStyle = pct === 100 ? (isDark ? '#35d195' : '#22AA88') : accent;
   ctx.fillRect(barX, barY, barW * pct / 100, barH);
   ctx.strokeStyle = fg;
   ctx.lineWidth = 3;
@@ -3762,7 +4117,7 @@ function drawCalendarToCanvas(){
   const colors = {
     paper:'#F5F3F0', ink:'#141414', signal:'#E30613',
     concrete:'#8A8A8A', line:'#D9D4CE', card:'#FFFCF9',
-    other:'#EEEBE6', ok:'#2A8'
+    other:'#EEEBE6', ok:'#0F7A5A'
   };
 
   ctx.fillStyle = colors.paper;
