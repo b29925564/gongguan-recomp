@@ -15,7 +15,7 @@
   --paper:#F5F3F0;
   --ink:#141414;
   --signal:#E30613;
-  --concrete:#8A8A8A;
+  --concrete:#6F6F6F;   /* 4.54:1 on --paper（原 #8A8A8A 只有 3.12:1，未達 WCAG AA） */
   --line:#D9D4CE;
   --card:#FFFCF9;
 
@@ -33,7 +33,7 @@
   --paper:#1a1a1e;
   --ink:#e8e4df;
   --signal:#ff4d58;
-  --concrete:#8a8a8a;
+  --concrete:#9a9a9a;   /* 5.50:1 on --card（原 #8a8a8a 為 4.48:1，差一點點） */
   --line:#333338;
   --card:#242428;
 
@@ -317,7 +317,7 @@
     --paper:#1a1a1e;
     --ink:#e8e4df;
     --signal:#ff4d58;
-    --concrete:#8a8a8a;
+    --concrete:#9a9a9a;
     --line:#333338;
     --card:#242428;
   }
@@ -465,8 +465,24 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 .junk-dot{
   width:5px;height:5px;background:var(--signal);
-  border-radius:50%;display:inline-block;
+  border-radius:50%;display:inline-block;flex-shrink:0;
 }
+/* 熱量數字與旗標排在同一行，
+   取代原本絕對定位的角落標記 —— 那個寫法在窄螢幕上
+   會直接壓在熱量數字上面 */
+.cal-meta{
+  font-size:10px;color:var(--concrete);
+  margin-top:6px;line-height:1.45;white-space:nowrap;
+}
+.cal-meta-row{
+  display:flex;align-items:center;justify-content:space-between;gap:4px;
+}
+.cal-flags{display:flex;align-items:center;gap:4px;flex-shrink:0}
+.eaten-indicator{
+  color:#2a8;font-size:12px;font-weight:800;line-height:1;
+}
+.eaten-indicator[hidden]{display:none}
+.cal-cell.is-selected .eaten-indicator{color:#4ade9e}
 .cal-cell.is-selected .junk-dot{background:#ff5a64}
 @media(max-width:600px){
   .cal-cell{min-height:66px;padding:6px 5px}
@@ -498,6 +514,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   .eaten-indicator{
     font-size:9px!important;
   }
+  .cal-meta-row{gap:2px!important}
+  .cal-flags{gap:2px!important}
 }
 .set-check{
   width:21px;height:21px;
@@ -576,7 +594,16 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .bw-delta-down{color:#2a8}
 .bw-delta-up{color:var(--signal)}
 .bw-chart-wrap{margin-top:14px;overflow-x:auto}
-.bw-empty{font-size:12px;color:var(--concrete);padding:20px 0;text-align:center}
+.bw-empty{
+  display:grid;gap:6px;justify-items:center;
+  padding:28px 16px;text-align:center;
+  border:1px dashed var(--line);
+  border-radius:var(--radius-soft);
+  background:var(--card);
+}
+.bw-empty .empty-icon{font-size:26px;line-height:1;color:var(--concrete);opacity:.7}
+.bw-empty .empty-title{font-size:14px;font-weight:800;color:var(--ink)}
+.bw-empty .empty-hint{font-size:12px;color:var(--concrete);line-height:1.5;max-width:30ch}
 
 .dp-nav-row{display:flex;gap:8px;margin-top:14px}
 .dp-nav-row .btn{flex:1}
@@ -842,6 +869,67 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 .export-preview canvas,.export-preview img{
   max-width:100%;height:auto;display:block;margin:0 auto;
+}
+
+/* ── 儲存狀態面板 ── */
+.storage-status{
+  border:1px solid var(--line);border-radius:4px;
+  background:var(--card);padding:10px 12px;
+  display:grid;gap:6px;margin-bottom:12px;
+}
+.storage-row{
+  display:flex;justify-content:space-between;align-items:baseline;
+  gap:12px;font-size:13px;
+}
+.storage-label{color:var(--concrete)}
+.storage-value{font-weight:700;text-align:right}
+.storage-value.ok{color:#2a8}
+.storage-value.warn{color:var(--signal)}
+
+/* ── 備份逾期提醒條 ── */
+#backupNagBanner{
+  position:fixed;
+  left:18px;right:18px;
+  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
+  z-index:57;display:none;
+  gap:12px;align-items:center;justify-content:space-between;
+  padding:12px 14px;
+  background:var(--card);border:var(--stroke);
+  border-radius:var(--radius);box-shadow:var(--hard-shadow-lg);
+  flex-wrap:wrap;
+}
+#backupNagBanner.show{display:flex;animation:bannerSlideIn .28s ease both}
+#backupNagBanner .nag-text{font-size:13px;line-height:1.4;flex:1 1 180px}
+#backupNagBanner .nag-actions{display:flex;gap:8px;flex-wrap:wrap}
+@keyframes bannerSlideIn{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+  #backupNagBanner.show{animation:none}
+}
+
+/* ── 圖片儲存退路（iOS 無法觸發下載時顯示） ── */
+#imgSaveLayer{
+  position:fixed;inset:0;z-index:70;display:none;
+  align-items:center;justify-content:center;
+  padding:18px;background:rgba(0,0,0,.62);
+  overflow:auto;
+}
+#imgSaveLayer.show{display:flex}
+.img-save-box{
+  width:min(560px,100%);
+  background:var(--card);border:var(--stroke);
+  border-radius:var(--radius);box-shadow:var(--hard-shadow-lg);
+  padding:16px 18px;display:grid;gap:10px;
+  max-height:90vh;overflow:auto;
+}
+.img-save-hint{font-size:13px;line-height:1.5;color:var(--concrete)}
+.img-save-box img{
+  max-width:100%;height:auto;display:block;
+  border:1px solid var(--line);border-radius:4px;
+  -webkit-touch-callout:default;
+  -webkit-user-select:auto;user-select:auto;
 }
 #pwaUpdateBanner{
   position:fixed;
@@ -1148,18 +1236,23 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 /* ══════════════════════════════════════════════
    CALENDAR HEATMAP v1.4.0
    ══════════════════════════════════════════════ */
+/* 底色只表示「訓練完成度」，階層拉開才看得出來
+   （原本 .08 / .18 太淡，而且飲食也疊同一個綠，
+     兩個訊號混在一起反而都讀不出來） */
 .cal-cell.heat-partial{
-  background:rgba(42,170,100,.08);
+  background:rgba(42,170,136,.16);
 }
 .cal-cell.heat-full{
-  background:rgba(42,170,100,.18);
+  background:rgba(42,170,136,.34);
 }
-.cal-cell.heat-eaten{
-  background:rgba(42,170,100,.1);
-}
-.cal-cell.heat-full.heat-eaten{
-  background:rgba(42,170,100,.25);
-}
+
+/* 飲食達標不再疊底色：格子右下角本來就有綠色 ✓，
+   兩個地方講同一件事只會互相干擾。
+   現在四個訊號各自獨立：
+     底色 = 訓練完成度
+     底部橫條 = 訓練進度
+     右下 ✓ = 飲食達標
+     右下紅點 = 垃圾食物日 */
 
 /* ── selected 時覆蓋 heatmap ── */
 .cal-cell.is-selected.heat-partial,
@@ -1192,16 +1285,10 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 
 /* ── dark mode heatmap ── */
 [data-theme="dark"] .cal-cell.heat-partial{
-  background:rgba(60,200,120,.08);
+  background:rgba(60,200,140,.15);
 }
 [data-theme="dark"] .cal-cell.heat-full{
-  background:rgba(60,200,120,.16);
-}
-[data-theme="dark"] .cal-cell.heat-eaten{
-  background:rgba(60,200,120,.08);
-}
-[data-theme="dark"] .cal-cell.heat-full.heat-eaten{
-  background:rgba(60,200,120,.22);
+  background:rgba(60,200,140,.32);
 }
 [data-theme="dark"] .cal-cell.is-selected.heat-partial,
 [data-theme="dark"] .cal-cell.is-selected.heat-full,
@@ -1218,21 +1305,18 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 /* ── auto dark ── */
 @media(prefers-color-scheme:dark){
   [data-theme="auto"] .cal-cell.heat-partial{
-    background:rgba(60,200,120,.08);
+    background:rgba(60,200,140,.15);
   }
   [data-theme="auto"] .cal-cell.heat-full{
-    background:rgba(60,200,120,.16);
+    background:rgba(60,200,140,.32);
   }
-  [data-theme="auto"] .cal-cell.heat-eaten{
-    background:rgba(60,200,120,.08);
-  }
-  [data-theme="auto"] .cal-cell.heat-full.heat-eaten{
-    background:rgba(60,200,120,.22);
-  }
+  /* 註：這條規則原本中間混進了一個 <link> 標籤，
+     整條宣告因此被 CSS parser 丟掉，auto 主題在系統深色下
+     選取有熱度的日期不會反白。那個 <link> 是第 9 行的重複，
+     圖示本來就載得到，直接移除即可。 */
   [data-theme="auto"] .cal-cell.is-selected.heat-partial,
   [data-theme="auto"] .cal-cell.is-selected.heat-full,
   [data-theme="auto"] .cal-cell.is-selected.heat-eaten{
-    <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
     background:#e8e4df;
   }
 }
@@ -1557,13 +1641,31 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
       <div class="settings-list" id="settingsList"></div>
       <div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--line)">
         <div class="kicker" style="margin-bottom:8px">資料管理</div>
+
+        <div class="storage-status" id="storageStatus">
+          <div class="storage-row">
+            <span class="storage-label">永久儲存</span>
+            <span class="storage-value" id="persistState">檢查中…</span>
+          </div>
+          <div class="storage-row">
+            <span class="storage-label">紀錄大小</span>
+            <span class="storage-value mono-num" id="storageUsage">—</span>
+          </div>
+          <div class="storage-row">
+            <span class="storage-label">上次備份</span>
+            <span class="storage-value" id="lastBackupState">—</span>
+          </div>
+        </div>
+
         <p class="small muted" style="margin-bottom:10px">
-          紀錄存在這台裝置的瀏覽器裡，清快取或換裝置會遺失。建議定期匯出備份。
+          紀錄只存在這台裝置的瀏覽器裡。換裝置、清除網站資料，或系統在空間不足時回收，都會讓紀錄消失。請定期匯出備份。
         </p>
+
         <div class="data-tools-row">
           <button type="button" id="exportBtn" class="btn"><i class="ph ph-download-simple icon" aria-hidden="true"></i>匯出備份</button>
           <button type="button" id="importBtn" class="btn"><i class="ph ph-upload-simple icon" aria-hidden="true"></i>匯入備份</button>
           <input type="file" id="importFileInput" accept="application/json">
+          <button type="button" id="undoRestoreBtn" class="btn" style="display:none"><i class="ph ph-arrow-counter-clockwise icon" aria-hidden="true"></i>還原上一次變更</button>
           <button type="button" id="resetBtn" class="btn btn-danger"><i class="ph ph-trash icon" aria-hidden="true"></i>清除所有紀錄</button>
         </div>
         <span class="small muted" id="dataToolsMsg" aria-live="polite" style="display:block;margin-top:8px"></span>
@@ -1682,7 +1784,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v2.2.0';
+const APP_VERSION = 'v2.5.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -1805,6 +1907,232 @@ function showStorageWarning(){
   const banner = document.getElementById('errorBanner');
   banner.style.display = 'block';
   banner.textContent = '⚠ 儲存空間不足，資料可能無法保存。請先匯出備份再清除瀏覽器快取。';
+}
+
+/* ══════════════════════════════════════════════
+   資料安全
+   紀錄只活在 localStorage，而 localStorage 是可以
+   被系統回收的。這一段負責三件事：
+   1. 向瀏覽器申請「永久儲存」，降低被回收的機率
+   2. 追蹤上次備份時間，太久沒備份就提醒
+   3. 匯入 / 清除前自動留一份快照，可以反悔
+   註：這些 key 故意不用 recomp_ 開頭，
+       才不會被 allRecompKeys() 當成使用者紀錄
+       而被匯出、或被「清除所有紀錄」一起刪掉。
+   ══════════════════════════════════════════════ */
+const META_LAST_BACKUP = 'rcmeta_lastBackup';
+const SNAPSHOT_KEY     = 'rcsnap_prev';
+const BACKUP_NAG_DAYS  = 14;
+
+/* 使用者紀錄的所有 key（只認 recomp_ 開頭，
+   所以上面那些 rcmeta_ / rcsnap_ 不會被算進去） */
+function allRecompKeys(){
+  const keys = [];
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && k.indexOf('recomp_') === 0) keys.push(k);
+    }
+  }catch(e){}
+  return keys;
+}
+
+let _persistGranted = null;
+
+async function requestPersistentStorage(){
+  try{
+    if(!navigator.storage || !navigator.storage.persist) return null;
+    if(await navigator.storage.persisted()){ _persistGranted = true; return true; }
+    _persistGranted = await navigator.storage.persist();
+    return _persistGranted;
+  }catch(e){ return null; }
+}
+
+function formatBytes(n){
+  if(!n && n !== 0) return '—';
+  if(n < 1024) return n + ' B';
+  if(n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+  return (n / 1024 / 1024).toFixed(1) + ' MB';
+}
+
+function getLastBackupDate(){
+  const raw = lsGet(META_LAST_BACKUP, null);
+  if(!raw) return null;
+  const d = new Date(raw);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function daysSinceBackup(){
+  const d = getLastBackupDate();
+  if(!d) return null;
+  return Math.floor((Date.now() - d.getTime()) / 86400000);
+}
+
+function markBackupDone(){
+  lsSet(META_LAST_BACKUP, new Date().toISOString());
+  hideBackupNag();
+  renderStorageStatus();
+}
+
+/* 快照：匯入或清除前留一份，讓使用者可以反悔 */
+function takeSnapshot(reason){
+  try{
+    const data = {};
+    allRecompKeys().forEach(k => data[k] = localStorage.getItem(k));
+    if(!Object.keys(data).length) return false;
+    localStorage.setItem(SNAPSHOT_KEY, JSON.stringify({
+      reason, takenAt: new Date().toISOString(), data
+    }));
+    return true;
+  }catch(e){
+    /* 空間不足就放棄快照，但不擋住使用者原本要做的事 */
+    console.warn('snapshot failed:', e);
+    return false;
+  }
+}
+
+function getSnapshot(){
+  try{
+    const raw = localStorage.getItem(SNAPSHOT_KEY);
+    if(!raw) return null;
+    const snap = JSON.parse(raw);
+    return (snap && snap.data && typeof snap.data === 'object') ? snap : null;
+  }catch(e){ return null; }
+}
+
+function restoreSnapshot(){
+  const snap = getSnapshot();
+  if(!snap) return 0;
+  allRecompKeys().forEach(k => lsRemove(k));
+  let n = 0;
+  Object.keys(snap.data).forEach(k => {
+    if(typeof snap.data[k] === 'string'){ lsSet(k, snap.data[k]); n++; }
+  });
+  try{ localStorage.removeItem(SNAPSHOT_KEY); }catch(e){}
+  return n;
+}
+
+function snapshotReasonText(reason){
+  if(reason === 'import') return '匯入備份';
+  if(reason === 'reset')  return '清除所有紀錄';
+  return '變更';
+}
+
+function refreshUndoButton(){
+  const btn = document.getElementById('undoRestoreBtn');
+  if(!btn) return;
+  const snap = getSnapshot();
+  if(!snap){ btn.style.display = 'none'; return; }
+  btn.style.display = '';
+  btn.title = `還原到「${snapshotReasonText(snap.reason)}」之前的狀態`;
+}
+
+async function renderStorageStatus(){
+  const persistEl = document.getElementById('persistState');
+  const usageEl   = document.getElementById('storageUsage');
+  const backupEl  = document.getElementById('lastBackupState');
+  if(!persistEl) return;
+
+  /* 永久儲存 */
+  let persisted = _persistGranted;
+  try{
+    if(navigator.storage && navigator.storage.persisted){
+      persisted = await navigator.storage.persisted();
+    }
+  }catch(e){}
+  if(persisted === true){
+    persistEl.textContent = '已啟用';
+    persistEl.className = 'storage-value ok';
+  }else if(persisted === false){
+    persistEl.textContent = '未啟用';
+    persistEl.className = 'storage-value warn';
+  }else{
+    persistEl.textContent = '此瀏覽器不支援';
+    persistEl.className = 'storage-value';
+  }
+
+  /* 紀錄大小：只算 recomp_ 的 localStorage 內容。
+     不用 storage.estimate()，因為它會把 PWA 的快取
+     一起算進去，顯示出來會比實際紀錄大很多。
+     localStorage 以 UTF-16 儲存，所以字元數 × 2。 */
+  const keys = allRecompKeys();
+  let chars = 0;
+  try{
+    keys.forEach(k => { chars += k.length + (localStorage.getItem(k) || '').length; });
+  }catch(e){}
+  usageEl.textContent = `${keys.length} 筆 · ${formatBytes(chars * 2)}`;
+
+  /* 上次備份 */
+  const days = daysSinceBackup();
+  if(days === null){
+    backupEl.textContent = '從未備份';
+    backupEl.className = 'storage-value warn';
+  }else if(days === 0){
+    backupEl.textContent = '今天';
+    backupEl.className = 'storage-value ok';
+  }else{
+    backupEl.textContent = `${days} 天前`;
+    backupEl.className = 'storage-value' + (days >= BACKUP_NAG_DAYS ? ' warn' : ' ok');
+  }
+
+  refreshUndoButton();
+}
+
+function hideBackupNag(){
+  const b = document.getElementById('backupNagBanner');
+  if(b) b.classList.remove('show');
+}
+
+function maybeShowBackupNag(){
+  /* 紀錄太少就不用吵 */
+  if(allRecompKeys().length < 20) return;
+  const days = daysSinceBackup();
+  if(days !== null && days < BACKUP_NAG_DAYS) return;
+
+  /* 同一天只提醒一次 */
+  const todayKey = 'rcmeta_nagShown_' + formatDateStrPad(new Date());
+  if(lsGet(todayKey, '') === '1') return;
+
+  let banner = document.getElementById('backupNagBanner');
+  if(!banner){
+    banner = document.createElement('div');
+    banner.id = 'backupNagBanner';
+    banner.innerHTML =
+      '<div class="nag-text">' +
+        '<strong id="nagTitle">該備份了</strong>' +
+        '<div class="muted" id="nagDetail"></div>' +
+      '</div>' +
+      '<div class="nag-actions">' +
+        '<button type="button" class="btn" id="nagLaterBtn">稍後</button>' +
+        '<button type="button" class="btn-signal" id="nagBackupBtn">立即備份</button>' +
+      '</div>';
+    document.body.appendChild(banner);
+    document.getElementById('nagLaterBtn').addEventListener('click', () => {
+      lsSet(todayKey, '1');
+      hideBackupNag();
+    });
+    document.getElementById('nagBackupBtn').addEventListener('click', () => {
+      hideBackupNag();
+      const btn = document.getElementById('exportBtn');
+      if(btn) btn.click();
+    });
+  }
+  banner.querySelector('#nagDetail').textContent =
+    days === null
+      ? '你還沒有匯出過備份。紀錄只存在這台裝置上。'
+      : `上次備份是 ${days} 天前。紀錄只存在這台裝置上。`;
+  banner.classList.add('show');
+}
+
+/* 每天清掉舊的「稍後提醒」記號，避免無限累積 */
+function cleanupNagFlags(){
+  try{
+    const today = 'rcmeta_nagShown_' + formatDateStrPad(new Date());
+    for(let i = localStorage.length - 1; i >= 0; i--){
+      const k = localStorage.key(i);
+      if(k && k.indexOf('rcmeta_nagShown_') === 0 && k !== today) localStorage.removeItem(k);
+    }
+  }catch(e){}
 }
 
 function bwKey(y, m, d){ return `recomp_bw_${y}-${m+1}-${d}`; }
@@ -1990,6 +2318,110 @@ function flashToast(msg){
   clearTimeout(flashToast._t);
   flashToast._t = setTimeout(() => el.style.opacity = '0', 1200);
 }
+
+/* ────────────────────────────────────────────────
+   Canvas → 圖片儲存
+   iOS 以 standalone PWA 執行時沒有下載管理員，
+   <a download> 會被忽略（點了沒反應）。
+   優先用 Web Share API 叫出系統分享表單
+   （可「儲存影像」到相簿，或直接發到社群），
+   桌面瀏覽器維持原本的下載行為，
+   兩者都不行時顯示圖片讓使用者長按儲存。
+   ──────────────────────────────────────────────── */
+function isIosDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+/* 同步轉檔：不能用 canvas.toBlob()，因為 await / callback
+   會讓 iOS 判定已脫離使用者手勢，navigator.share() 就會被拒絕 */
+function pngDataUrlToBlob(dataUrl){
+  const base64 = dataUrl.split(',')[1];
+  const bin = atob(base64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  return new Blob([bytes], { type:'image/png' });
+}
+
+function showImageSaveLayer(dataUrl, title){
+  let layer = document.getElementById('imgSaveLayer');
+  if(!layer){
+    layer = document.createElement('div');
+    layer.id = 'imgSaveLayer';
+    layer.innerHTML =
+      '<div class="img-save-box">' +
+        '<div class="kicker" id="imgSaveTitle">儲存圖片</div>' +
+        '<div class="img-save-hint">長按下方圖片 → 選「加入照片」或「儲存影像」即可存到相簿。</div>' +
+        '<img id="imgSaveTarget" alt="匯出的圖片">' +
+        '<button type="button" class="btn" id="imgSaveCloseBtn">關閉</button>' +
+      '</div>';
+    document.body.appendChild(layer);
+    layer.addEventListener('click', e => {
+      if(e.target === layer || e.target.id === 'imgSaveCloseBtn'){
+        layer.classList.remove('show');
+      }
+    });
+  }
+  layer.querySelector('#imgSaveTitle').textContent = title || '儲存圖片';
+  layer.querySelector('#imgSaveTarget').src = dataUrl;
+  layer.classList.add('show');
+}
+
+function saveCanvasAsImage(canvas, filename, okMsg, layerTitle){
+  let dataUrl = '', blob = null;
+  try{
+    dataUrl = canvas.toDataURL('image/png');
+    blob = pngDataUrlToBlob(dataUrl);
+  }catch(err){
+    flashToast('產生圖片失敗：' + (err && err.message ? err.message : err));
+    return;
+  }
+
+  const anchorSupportsDownload = 'download' in document.createElement('a');
+  const preferShare = isIosDevice() || !anchorSupportsDownload;
+
+  const tryShare = () => {
+    try{
+      if(!blob || typeof File !== 'function' || !navigator.canShare || !navigator.share) return false;
+      const file = new File([blob], filename, { type:'image/png' });
+      if(!navigator.canShare({ files:[file] })) return false;
+      navigator.share({ files:[file] })
+        .then(() => flashToast(okMsg || '已匯出'))
+        .catch(err => {
+          /* 使用者自己取消分享就安靜結束 */
+          if(err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) return;
+          showImageSaveLayer(dataUrl, layerTitle);
+        });
+      return true;
+    }catch(e){ return false; }
+  };
+
+  const tryDownload = () => {
+    if(!blob || !anchorSupportsDownload) return false;
+    try{
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      flashToast(okMsg || '已下載');
+      return true;
+    }catch(e){ return false; }
+  };
+
+  if(preferShare){
+    if(tryShare()) return;
+    if(tryDownload()) return;
+  }else{
+    if(tryDownload()) return;
+    if(tryShare()) return;
+  }
+
+  showImageSaveLayer(dataUrl, layerTitle);
+}
 function copyAnyText(t, msg){
   const done = () => flashToast(msg || '已複製');
   if(navigator.clipboard && window.isSecureContext){
@@ -2163,10 +2595,15 @@ if(isPast && getPref('heatmap')){
         <span class="cal-daynum">${d}</span>
         <span class="cal-tag">${plan.train}</span>
       </div>
-      <div class="cal-meta mono-num" style="font-size:10px;color:var(--concrete);margin-top:6px;line-height:1.45">P${plan.p}g<br>${plan.kcal}kcal</div>
-      <div style="position:absolute;bottom:7px;right:8px;display:flex;gap:4px;align-items:center">
-        ${eaten ? '<span class="eaten-indicator" style="color:#2a8;font-size:10px">✓</span>' : '<span class="eaten-indicator" style="display:none"></span>'}
-        ${plan.junk ? '<span class="junk-dot"></span>' : ''}
+      <div class="cal-meta mono-num">
+        <div>P${plan.p}g</div>
+        <div class="cal-meta-row">
+          <span>${plan.kcal}</span>
+          <span class="cal-flags">
+            <span class="eaten-indicator"${eaten ? '' : ' hidden'}>✓</span>
+            ${plan.junk ? '<span class="junk-dot"></span>' : ''}
+          </span>
+        </div>
       </div>
       ${heatBar}
     </div>`;
@@ -2264,7 +2701,17 @@ function renderBwChart(){
   if(!wrap) return;
   const entries = getAllBwEntries();
   if(entries.length < 2){
-    wrap.innerHTML = `<div class="bw-empty">${entries.length === 0 ? '尚無資料可繪圖' : '至少需要 2 筆紀錄才能畫趨勢線'}</div>`;
+    wrap.innerHTML = entries.length === 0
+      ? `<div class="bw-empty">
+           <i class="ph ph-chart-line empty-icon" aria-hidden="true"></i>
+           <div class="empty-title">還沒有體重紀錄</div>
+           <div class="empty-hint">在上面輸入今天的體重，累積兩筆之後這裡就會長出趨勢線。</div>
+         </div>`
+      : `<div class="bw-empty">
+           <i class="ph ph-chart-line empty-icon" aria-hidden="true"></i>
+           <div class="empty-title">再一筆就能畫圖</div>
+           <div class="empty-hint">目前有 1 筆紀錄。趨勢線至少需要兩個時間點才畫得出來。</div>
+         </div>`;
     return;
   }
 
@@ -2793,54 +3240,83 @@ function drawTrainingCard(){
 
   const plan = getPlanForDate(selectedDateObj);
   const dateStr = formatDateStr(selectedDateObj);
-
   if(plan.train === '休') return null;
 
   const list = WORKOUTS[plan.train];
-  const ratio = 2;
-  const W = 540;
-  const rowH = 44;
-  const headerH = 120;
-  const footerH = 50;
-  const padX = 28;
-  const H = headerH + list.length * rowH + footerH + 20;
+
+  /* 固定 4:5（1080×1350）—— IG / Threads 動態牆最吃得開的比例。
+     之前是 540 寬、高度隨動作數變動，貼上去會被裁切。 */
+  const W = 1080, H = 1350;
+  const PAD = 72;
 
   const canvas = document.createElement('canvas');
-  canvas.width = W * ratio;
-  canvas.height = H * ratio;
-
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
   if(!ctx) return null;
-  ctx.scale(ratio, ratio);
   ctx.textBaseline = 'top';
 
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
     (document.documentElement.getAttribute('data-theme') === 'auto' &&
      window.matchMedia('(prefers-color-scheme:dark)').matches);
 
-  const bg = isDark ? '#1a1a1e' : '#F5F3F0';
-  const fg = isDark ? '#e8e4df' : '#141414';
-  const muted = '#8A8A8A';
+  const bg     = isDark ? '#1a1a1e' : '#F5F3F0';
+  const fg     = isDark ? '#e8e4df' : '#141414';
+  const muted  = isDark ? '#9a9a9a' : '#6F6F6F';
   const accent = isDark ? '#ff4d58' : '#E30613';
   const cardBg = isDark ? '#242428' : '#FFFCF9';
-  const ok = '#2a8';
+  const track  = isDark ? '#333338' : '#D9D4CE';
 
-  /* background */
+  /* 明確指定中文字型，不然各裝置 fallback 出來的字重差很多 */
+  const SANS = '-apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+  const MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
+  const font = (weight, size, stack) => `${weight} ${size}px ${stack || SANS}`;
+
+  const setLS = v => { try{ ctx.letterSpacing = v; }catch(e){} };
+
+  /* 文字過長就截斷加省略號 */
+  function fitText(text, maxW){
+    if(ctx.measureText(text).width <= maxW) return text;
+    let t = text;
+    while(t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+    return t + '…';
+  }
+
+  /* Neo-Brutalist 硬陰影：先畫一塊位移的實心色，再疊卡片 */
+  function hardCard(x, y, w, h, fill){
+    ctx.fillStyle = fg;
+    ctx.fillRect(x + 8, y + 8, w, h);
+    ctx.fillStyle = fill;
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = fg;
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x + 1.5, y + 1.5, w - 3, h - 3);
+  }
+
+  /* ── 底 ── */
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = accent;
-  ctx.fillRect(0, 0, W, 5);
+  ctx.fillRect(0, 0, W, 16);
 
-  /* header */
+  /* ── 抬頭 ── */
   ctx.fillStyle = fg;
-  ctx.font = '900 28px sans-serif';
-  ctx.fillText('RECOMP', padX, 22);
+  ctx.font = font(900, 72);
+  setLS('-2px');
+  ctx.fillText('RECOMP', PAD, 78);
+  setLS('0px');
+
+  ctx.fillStyle = accent;
+  ctx.font = font(800, 30);
+  ctx.fillText(getTrainText(plan.train), PAD, 170);
 
   ctx.fillStyle = muted;
-  ctx.font = '12px sans-serif';
-  ctx.fillText(formatDateStrPad(selectedDateObj) + ' · ' + getTrainText(plan.train), padX, 58);
+  ctx.font = font(500, 26, MONO);
+  ctx.textAlign = 'right';
+  ctx.fillText(formatDateStrPad(selectedDateObj), W - PAD, 174);
+  ctx.textAlign = 'left';
 
-  /* completion stats */
+  /* ── 完成度 ── */
   const totalSets = list.reduce((s, ex) => s + ex.sets, 0);
   let doneSets = 0;
   list.forEach(ex => {
@@ -2850,61 +3326,118 @@ function drawTrainingCard(){
   });
   const pct = totalSets ? Math.round(doneSets / totalSets * 100) : 0;
 
+  /* ── 主視覺卡：把完成率放大成主角 ── */
+  const heroY = 232, heroH = 286;
+  hardCard(PAD, heroY, W - PAD * 2, heroH, cardBg);
+
   ctx.fillStyle = fg;
-  ctx.font = '700 16px monospace';
-  ctx.fillText(`${doneSets}/${totalSets} sets · ${pct}%`, padX, 82);
+  ctx.font = font(900, 172, MONO);
+  setLS('-6px');
+  const pctText = String(pct);
+  ctx.fillText(pctText, PAD + 40, heroY + 52);
+  const pctW = ctx.measureText(pctText).width;
+  setLS('0px');
 
-  /* progress bar */
-  const barY = 104;
-  const barW = W - padX * 2;
-  ctx.fillStyle = isDark ? '#333338' : '#D9D4CE';
-  ctx.fillRect(padX, barY, barW, 5);
   ctx.fillStyle = accent;
-  ctx.fillRect(padX, barY, barW * pct / 100, 5);
+  ctx.font = font(900, 64);
+  ctx.fillText('%', PAD + 40 + pctW + 12, heroY + 136);
 
-  /* exercise rows */
+  ctx.textAlign = 'right';
+  ctx.fillStyle = muted;
+  ctx.font = font(700, 24);
+  setLS('3px');
+  ctx.fillText('COMPLETE', W - PAD - 40, heroY + 56);
+  setLS('0px');
+
+  ctx.fillStyle = fg;
+  ctx.font = font(800, 52, MONO);
+  ctx.fillText(`${doneSets}/${totalSets}`, W - PAD - 40, heroY + 92);
+  /* 全部做完就把標籤換成綠色，讓「完成」在縮圖上一眼看得出來 */
+  const allDone = pct === 100;
+  ctx.fillStyle = allDone ? '#2a8' : muted;
+  ctx.font = font(allDone ? 800 : 600, 22);
+  ctx.fillText(allDone ? '✓ 全部完成' : '組完成', W - PAD - 40, heroY + 154);
+  ctx.textAlign = 'left';
+
+  /* 進度條 */
+  const barX = PAD + 40, barY = heroY + heroH - 52, barW = W - PAD * 2 - 80, barH = 20;
+  ctx.fillStyle = track;
+  ctx.fillRect(barX, barY, barW, barH);
+  ctx.fillStyle = pct === 100 ? '#2a8' : accent;
+  ctx.fillRect(barX, barY, barW * pct / 100, barH);
+  ctx.strokeStyle = fg;
+  ctx.lineWidth = 3;
+  ctx.strokeRect(barX + 1.5, barY + 1.5, barW - 3, barH - 3);
+
+  /* ── 動作清單 ── */
+  const footerY = H - 96;
+  const listArea = heroY + heroH + 40;
+  const avail = footerY - listArea - 24;
+  const rowH = Math.min(140, avail / list.length);
+  /* 動作數不同（A 五項、B 四項），把整塊清單置中，
+     才不會像之前那樣底部空一大塊 */
+  const listTop = listArea + (avail - rowH * list.length) / 2;
+  const dot = 26, dotGap = 9;
+
   list.forEach((ex, i) => {
-    const y = headerH + i * rowH;
+    const y = listTop + i * rowH;
     const liveKg = getExerciseWeight(ex);
 
-    /* row bg */
-    if(i % 2 === 0){
-      ctx.fillStyle = cardBg;
-      ctx.fillRect(padX - 8, y, W - padX * 2 + 16, rowH);
+    /* 分隔線 */
+    if(i > 0){
+      ctx.strokeStyle = isDark ? '#333338' : '#D9D4CE';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(PAD, y - rowH * 0.06);
+      ctx.lineTo(W - PAD, y - rowH * 0.06);
+      ctx.stroke();
     }
 
-    /* set indicators */
+    /* 名稱 */
+    ctx.fillStyle = fg;
+    ctx.font = font(700, 30);
+    const dotsW = ex.sets * (dot + dotGap);
+    ctx.fillText(fitText(ex.name, W - PAD * 2 - dotsW - 40), PAD, y + 14);
+
+    /* 重量 · 次數 */
+    ctx.fillStyle = muted;
+    ctx.font = font(500, 24, MONO);
+    ctx.fillText(`${liveKg}kg · ${ex.reps}`, PAD, y + 54);
+
+    /* 組數方塊：空 / 完成 / 達上限 */
     for(let s = 0; s < ex.sets; s++){
       const state = lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s+1}`, '0');
-      const cx = padX + s * 18;
-      const cy = y + 12;
-      ctx.fillStyle = state === '2' ? accent : state === '1' ? fg : (isDark ? '#444' : '#ddd');
-      ctx.beginPath();
-      ctx.arc(cx + 6, cy + 6, 5, 0, Math.PI * 2);
-      ctx.fill();
+      const bx = W - PAD - dotsW + s * (dot + dotGap) + dotGap;
+      const by = y + 26;
+      ctx.fillStyle = state === '2' ? accent : state === '1' ? fg : 'transparent';
+      if(state !== '0') ctx.fillRect(bx, by, dot, dot);
+      ctx.strokeStyle = state === '0' ? (isDark ? '#44444a' : '#C9C4BE') : fg;
+      ctx.lineWidth = 2.5;
+      ctx.strokeRect(bx + 1.25, by + 1.25, dot - 2.5, dot - 2.5);
     }
-
-    /* exercise name + weight */
-    ctx.fillStyle = fg;
-    ctx.font = '600 12px sans-serif';
-    ctx.fillText(ex.name, padX + ex.sets * 18 + 8, y + 6);
-
-    ctx.fillStyle = muted;
-    ctx.font = '12px monospace';
-    ctx.fillText(`${liveKg}kg · ${ex.reps}`, padX + ex.sets * 18 + 8, y + 24);
   });
 
-  /* footer */
-  const fy = headerH + list.length * rowH + 16;
-  ctx.fillStyle = muted;
-  ctx.font = '10px sans-serif';
-  ctx.fillText(`RECOMP ${APP_VERSION} · ${formatDateStrPad(new Date())}`, padX, fy);
+  /* ── 頁尾 ── */
+  ctx.strokeStyle = fg;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(PAD, footerY);
+  ctx.lineTo(W - PAD, footerY);
+  ctx.stroke();
 
-  /* body weight if available */
+  ctx.fillStyle = muted;
+  ctx.font = font(600, 22, MONO);
+  ctx.fillText(`RECOMP ${APP_VERSION}`, PAD, footerY + 22);
+
   const bw = getBwEntry(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate());
   if(bw){
     ctx.textAlign = 'right';
-    ctx.fillText(`BW ${bw.w}kg${bw.bf !== null && bw.bf !== undefined ? ` · BF ${bw.bf}%` : ''}`, W - padX, fy);
+    ctx.fillStyle = fg;
+    ctx.font = font(700, 24, MONO);
+    ctx.fillText(
+      `BW ${bw.w}kg${bw.bf !== null && bw.bf !== undefined ? ` · BF ${bw.bf}%` : ''}`,
+      W - PAD, footerY + 21
+    );
     ctx.textAlign = 'left';
   }
 
@@ -3367,6 +3900,7 @@ function initSettings(){
 
   function openSettings(){
     renderSettings();
+    renderStorageStatus();
     modal.classList.add('show');
     modal.setAttribute('aria-hidden', 'false');
     closeBtn.focus();
@@ -3738,8 +4272,8 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
       if(cell){
         const indicator = cell.querySelector('.eaten-indicator');
         if(indicator){
-          indicator.style.display = next === '1' ? '' : 'none';
-          indicator.style.color = '#2a8'; indicator.style.fontSize = '10px'; indicator.textContent = '✓';
+          indicator.textContent = '✓';
+          indicator.hidden = next !== '1';
         }
       }
     }
@@ -3870,11 +4404,12 @@ searchClearBtn.addEventListener('click', () => {
   exportCalModal.addEventListener('click', e => { if(e.target === exportCalModal) closeExportCalModal(); });
   document.getElementById('downloadCalBtn').addEventListener('click', () => {
     if(!exportCanvasRef) return;
-    const a = document.createElement('a');
-    a.href = exportCanvasRef.toDataURL('image/png');
-    a.download = `recomp-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    flashToast('已下載 PNG');
+    saveCanvasAsImage(
+      exportCanvasRef,
+      `recomp-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`,
+      '已匯出 PNG',
+      '月曆 PNG'
+    );
   });
 
   document.addEventListener('keydown', e => {
@@ -3885,11 +4420,6 @@ searchClearBtn.addEventListener('click', () => {
     else if(drawer.classList.contains('open')) closeOrderDrawer();
   });
 
-  function allRecompKeys(){
-    const keys = [];
-    try{ for(let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if(k && k.indexOf('recomp_') === 0) keys.push(k); } }catch(e){}
-    return keys;
-  }
   function showDataMsg(msg, isError){
     const el = document.getElementById('dataToolsMsg');
     if(!el) return;
@@ -3901,13 +4431,45 @@ searchClearBtn.addEventListener('click', () => {
     try{
       const data = {};
       allRecompKeys().forEach(k => data[k] = localStorage.getItem(k));
-      const payload = { exportedAt: new Date().toISOString(), data };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+      const payload = {
+        app: 'RECOMP',
+        appVersion: APP_VERSION,
+        schemaVersion: SCHEMA_VERSION,
+        exportedAt: new Date().toISOString(),
+        recordCount: Object.keys(data).length,
+        data
+      };
+      const text = JSON.stringify(payload, null, 2);
+      const filename = `recomp-backup-${new Date().toISOString().slice(0,10)}.json`;
+      const blob = new Blob([text], {type:'application/json'});
+      const count = allRecompKeys().length;
+
+      /* iOS standalone PWA 無法用 <a download>，改走系統分享表單 */
+      const anchorSupportsDownload = 'download' in document.createElement('a');
+      if(isIosDevice() || !anchorSupportsDownload){
+        try{
+          const file = new File([blob], filename, {type:'application/json'});
+          if(navigator.canShare && navigator.share && navigator.canShare({files:[file]})){
+            navigator.share({files:[file]})
+              .then(() => { showDataMsg(`已匯出 ${count} 筆紀錄`); markBackupDone(); })
+              .catch(err => {
+                if(err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) return;
+                copyAnyText(text, '無法存檔，備份內容已複製到剪貼簿');
+              });
+            return;
+          }
+        }catch(e){}
+        copyAnyText(text, '無法存檔，備份內容已複製到剪貼簿');
+        return;
+      }
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a'); a.href = url;
-      a.download = `recomp-backup-${new Date().toISOString().slice(0,10)}.json`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-      showDataMsg(`已匯出 ${allRecompKeys().length} 筆紀錄`);
+      a.download = filename;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 10000);
+      showDataMsg(`已匯出 ${count} 筆紀錄`);
+      markBackupDone();
     }catch(e){ showDataMsg('匯出失敗：' + e.message, true); }
   });
 
@@ -3924,27 +4486,71 @@ searchClearBtn.addEventListener('click', () => {
         const parsed = JSON.parse(reader.result);
         const data = parsed && parsed.data ? parsed.data : parsed;
         if(!data || typeof data !== 'object') throw new Error('檔案格式不正確');
-        let count = 0;
-        Object.keys(data).forEach(k => {
+
+        const incoming = Object.keys(data);
+        if(!incoming.length) throw new Error('檔案裡沒有紀錄');
+
+        /* 匯入會覆蓋現有紀錄，先留一份快照讓使用者可以反悔 */
+        const snapped = takeSnapshot('import');
+
+        let count = 0, skipped = 0;
+        incoming.forEach(k => {
           if(VALID_IMPORT_KEY.test(k) && typeof data[k] === 'string'){ lsSet(k, data[k]); count++; }
+          else skipped++;
         });
         _bumpCountCache.clear();
-        showDataMsg(`已匯入 ${count} 筆紀錄，正在重新整理畫面…`);
+
+        /* 匯入報告：讓使用者知道到底進了什麼 */
+        const parts = [`已匯入 ${count} 筆`];
+        if(skipped) parts.push(`略過 ${skipped} 筆不認得的資料`);
+        if(parsed && parsed.exportedAt){
+          const d = new Date(parsed.exportedAt);
+          if(!isNaN(d.getTime())) parts.push(`來源備份日期 ${formatDateStrPad(d)}`);
+        }
+        if(parsed && parsed.appVersion && parsed.appVersion !== APP_VERSION){
+          parts.push(`來源版本 ${parsed.appVersion}`);
+        }
+        if(snapped) parts.push('可用「還原上一次變更」回到匯入前');
+        showDataMsg(parts.join('，'));
+
         renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
         refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
-      }catch(err){ showDataMsg('匯入失敗：檔案格式不正確', true); }
+        renderStorageStatus();
+      }catch(err){
+        showDataMsg('匯入失敗：' + (err && err.message ? err.message : '檔案格式不正確'), true);
+      }
     };
     reader.onerror = () => showDataMsg('匯入失敗：無法讀取檔案', true);
     reader.readAsText(file); e.target.value = '';
   });
 
   document.getElementById('resetBtn').addEventListener('click', () => {
-    if(!confirm('確定要清除所有訓練打勾、重量進度、體重紀錄與飲食打勾嗎？此動作無法復原。')) return;
+    const n = allRecompKeys().length;
+    if(!n){ showDataMsg('目前沒有任何紀錄'); return; }
+    if(!confirm(`確定要清除全部 ${n} 筆紀錄嗎？\n（訓練打勾、重量進度、體重紀錄、飲食打勾）\n\n系統會先留一份快照，清除後仍可按「還原上一次變更」救回來。`)) return;
+
+    takeSnapshot('reset');
     allRecompKeys().forEach(k => lsRemove(k));
     _bumpCountCache.clear();
-    showDataMsg('已清除所有紀錄');
+    showDataMsg(`已清除 ${n} 筆紀錄，可按「還原上一次變更」救回`);
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
     refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+    renderStorageStatus();
+  });
+
+  document.getElementById('undoRestoreBtn').addEventListener('click', () => {
+    const snap = getSnapshot();
+    if(!snap){ showDataMsg('沒有可還原的快照'); refreshUndoButton(); return; }
+    const when = new Date(snap.takenAt);
+    const whenText = isNaN(when.getTime()) ? '' : `（${formatDateStrPad(when)}）`;
+    if(!confirm(`要還原到「${snapshotReasonText(snap.reason)}」之前的狀態嗎？${whenText}\n\n目前的紀錄會被這份快照取代。`)) return;
+
+    const n = restoreSnapshot();
+    _bumpCountCache.clear();
+    showDataMsg(`已還原 ${n} 筆紀錄`);
+    renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
+    refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+    renderStorageStatus();
   });
 
   const initDate = new Date();
@@ -3955,6 +4561,12 @@ searchClearBtn.addEventListener('click', () => {
   initPwa();
   checkRemoteVersion();
   initSettings();
+
+  /* 資料安全：申請永久儲存 → 更新狀態面板 → 必要時提醒備份 */
+  cleanupNagFlags();
+  refreshUndoButton();
+  requestPersistentStorage().then(() => renderStorageStatus());
+  setTimeout(maybeShowBackupNag, 2500);
 /* ── Training card export (delegated) ── */
 document.getElementById('dpWorkout').addEventListener('click', e => {
   const exportBtn = e.target.closest('#exportTrainCardBtn');
@@ -3965,13 +4577,12 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     flashToast('休息日無訓練可匯出');
     return;
   }
-  const a = document.createElement('a');
-  a.href = canvas.toDataURL('image/png');
-  a.download = `recomp-training-${formatDateStrPad(selectedDateObj)}.png`;
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  flashToast('已下載訓練卡');
+  saveCanvasAsImage(
+    canvas,
+    `recomp-training-${formatDateStrPad(selectedDateObj)}.png`,
+    '已匯出訓練卡',
+    '今日訓練卡'
+  );
 });  /* ── Tab switching ── */
 document.querySelector('.tab-bar').addEventListener('click', e => {
   const btn = e.target.closest('[data-tab]');
