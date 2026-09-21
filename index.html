@@ -79,9 +79,6 @@
   border-color:#999;
   color:#444;
 }
-[data-theme="dark"] .cal-cell.is-selected .junk-dot{
-  background:#E30613;
-}
 [data-theme="dark"] .cal-tag{
   border-color:#444;
   color:var(--concrete);
@@ -177,20 +174,8 @@
 }
 
 /* ── bw stats / chart ── */
-[data-theme="dark"] .bw-stat{
-  background:var(--card);
-  border-color:var(--line);
-}
 
 /* ── meal / exercise dark ── */
-[data-theme="dark"] .meal-block{
-  background:var(--card);
-  border-color:var(--line);
-}
-[data-theme="dark"] .meal-sup{
-  background:#2a2a2e;
-  border-color:var(--line);
-}
 [data-theme="dark"] .ex-row{
   border-bottom-color:var(--line);
 }
@@ -228,10 +213,6 @@
 }
 
 /* ── drawers / modals dark ── */
-[data-theme="dark"] #orderDrawer{
-  background:var(--card);
-  border-left-color:var(--ink);
-}
 [data-theme="dark"] #searchDrawer{
   background:var(--card);
   border-right-color:var(--ink);
@@ -251,14 +232,6 @@
 }
 
 /* ── FABs dark ── */
-[data-theme="dark"] #orderFab{
-  background:var(--signal);
-  color:#fff;
-}
-[data-theme="dark"] #searchFab{
-  background:var(--ink);
-  color:var(--paper);
-}
 
 /* ── toast / banners dark ── */
 [data-theme="dark"] #toast{
@@ -284,13 +257,6 @@
 }
 
 /* ── rest cards dark ── */
-[data-theme="dark"] .rest-card-p{
-  border-color:var(--line);
-  color:var(--concrete);
-}
-[data-theme="dark"] .rest-card-footer{
-  border-top-color:var(--line);
-}
 
 /* ── week rows dark ── */
 [data-theme="dark"] .week-row{
@@ -353,11 +319,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   font-weight:900;
   line-height:1.05;
 }
-.stat-label-row{
-  display:flex;flex-wrap:wrap;gap:6px 20px;
-  margin-top:18px;font-size:13px;color:var(--concrete)
-}
-.stat-label-row b{color:var(--ink)}
 
 .swiss-card{
   background:var(--card);
@@ -377,7 +338,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .btn-signal:active{background:#a00410;transform:scale(.97)}
 .set-check:active{opacity:.7;transform:scale(.92)}
 .search-chip:active{transform:scale(.95)}
-.copy-btn:active,.meal-copy-btn:active{opacity:.6}
 .cal-cell:active:not(.is-other){background:#e8e4df}
 .cal-cell.is-selected:active{background:#2a2a2a}  
 .btn.active,.btn.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
@@ -388,19 +348,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .btn-signal:hover{background:#c00510}
 .btn-danger{color:var(--signal);border-color:var(--signal)}
 
-.grid-3{display:grid;gap:16px}
-.grid-3 > .swiss-card:nth-child(1){
-  background:var(--signal);
-  color:#fff;
-}
 .grid-3 > .swiss-card:nth-child(1) .kicker,
 .grid-3 > .swiss-card:nth-child(1) .muted,
-.grid-3 > .swiss-card:nth-child(1) .small{
-  color:#ffe0e3 !important;
-}
-.grid-3 > .swiss-card:nth-child(1) b{
-  color:#fff !important;
-}
 @media(min-width:860px){.grid-3{grid-template-columns:repeat(3,1fr)}}
 
 .two-col{display:grid;gap:20px}
@@ -409,7 +358,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   #dayPanel{position:static!important;top:auto!important}
 }
 
-.rest-grid{display:grid;gap:12px}
 @media(min-width:640px){.rest-grid{grid-template-columns:repeat(2,1fr)}}
 @media(min-width:1024px){.rest-grid{grid-template-columns:repeat(3,1fr)}}
 
@@ -463,10 +411,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   color:#fff;
   background:transparent;
 }
-.junk-dot{
-  width:5px;height:5px;background:var(--signal);
-  border-radius:50%;display:inline-block;flex-shrink:0;
-}
 /* 熱量數字與旗標排在同一行，
    取代原本絕對定位的角落標記 —— 那個寫法在窄螢幕上
    會直接壓在熱量數字上面 */
@@ -478,12 +422,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   display:flex;align-items:center;justify-content:space-between;gap:4px;
 }
 .cal-flags{display:flex;align-items:center;gap:4px;flex-shrink:0}
-.eaten-indicator{
-  color:#2a8;font-size:12px;font-weight:800;line-height:1;
-}
-.eaten-indicator[hidden]{display:none}
-.cal-cell.is-selected .eaten-indicator{color:#4ade9e}
-.cal-cell.is-selected .junk-dot{background:#ff5a64}
 @media(max-width:600px){
   .cal-cell{min-height:66px;padding:6px 5px}
 }
@@ -506,13 +444,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
     letter-spacing:-.02em;
     overflow-wrap:anywhere;
     word-break:break-all;
-  }
-  .junk-dot{
-    width:4px!important;
-    height:4px!important;
-  }
-  .eaten-indicator{
-    font-size:9px!important;
   }
   .cal-meta-row{gap:2px!important}
   .cal-flags{gap:2px!important}
@@ -583,14 +514,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   box-shadow:2px 2px 0 var(--ink);
 }
 .bw-field input:focus{outline:none;border-color:var(--ink)}
-.bw-stat{padding:8px 12px;border:1px solid var(--line);border-radius:4px;background:var(--card);min-width:84px}
-.bw-stat-label{font-size:10px;color:var(--concrete);text-transform:uppercase;letter-spacing:.08em}
-.bw-stat-val{
-  font-size:24px;
-  font-weight:900;
-  margin-top:2px;
-  line-height:1;
-}
 .bw-delta-down{color:#2a8}
 .bw-delta-up{color:var(--signal)}
 .bw-chart-wrap{margin-top:14px;overflow-x:auto}
@@ -616,31 +539,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   margin-top:4px;
   line-height:1.05;
 }
-.dp-macros{font-size:11px;color:var(--concrete);text-align:right;line-height:1.6}
-.dp-eaten-row{margin-top:10px}
 
-.meal-block{
-  border:1px solid var(--line);background:var(--card);
-  padding:12px;border-radius:4px;
-}
-.meal-block-label{
-  font-size:10px;text-transform:uppercase;
-  letter-spacing:.1em;color:var(--concrete);
-}
-.meal-block-shop{font-weight:700;font-size:14px;margin-top:3px}
-.meal-block-item{font-size:13px;margin-top:2px}
-.meal-block-addr{font-size:11px;color:var(--concrete);margin-top:2px}
-.meal-block-actions{
-  display:flex;gap:14px;margin-top:7px;font-size:11px;
-}
-.meal-copy-btn{
-  text-decoration:underline;background:none;border:none;
-  padding:0;cursor:pointer;color:inherit;font-size:11px;
-}
-.meal-sup{
-  background:#f0ede8;border:1px solid var(--line);
-  padding:12px;border-radius:4px;font-size:12px;
-}
 
 .ex-row{
   display:flex;gap:10px;padding:7px 0;
@@ -653,23 +552,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .ex-note{font-size:11px;color:var(--concrete)}
 .ex-hint{font-size:11px;color:var(--concrete);padding-top:6px}
 
-.rest-card-header{
-  display:flex;justify-content:space-between;
-  align-items:start;gap:8px;
-}
-.rest-card-name{font-weight:700;font-size:14px}
-.rest-card-p{
-  font-size:10px;padding:2px 6px;border:1px solid var(--line);
-  color:var(--concrete);white-space:nowrap;
-}
-.rest-card-addr{font-size:11px;color:var(--concrete);margin-top:3px}
-.rest-card-order{font-size:12px;margin-top:8px}
-.rest-card-footer{
-  display:flex;justify-content:space-between;align-items:center;
-  margin-top:10px;padding-top:10px;
-  border-top:1px dotted var(--line);font-size:11px;
-}
-.rest-card-actions{display:flex;gap:12px}
 .copy-btn{
   text-decoration:underline;background:none;border:none;
   padding:0;cursor:pointer;font-size:11px;color:inherit;
@@ -690,15 +572,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   white-space:nowrap;
 }
 
-#orderDrawer{
-  position:fixed;right:0;top:0;height:100%;width:360px;
-  max-width:92vw;background:var(--card);
-  border-left:var(--stroke);z-index:50;
-  transform:translateX(100%);
-  transition:transform .24s cubic-bezier(.16,1,.3,1);
-  box-shadow:-6px 0 0 var(--ink);
-}
-#orderDrawer.open{transform:translateX(0)}
 #drawerBackdrop{
   position:fixed;inset:0;background:rgba(0,0,0,.18);
   z-index:40;
@@ -708,54 +581,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 #drawerBackdrop.show{
   opacity:1;
   pointer-events:auto;
-}
-#orderFab{
-  position:fixed;right:18px;z-index:45;
-  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
-  background:var(--signal);color:#fff;border:var(--stroke);
-  padding:11px 16px;font-size:12px;font-weight:800;
-  border-radius:var(--radius);box-shadow:var(--hard-shadow);
-  cursor:pointer;letter-spacing:.04em;
-  transition:transform .08s, box-shadow .08s, background .12s;
-}
-#orderFab:hover{background:#c00510}
-#orderFab:active{
-  transform:translate(4px,4px);
-  box-shadow:0 0 0 var(--ink);
-}
-#searchFab,
-#orderFab{
-  transition:transform .08s, background .13s, box-shadow .13s;
-}
-
-#searchFab:active,
-#orderFab:active{
-  transform:scale(.96);
-  box-shadow:0 2px 10px rgba(0,0,0,.18);
-}
-#searchFab{
-  position:fixed;left:18px;z-index:45;
-  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
-  background:var(--ink);color:var(--paper);border:var(--stroke);
-  padding:11px 16px;font-size:12px;font-weight:800;
-  border-radius:var(--radius);box-shadow:var(--hard-shadow);
-  cursor:pointer;letter-spacing:.04em;
-  transition:transform .08s, box-shadow .08s, background .12s;
-}
-#searchFab:hover{background:#000}
-#searchFab:active{
-  transform:translate(4px,4px);
-  box-shadow:0 0 0 var(--ink);
-}
-#searchFab,
-#orderFab{
-  transition:transform .08s, background .13s, box-shadow .13s;
-}
-
-#searchFab:active,
-#orderFab:active{
-  transform:scale(.96);
-  box-shadow:0 2px 10px rgba(0,0,0,.18);
 }
 #searchDrawer{
   position:fixed;left:0;top:0;height:100%;width:390px;
@@ -890,8 +715,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 #backupNagBanner{
   position:fixed;
   left:18px;right:18px;
-  bottom:calc(18px + env(safe-area-inset-bottom, 0px));
-  z-index:57;display:none;
+  bottom:calc(var(--tabbar-h) + 12px + env(safe-area-inset-bottom, 0px));
+  z-index:60;display:none;
   gap:12px;align-items:center;justify-content:space-between;
   padding:12px 14px;
   background:var(--card);border:var(--stroke);
@@ -1049,10 +874,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   transition:transform .08s;
 }
 .copy-btn:active,
-.meal-copy-btn:active{
-  opacity:.6;
-  transition:opacity .08s;
-}
 .cal-cell:active:not(.is-other){
   background:#e0dcd7!important;
   transition:background .08s;
@@ -1096,20 +917,8 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .btn,
 .btn-signal,
 .search-chip,
-.copy-btn,
-.meal-copy-btn{
-  transition:background .12s, color .12s, border-color .12s, transform .08s, box-shadow .12s;
-}
-
-/* ── FAB 按鈕 ── */
-#orderFab,
-#searchFab{
-  transition:background .15s, transform .1s, box-shadow .15s;
-}
-#orderFab:active,
-#searchFab:active{
-  transform:scale(.94);
-  box-shadow:0 2px 8px rgba(0,0,0,.15);
+.copy-btn{
+  transition:background .15s, border-color .15s, opacity .12s;
 }
 
 /* ── Modal 開關 ── */
@@ -1133,9 +942,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 
 /* ── Drawer 滑入 ── */
-#orderDrawer{
-  transition:transform .28s cubic-bezier(.16,1,.3,1);
-}
 #searchDrawer{
   transition:transform .28s cubic-bezier(.16,1,.3,1);
 }
@@ -1160,15 +966,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 
 /* ── 飲食達標按鈕 ── */
-#dpEatenToggle{
-  transition:background .15s, color .15s, border-color .15s, transform .1s;
-}
-#dpEatenToggle:active{
-  transform:scale(.97);
-}
-#dpEatenToggle.on{
-  animation:eatenPop .25s ease;
-}
 @keyframes eatenPop{
   0%{transform:scale(1)}
   50%{transform:scale(1.03)}
@@ -1199,13 +996,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 }
 
 /* ── 餐廳卡片 hover ── */
-.rest-grid .swiss-card{
-  transition:border-color .15s, box-shadow .15s, transform .12s;
-}
-.rest-grid .swiss-card:hover{
-  box-shadow:0 2px 12px rgba(0,0,0,.06);
-  transform:translateY(-1px);
-}
 
 /* ── progress bar 填充動畫 ── */
 .progress-fill{
@@ -1229,9 +1019,6 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 [data-theme="dark"] .search-item:hover,
 [data-theme="dark"] .week-day-link:hover{
   box-shadow:0 2px 8px rgba(0,0,0,.2);
-}
-[data-theme="dark"] .rest-grid .swiss-card:hover{
-  box-shadow:0 2px 12px rgba(0,0,0,.2);
 }
 /* ══════════════════════════════════════════════
    CALENDAR HEATMAP v1.4.0
@@ -1325,53 +1112,10 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   display:inline-flex; align-items:center; justify-content:center;
   line-height:1; vertical-align:-0.12em; font-size:16px; color:currentColor;
 }
-.btn .icon, .btn-signal .icon, .copy-btn .icon, .meal-copy-btn .icon{ margin-right:6px; }
 .icon-only{ display:inline-flex; align-items:center; justify-content:center; }
 .icon-only .icon{ margin-right:0; }
-#searchFab .icon, #orderFab .icon{ margin-right:6px; font-size:15px; }
 
 /* ── Tab navigation ── */
-.tab-bar{
-  display:flex;
-  gap:0;
-  border-bottom:2px solid var(--ink);
-  margin-bottom:0;
-}
-.tab-btn{
-  flex:1;
-  padding:12px 16px;
-  font-size:13px;
-  font-weight:700;
-  text-align:center;
-  cursor:pointer;
-  border:none;
-  background:transparent;
-  color:var(--concrete);
-  font-family:inherit;
-  transition:color .15s, background .15s;
-  border-bottom:3px solid transparent;
-  margin-bottom:-2px;
-}
-.tab-btn:hover{
-  color:var(--ink);
-}
-.tab-btn.active{
-  color:var(--ink);
-  border-bottom-color:var(--signal);
-}
-.tab-panel{
-  display:none;
-}
-.tab-panel.active{
-  display:block;
-}
-[data-theme="dark"] .tab-bar{
-  border-bottom-color:var(--ink);
-}
-[data-theme="dark"] .tab-btn.active{
-  color:var(--ink);
-  border-bottom-color:var(--signal);
-}
 
 /* ── Makeup reminder ── */
 .makeup-banner{
@@ -1416,215 +1160,516 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   color:var(--ink);
   border-color:var(--signal);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   APP SHELL v3
+   ──────────────────────────────────────────────────────────────
+   之前的「廉價感」有兩個來源：
+   1. 所有資訊攤在同一張長捲頁上，那是網頁的結構不是 app 的
+   2. 4px 的硬位移陰影 + 到處 2px 純黑粗框
+      —— 那是 Neo-Brutalist 的網頁風潮，不是瑞士風。
+      真正的瑞士風靠的是網格、字級層級和留白，不是裝飾。
+   所以這一段把陰影與粗框換成髮絲線，改用尺標化的間距，
+   並把版面切成三個各司其職的畫面 + 固定的上下列。
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --s1:4px;  --s2:8px;  --s3:12px; --s4:16px;
+  --s5:24px; --s6:32px; --s7:48px;
+
+  --fs-micro:11px; --fs-small:13px; --fs-body:15px;
+  --fs-lead:17px;  --fs-title:22px; --fs-display:34px;
+
+  --bar-h:52px;
+  --tabbar-h:56px;
+
+  --stroke:1px solid var(--line);
+  --stroke-soft:1px solid var(--line);
+  --hard-shadow:none;
+  --hard-shadow-sm:none;
+  --hard-shadow-lg:0 12px 32px rgba(0,0,0,.16);
+  --radius:0px;
+  --radius-soft:0px;
+}
+[data-theme="dark"]{
+  --stroke:1px solid var(--line);
+  --stroke-soft:1px solid var(--line);
+  --hard-shadow:none;
+  --hard-shadow-sm:none;
+  --hard-shadow-lg:0 12px 32px rgba(0,0,0,.5);
+}
+
+body{
+  font-size:var(--fs-body);
+  padding-bottom:calc(var(--tabbar-h) + env(safe-area-inset-bottom,0px));
+}
+
+/* ── 上列 ── */
+.app-bar{
+  position:sticky;top:0;z-index:40;
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+  padding-top:env(safe-area-inset-top,0px);
+}
+.app-bar-inner{
+  height:var(--bar-h);
+  display:flex;align-items:center;justify-content:space-between;
+  gap:var(--s3);
+  padding:0 var(--s4);
+  max-width:760px;margin:0 auto;
+}
+.app-bar-lead{display:flex;align-items:baseline;gap:var(--s3);min-width:0}
+.wordmark{
+  font-weight:900;font-size:var(--fs-lead);
+  letter-spacing:-.02em;flex-shrink:0;
+}
+.app-bar-sub{
+  font-size:var(--fs-small);color:var(--concrete);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.app-bar-actions{display:flex;gap:var(--s1);flex-shrink:0}
+
+.icon-btn{
+  width:38px;height:38px;
+  display:grid;place-items:center;
+  background:none;border:none;border-radius:0;
+  color:var(--ink);font-size:19px;
+  cursor:pointer;
+  transition:opacity .15s;
+}
+.icon-btn:active{opacity:.45}
+.icon-btn:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+
+/* ── 畫面 ── */
+.app-main{max-width:760px;margin:0 auto}
+.screen{display:none}
+.screen.is-active{display:block;animation:screenIn .22s ease both}
+@keyframes screenIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){
+  .screen.is-active{animation:none}
+}
+.screen-inner{
+  padding:var(--s5) var(--s4) var(--s7);
+  display:grid;gap:var(--s4);
+}
+
+/* ── 下列導覽 ── */
+.tabbar{
+  position:fixed;left:0;right:0;bottom:0;z-index:45;
+  display:grid;grid-template-columns:repeat(3,1fr);
+  background:var(--paper);
+  border-top:1px solid var(--line);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.tabbar-btn{
+  height:var(--tabbar-h);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+  background:none;border:none;border-radius:0;
+  color:var(--concrete);
+  font-family:inherit;font-size:var(--fs-micro);font-weight:600;
+  cursor:pointer;
+  transition:color .15s;
+}
+.tabbar-btn i{font-size:21px;line-height:1}
+.tabbar-btn.is-active{color:var(--ink)}
+.tabbar-btn.is-active i{color:var(--signal)}
+.tabbar-btn:active{opacity:.55}
+.tabbar-btn:focus-visible{outline:2px solid var(--signal);outline-offset:-3px}
+
+/* ── 卡片 ── */
+.card{
+  background:var(--card);
+  border:1px solid var(--line);
+  padding:var(--s4);
+}
+.card-tight{padding:var(--s3)}
+.card-head{
+  display:flex;align-items:baseline;justify-content:space-between;
+  gap:var(--s3);margin-bottom:var(--s3);
+}
+.card-head-note{font-size:var(--fs-small);color:var(--concrete)}
+.kicker{
+  font-size:10px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--concrete);
+}
+
+/* ── 今日 ── */
+.day-head{display:grid;gap:var(--s1)}
+.day-kicker{
+  font-size:var(--fs-small);font-weight:600;
+  color:var(--signal);letter-spacing:.02em;
+}
+.day-title{
+  font-size:var(--fs-display);font-weight:900;
+  letter-spacing:-.025em;line-height:1.1;margin:0;
+}
+.day-nav{display:grid;grid-template-columns:auto 1fr auto;gap:var(--s2)}
+
+.progress-strip{display:grid;gap:var(--s2)}
+.progress-strip-label{display:flex;align-items:baseline;justify-content:space-between;gap:var(--s3)}
+.progress-strip-val{font-size:var(--fs-lead);font-weight:800}
+.progress-strip-val .unit{font-size:var(--fs-small);color:var(--concrete);margin-left:1px}
+.progress-strip-goal{font-size:var(--fs-small);color:var(--concrete);font-weight:500;margin-left:var(--s2)}
+.progress-track{height:3px;background:var(--line)}
+.progress-fill{height:100%;background:var(--signal);transition:width .4s ease}
+
+.disclosure{
+  border:1px solid var(--line);
+  background:var(--card);
+}
+.disclosure summary{
+  padding:var(--s3) var(--s4);
+  font-size:var(--fs-small);font-weight:700;
+  cursor:pointer;list-style:none;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.disclosure summary::-webkit-details-marker{display:none}
+.disclosure summary::after{
+  content:'+';color:var(--concrete);font-weight:400;font-size:var(--fs-lead);
+}
+.disclosure[open] summary::after{content:'−'}
+.disclosure-body{
+  padding:0 var(--s4) var(--s4);
+  font-size:var(--fs-small);line-height:1.7;color:var(--concrete);
+}
+
+/* ── 月曆 ── */
+.cal-head{
+  display:grid;grid-template-columns:auto 1fr auto;
+  align-items:center;gap:var(--s2);
+}
+.cal-head-label{
+  text-align:center;font-weight:800;font-size:var(--fs-lead);
+  letter-spacing:-.01em;
+}
+.cal-dow{
+  text-align:center;margin-bottom:var(--s1);
+  font-size:10px;color:var(--concrete);font-weight:600;
+}
+.cal-legend{
+  display:flex;flex-wrap:wrap;gap:var(--s3);
+  margin-top:var(--s3);padding-top:var(--s3);
+  border-top:1px solid var(--line);
+  font-size:var(--fs-micro);color:var(--concrete);
+}
+.cal-legend span{display:flex;align-items:center;gap:var(--s1)}
+.tag-chip{
+  font-style:normal;font-size:9px;font-weight:700;
+  border:1px solid var(--ink);color:var(--ink);
+  padding:1px 4px;line-height:1.3;
+}
+.tag-chip.is-rest{border-color:var(--line);color:var(--concrete)}
+
+.action-row{display:flex;flex-wrap:wrap;gap:var(--s2)}
+.action-row .btn{flex:1 1 auto}
+
+/* ── 體重 ── */
+.bw-entry{display:grid;grid-template-columns:1fr auto;gap:var(--s2);align-items:end}
+.bw-field{display:grid;gap:var(--s1);min-width:0}
+.bw-field label{font-size:var(--fs-micro);color:var(--concrete);font-weight:600}
+.bw-input-shell{
+  display:flex;align-items:center;gap:var(--s1);
+  border:1px solid var(--line);background:var(--paper);
+  padding:0 var(--s3);height:46px;
+}
+.bw-input-shell:focus-within{border-color:var(--ink)}
+.bw-input-shell input{
+  flex:1;min-width:0;height:100%;width:auto;
+  border:none!important;background:none!important;
+  box-shadow:none!important;outline:none;padding:0;
+  font-family:'Fragment Mono',ui-monospace,monospace;
+  font-size:var(--fs-title);font-weight:700;
+  color:var(--ink);
+}
+.bw-input-shell input::-webkit-outer-spin-button,
+.bw-input-shell input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.bw-unit{font-size:var(--fs-small);color:var(--concrete);font-weight:600}
+.bw-entry-note{margin-top:var(--s2);font-size:var(--fs-micro);color:var(--concrete)}
+.form-msg{display:block;margin-top:var(--s2);font-size:var(--fs-small);color:var(--concrete)}
+
+.range-switch{display:flex;border:1px solid var(--line)}
+.range-btn{
+  padding:5px 10px;
+  background:none;border:none;border-right:1px solid var(--line);
+  font-family:inherit;font-size:var(--fs-micro);font-weight:600;
+  color:var(--concrete);cursor:pointer;
+  transition:background .15s,color .15s;
+}
+.range-btn:last-child{border-right:none}
+.range-btn.is-active{background:var(--ink);color:var(--paper)}
+.range-btn:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+
+.stat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--s2)}
+
+/* ── 按鈕：統一到 44px 觸控高度 ── */
+.btn{
+  min-height:44px;
+  padding:0 var(--s4);
+  display:inline-flex;align-items:center;justify-content:center;gap:var(--s2);
+  border:1px solid var(--line);
+  background:var(--card);color:var(--ink);
+  font-family:inherit;font-size:var(--fs-small);font-weight:700;
+  border-radius:0;box-shadow:none;
+  cursor:pointer;
+  transition:background .15s,border-color .15s,opacity .12s;
+}
+.btn:hover{border-color:var(--ink)}
+.btn:active{opacity:.6;transform:none}
+.btn-quiet{background:none}
+.btn-primary{
+  background:var(--ink);color:var(--paper);border-color:var(--ink);
+}
+.btn-primary:hover{opacity:.85}
+.btn.icon-only{min-height:38px;padding:0 var(--s2)}
+
+/* ── Modal 改成 iOS 的底部 sheet ── */
+@media(max-width:640px){
+  .modal{align-items:flex-end;padding:0}
+  .modal-card{
+    width:100%;max-height:88vh;
+    border:none;border-top:1px solid var(--line);
+    box-shadow:var(--hard-shadow-lg);
+    animation:sheetUp .26s cubic-bezier(.32,.72,0,1) both;
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  @keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+}
+@media(prefers-reduced-motion:reduce){
+  .modal-card{animation:none!important}
+}
+
+/* 舊版殘留的裝飾一次關掉 */
+.swiss-card{box-shadow:none;border:1px solid var(--line)}
+.cal-cell{box-shadow:none!important}
+
+
+/* ── 體重圖 ── */
+.bw-chart-wrap{position:relative}
+.bw-svg{width:100%;height:auto;display:block;overflow:visible}
+.chart-axis{
+  font-family:'Fragment Mono',ui-monospace,monospace;
+  font-size:10px;fill:var(--concrete);
+}
+.chart-note{
+  font-family:'Fragment Mono',ui-monospace,monospace;
+  font-size:9px;fill:var(--concrete);
+}
+.chart-value{
+  font-family:'Fragment Mono',ui-monospace,monospace;
+  font-size:13px;font-weight:700;fill:var(--ink);
+}
+.chart-hot{cursor:crosshair}
+.chart-cursor[hidden]{display:none}
+.chart-tip{
+  position:absolute;top:0;transform:translateX(-50%);
+  background:var(--ink);color:var(--paper);
+  font-size:var(--fs-micro);font-weight:600;
+  padding:3px 7px;white-space:nowrap;pointer-events:none;
+}
+.chart-foot{
+  display:flex;justify-content:space-between;align-items:baseline;gap:var(--s3);
+  margin-top:var(--s2);font-size:var(--fs-micro);color:var(--concrete);
+}
+.chart-foot-delta{font-weight:800;font-family:'Fragment Mono',ui-monospace,monospace}
+.chart-foot-delta.is-down{color:#2a8}
+.chart-foot-delta.is-up{color:var(--signal)}
+.chart-key{
+  display:flex;gap:var(--s4);margin-top:var(--s2);
+  font-size:var(--fs-micro);color:var(--concrete);
+}
+.chart-key span{display:flex;align-items:center;gap:var(--s1)}
+.key-line{display:block;width:14px;height:2px;background:var(--signal)}
+.key-dot{display:block;width:6px;height:6px;border-radius:50%;background:var(--concrete);opacity:.5}
+
+/* ── 統計格 ── */
+.stat-cell{
+  background:var(--card);border:1px solid var(--line);
+  padding:var(--s3);display:grid;gap:2px;
+}
+.stat-cell-label{font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--concrete)}
+.stat-cell-val{font-size:var(--fs-title);font-weight:800;letter-spacing:-.02em}
+.stat-cell-val .unit{font-size:var(--fs-small);color:var(--concrete);font-weight:600;margin-left:1px}
+.stat-cell-val.is-down{color:#2a8}
+.stat-cell-val.is-up{color:var(--signal)}
+.stat-empty{
+  grid-column:1/-1;font-size:var(--fs-small);color:var(--concrete);
+  border:1px dashed var(--line);padding:var(--s4);text-align:center;
+}
+
 </style>
 </head>
 <body>
 
-<div class="red-bar"></div>
 <div id="errorBanner" role="alert"></div>
 
-<header style="border-bottom:1px solid var(--line)">
-  <div class="container" style="padding-top:44px;padding-bottom:44px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-  <div class="kicker">Body Recomposition Dashboard — Gongguan, NTU</div>
-  <div style="display:flex;gap:6px">
-    <button type="button" id="themeToggle" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="切換主題">
-      <i class="ph ph-monitor icon" aria-hidden="true"></i>
-    </button>
-    <button type="button" id="settingsBtn" class="btn icon-only" style="padding:5px 8px;line-height:1" aria-label="設定">
-      <i class="ph ph-gear icon" aria-hidden="true"></i>
-    </button>
-  </div>
-</div>
-    <h1>RECOMP</h1>
-    <div class="stat-label-row">
-      <span><b>176cm</b> / 75kg / 24y / 男</span>
-      <span>Skinny fat · 蠶豆症</span>
-      <span>國青大樓</span>
-      <span style="color:var(--ink)">無乳清 · 無咖啡 · 無四神湯</span>
-      <span>$350 / 天</span>
-      <span>P 130–145g · 2100–2300 kcal</span>
+<header class="app-bar">
+  <div class="app-bar-inner">
+    <div class="app-bar-lead">
+      <span class="wordmark">RECOMP</span>
+      <span class="app-bar-sub" id="todayTopLabel">—</span>
+    </div>
+    <div class="app-bar-actions">
+      <button type="button" id="searchOpenBtn" class="icon-btn" aria-label="搜尋">
+        <i class="ph ph-magnifying-glass" aria-hidden="true"></i>
+      </button>
+      <button type="button" id="themeToggle" class="icon-btn" aria-label="切換主題">
+        <i class="ph ph-monitor" aria-hidden="true"></i>
+      </button>
+      <button type="button" id="settingsBtn" class="icon-btn" aria-label="設定">
+        <i class="ph ph-gear" aria-hidden="true"></i>
+      </button>
     </div>
   </div>
 </header>
 
-<section class="container" style="padding-top:28px;padding-bottom:28px">
-  <div class="grid-3">
-    <div class="swiss-card" style="padding:18px">
-      <div class="kicker" style="margin-bottom:4px">當前查看</div>
-      <div class="stat-primary" id="todayTopLabel">—</div>
-      <div class="small muted" style="margin-top:4px">訓練週期：上 / 下 / 休 / 上 / 下 / 休 / 休</div>
-    </div>
-    <div class="swiss-card" style="padding:18px">
-      <div class="kicker" style="margin-bottom:4px">訓練重量 · 胸推</div>
-      <div>
-        <span class="mono-num" style="font-size:30px;font-weight:800" id="chestWeightNum">36<span class="small muted">kg</span></span>
-        <span class="mono-num" style="color:var(--signal);font-size:12px;margin-left:10px">→ 目標 50kg+</span>
-      </div>
-      <div style="height:5px;background:var(--line);margin-top:8px">
-        <div id="chestWeightBar" style="width:52%;height:100%;background:var(--signal)"></div>
-      </div>
-      <div class="small muted mono-num" style="margin-top:6px">起始 36kg · 4組 x 6-10下 · RPE 7-8</div>
-    </div>
-    <div class="swiss-card" style="padding:18px">
-      <div class="kicker" style="margin-bottom:4px">營養基準</div>
-      <div style="font-size:13px;color:var(--concrete);line-height:1.7">
-        蛋白質 <b style="color:var(--ink)">130–145g</b> / 天<br>
-        熱量 <b style="color:var(--ink)">2100–2300 kcal</b><br>
-        預算 <b style="color:var(--ink)">$ ≤350 TWD</b>
-      </div>
-    </div>
-  </div>
-</section>
+<main class="app-main">
 
-<section class="container" style="padding-bottom:52px">
-  <div class="tab-bar" style="margin-bottom:22px">
-    <button type="button" class="tab-btn active" data-tab="main">
-      <i class="ph ph-barbell icon" aria-hidden="true"></i> 訓練 / 飲食
-    </button>
-    <button type="button" class="tab-btn" data-tab="restaurants">
-      <i class="ph ph-fork-knife icon" aria-hidden="true"></i> 餐廳白名單
-    </button>
-  </div>
-  <div id="tabMain" class="tab-panel active">
-  <div class="swiss-card" style="padding:18px;margin-bottom:22px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-      <div>
-        <div class="kicker">本月摘要</div>
-        <div style="font-weight:800;font-size:16px;margin-top:2px" id="msumMonthLabel">—</div>
-      </div>
-      <div class="small muted">統計依「打勾」與「標記已吃」紀錄計算</div>
-    </div>
-    <div class="msum-grid" id="msumGrid"></div>
-  </div>
+  <!-- ─────────── 今日 ─────────── -->
+  <section id="screenToday" class="screen is-active" role="tabpanel" aria-label="今日">
+    <div class="screen-inner">
 
-  <div class="swiss-card" style="padding:18px;margin-bottom:22px">
-    <div style="display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:8px;margin-bottom:12px">
-      <div>
-        <div class="kicker">體重 / 體脂趨勢</div>
-        <div style="font-weight:800;font-size:16px;margin-top:2px">紀錄真實結果，不只是計畫</div>
+      <div class="day-head">
+        <div class="day-kicker" id="dpKicker">—</div>
+        <h1 class="day-title" id="dpTitle">—</h1>
       </div>
-    </div>
-    <div class="bw-input-row">
-      <div class="bw-field">
-        <label for="bwWeightInput">體重 (kg)</label>
-        <input type="number" id="bwWeightInput" step="0.1" min="30" max="200" placeholder="75.0">
-      </div>
-      <div class="bw-field">
-        <label for="bwFatInput">體脂 % (選填)</label>
-        <input type="number" id="bwFatInput" step="0.1" min="3" max="60" placeholder="22.0">
-      </div>
-      <button type="button" id="bwSaveBtn" class="btn">紀錄今日所選日期</button>
-      <span class="small muted" id="bwSaveMsg" aria-live="polite"></span>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:14px" id="bwStatsRow"></div>
-    <div class="bw-chart-wrap" id="bwChartWrap"></div>
-  </div>
 
-  <div style="display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px">
-    <div>
-      <h2>訓練・飲食月曆</h2>
-      <div class="small muted" style="margin-top:4px">
-        點選日期查看當日訓練 + 三餐點餐口令 ·
-        <span style="display:inline-block;width:5px;height:5px;background:var(--signal);border-radius:50%;vertical-align:middle"></span>
-        垃圾食物日
+      <div class="day-nav">
+        <button type="button" id="dpPrev" class="btn btn-quiet" aria-label="前一天">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <button type="button" id="dpToday" class="btn btn-quiet">今天</button>
+        <button type="button" id="dpNext" class="btn btn-quiet" aria-label="後一天">
+          <i class="ph ph-caret-right" aria-hidden="true"></i>
+        </button>
       </div>
-    </div>
-    <div class="small muted">
-      <span style="border:1px solid var(--ink);padding:1px 5px;font-size:10px">A</span> 上肢推　
-      <span style="border:1px solid var(--ink);padding:1px 5px;font-size:10px">B</span> 下肢背　
-      <span style="border:1px solid var(--line);padding:1px 5px;font-size:10px;color:var(--concrete)">休</span> 休息
-    </div>
-  </div>
 
-  <div style="display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-    <button type="button" id="weekReportBtn" class="btn"><i class="ph ph-chart-bar icon" aria-hidden="true"></i>週報</button>
-    <button type="button" id="exportCalBtn" class="btn"><i class="ph ph-image icon" aria-hidden="true"></i>匯出月曆 PNG</button>
-  </div>
-
-  <div class="two-col">
-    <div>
-      <div class="swiss-card" style="padding:16px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:8px;flex-wrap:wrap">
-          <button type="button" class="btn" id="calPrev">‹ 上月</button>
-          <div style="font-weight:700" id="calMonthLabel">2026 年 6 月</div>
-          <div style="display:flex;gap:8px">
-            <button type="button" class="btn" id="calToday">今天</button>
-            <button type="button" class="btn" id="calNext">下月 ›</button>
-          </div>
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker" id="dpWorkoutLabel">訓練</span>
         </div>
-        <div class="cal-grid small muted mono-num" style="text-align:center;margin-bottom:6px;color:var(--concrete)">
+        <div id="dpWorkout"></div>
+      </div>
+
+      <div class="card card-tight">
+        <div class="progress-strip">
+          <div class="progress-strip-label">
+            <span class="kicker">胸推進度</span>
+            <span class="mono-num progress-strip-val">
+              <span id="chestWeightNum">36</span>
+              <span class="progress-strip-goal">目標 50</span>
+            </span>
+          </div>
+          <div class="progress-track"><div id="chestWeightBar" class="progress-fill" style="width:52%"></div></div>
+        </div>
+      </div>
+
+      <details class="disclosure">
+        <summary>訓練規則</summary>
+        <div class="disclosure-body">
+          RPE 7-8 · 組間 90 秒<br>
+          第一組做到次數上限 → 下次 +2.5kg<br>
+          睡眠未滿 6 小時，隔天重量 -10%
+        </div>
+      </details>
+
+    </div>
+  </section>
+
+  <!-- ─────────── 月曆 ─────────── -->
+  <section id="screenCalendar" class="screen" role="tabpanel" aria-label="月曆" hidden>
+    <div class="screen-inner">
+
+      <div class="cal-head">
+        <button type="button" class="icon-btn" id="calPrev" aria-label="上個月">
+          <i class="ph ph-caret-left" aria-hidden="true"></i>
+        </button>
+        <div class="cal-head-label" id="calMonthLabel">—</div>
+        <button type="button" class="icon-btn" id="calNext" aria-label="下個月">
+          <i class="ph ph-caret-right" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="card card-tight">
+        <div class="cal-grid cal-dow mono-num">
           <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
         </div>
-        <div id="calGrid" class="cal-grid" role="grid" aria-label="訓練飲食月曆"></div>
+        <div id="calGrid" class="cal-grid" role="grid" aria-label="訓練月曆"></div>
+        <div class="cal-legend">
+          <span><i class="tag-chip">A</i> 上肢推</span>
+          <span><i class="tag-chip">B</i> 下肢背</span>
+          <span><i class="tag-chip is-rest">休</i> 休息</span>
+        </div>
       </div>
-      <div class="swiss-card" style="padding:12px 14px;margin-top:12px;font-size:11px;color:var(--concrete);line-height:1.7">
-        <b style="color:var(--ink)">訓練規則：</b>RPE 7-8 · 組間 90s · 第一組做到次數上限 → 下次 +2.5kg · 睡眠 &lt;6hr 隔天重量 -10%<br>
-        <b style="color:var(--ink)">器材限定：</b>胸推 / 蝴蝶 / 後三角 / 二頭彎舉 / 腿推 / 腹背 / 三頭推舉 / 高拉
-      </div>
-    </div>
 
-    <div>
-      <div class="swiss-card" style="padding:20px;position:sticky;top:16px" id="dayPanel">
-        <div class="dp-header">
-          <div>
-            <div class="kicker" id="dpKicker">—</div>
-            <div class="dp-title" id="dpTitle">—</div>
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker">本月摘要</span>
+          <span class="card-head-note mono-num" id="msumMonthLabel">—</span>
+        </div>
+        <div class="msum-grid" id="msumGrid"></div>
+      </div>
+
+      <div class="action-row">
+        <button type="button" id="calToday" class="btn btn-quiet">回到今天</button>
+        <button type="button" id="weekReportBtn" class="btn btn-quiet">週報</button>
+        <button type="button" id="exportCalBtn" class="btn btn-quiet">匯出 PNG</button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ─────────── 體重 ─────────── -->
+  <section id="screenWeight" class="screen" role="tabpanel" aria-label="體重" hidden>
+    <div class="screen-inner">
+
+      <div class="card">
+        <div class="card-head"><span class="kicker">紀錄體重</span></div>
+        <div class="bw-entry">
+          <div class="bw-field">
+            <label for="bwWeightInput">體重</label>
+            <div class="bw-input-shell">
+              <input type="number" id="bwWeightInput" step="0.1" min="30" max="200" inputmode="decimal" placeholder="75.0">
+              <span class="bw-unit">kg</span>
+            </div>
           </div>
-          <div class="dp-macros mono-num" id="dpMacros">—</div>
+          <button type="button" id="bwSaveBtn" class="btn btn-primary">紀錄</button>
         </div>
-        <div class="dp-eaten-row">
-          <button type="button" id="dpEatenToggle" class="btn" style="font-size:11px">
-            ☐ 標記今日三餐已照計畫吃
-          </button>
-        </div>
-        <div class="dp-section">
-          <div class="kicker" style="margin-bottom:8px" id="dpWorkoutLabel">訓練</div>
-          <div id="dpWorkout"></div>
-        </div>
-        <div class="dp-section" id="dpMealsWrap">
-          <div id="dpMeals" style="display:grid;gap:10px"></div>
-        </div>
-        <div class="dp-nav-row">
-          <button type="button" id="dpPrev" class="btn">← 前一天</button>
-          <button type="button" id="dpNext" class="btn">後一天 →</button>
-        </div>
-        <div class="dp-hint">
-          蛋白質不夠就多吃 1–2 顆茶葉蛋。臨時換店：女九 ↔ 鳳城 ↔ 大福利 ／ 八方 ↔ Subway ↔ 摩斯
-        </div>
+        <div class="bw-entry-note" id="bwEntryDate">—</div>
+        <span class="form-msg" id="bwSaveMsg" aria-live="polite"></span>
       </div>
-    </div>
-</div>
-  </div><!-- end tabMain -->
-</section>
-  <div id="tabRestaurants" class="tab-panel">
-<div style="padding:24px 0">
-  <div class="container">
-    <h2 style="margin-bottom:6px">公館國青白名單 · 18 家</h2>
-    <p style="font-size:13px;color:var(--concrete);margin-bottom:18px">
-      全部走路 10 分鐘內。已剔除：池先生 / 楽坡 Bon Box / 阿英 / 美而美 / 永和豆漿 / 兄弟鹹酥雞 / 肯德基 / 一弄 / 118巷群。點擊「複製」直接複製點餐口令。
-    </p>
-<div id="restaurantGrid" class="rest-grid"></div>
-  </div>
-</div>
 
-  </div><!-- end tabRestaurants -->
-<footer style="padding:36px 0;font-size:11px;color:var(--concrete)">
-  <div class="container" style="display:flex;flex-wrap:wrap;justify-content:space-between;gap:16px">
-    <div>
-      RECOMP · Body Recomposition Dashboard<br>
-      176 / 75kg / 24y 男 · Skinny fat · 蠶豆症<br>
-      目標：肚子變小 · 胸部變大<br>
-<span class="mono-num" id="appVersionLabel"></span>
+      <div class="stat-row" id="bwStatsRow"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker">趨勢</span>
+          <div class="range-switch" id="bwRangeSwitch" role="group" aria-label="時間範圍">
+            <button type="button" data-range="30" class="range-btn">1月</button>
+            <button type="button" data-range="90" class="range-btn is-active">3月</button>
+            <button type="button" data-range="180" class="range-btn">6月</button>
+            <button type="button" data-range="0" class="range-btn">全部</button>
+          </div>
+        </div>
+        <div class="bw-chart-wrap" id="bwChartWrap"></div>
+      </div>
+
     </div>
-    <div class="mono-num" style="text-align:right">
-      P 130–145 g / d<br>
-      2100–2300 kcal<br>
-      $ ≤350 TWD / d<br>
-      無乳清 · 無咖啡
-    </div>
-  </div>
-</footer>
+  </section>
+
+</main>
+
+<nav class="tabbar" role="tablist" aria-label="主要導覽">
+  <button type="button" class="tabbar-btn is-active" data-screen="today" role="tab" aria-selected="true">
+    <i class="ph ph-barbell" aria-hidden="true"></i><span>今日</span>
+  </button>
+  <button type="button" class="tabbar-btn" data-screen="calendar" role="tab" aria-selected="false">
+    <i class="ph ph-calendar-blank" aria-hidden="true"></i><span>月曆</span>
+  </button>
+  <button type="button" class="tabbar-btn" data-screen="weight" role="tab" aria-selected="false">
+    <i class="ph ph-chart-line" aria-hidden="true"></i><span>體重</span>
+  </button>
+</nav>
+
 <!-- Settings modal -->
 <div id="settingsModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle" aria-hidden="true">
   <div class="modal-card" style="width:min(480px,100%)">
@@ -1742,16 +1787,15 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   </div>
 </div>
 
-<!-- Search FAB / Drawer -->
-<button type="button" id="searchFab"><i class="ph ph-magnifying-glass icon" aria-hidden="true"></i>搜尋</button>
-<div id="searchDrawer" role="dialog" aria-modal="true" aria-label="搜尋訓練與飲食紀錄" aria-hidden="true">
+<!-- Search drawer -->
+<div id="searchDrawer" role="dialog" aria-modal="true" aria-label="搜尋訓練紀錄" aria-hidden="true">
   <div class="drawer-head">
-    搜尋 / 篩選
+    搜尋
     <button type="button" id="closeSearchDrawer" class="icon-only" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉"><i class="ph ph-x icon" aria-hidden="true"></i></button>
   </div>
   <div class="drawer-body">
     <div style="position:relative">
-  <input type="search" id="searchInput" class="search-input" placeholder="輸入日期、店名、動作、A/B/休…" style="padding-right:36px">
+  <input type="search" id="searchInput" class="search-input" placeholder="日期、動作、A / B / 休…" style="padding-right:36px">
   <button type="button" id="searchClearBtn" aria-label="清除搜尋"
     style="position:absolute;right:10px;top:50%;transform:translateY(-50%);
     background:none;border:none;cursor:pointer;font-size:16px;
@@ -1763,28 +1807,18 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
       <button type="button" class="search-chip" data-filter="B">B日</button>
       <button type="button" class="search-chip" data-filter="rest">休息</button>
       <button type="button" class="search-chip" data-filter="trained">已完成訓練</button>
-      <button type="button" class="search-chip" data-filter="eaten">已吃</button>
-      <button type="button" class="search-chip" data-filter="junk">垃圾食物</button>
     </div>
     <div class="search-meta" id="searchResultMeta">掃描今天前 365 天與後 31 天…</div>
     <div id="searchResults" class="search-results"></div>
   </div>
 </div>
 
-<!-- Order FAB / Drawer -->
-<button type="button" id="orderFab"><i class="ph ph-fork-knife icon" aria-hidden="true"></i>點餐口令</button>
-<div id="orderDrawer" role="dialog" aria-modal="true" aria-label="點餐口令" aria-hidden="true">
-  <div style="padding:16px 18px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;font-weight:800">
-    到店直接唸
-    <button type="button" id="closeDrawer" class="icon-only" style="background:none;border:none;font-size:22px;color:var(--concrete);cursor:pointer" aria-label="關閉"><i class="ph ph-x icon" aria-hidden="true"></i></button>
-  </div>
-  <div id="orderList" style="padding:14px 18px;overflow-y:auto;height:calc(100% - 56px);font-size:13px"></div>
 </div>
 <div id="drawerBackdrop"></div>
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v2.5.0';
+const APP_VERSION = 'v3.0.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -1819,62 +1853,17 @@ const WORKOUTS = {
 ]
 };
 
-const RESTAURANTS = [
-  { name:'台大女九 小福自助餐',   shortName:'女九自助餐',   addr:'新生南路三段 女九宿舍B1',              order:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗',                    price:'$110', p:'P 45g' },
-  { name:'大福利排骨大王',         shortName:'大福利',       addr:'羅斯福路三段286巷12號',                order:'雞腿飯 1份',                                                    price:'$130', p:'P 38g' },
-  { name:'鳳城燒臘',               shortName:'鳳城燒臘',     addr:'新生南路三段58-3號',                   order:'三寶飯：燒鴨＋油雞＋叉燒',                                     price:'$125', p:'P 40g' },
-  { name:'小鹿亭',                 shortName:'小鹿亭',       addr:'公館商圈 羅斯福路',                    order:'日式咖哩雞肉飯 / 豬排丼',                                       price:'$100-120', p:'P 30g' },
-  { name:'厚宅咖哩',               shortName:'厚宅咖哩',     addr:'羅斯福路四段1號 台大大一女B棟',        order:'雞肉咖哩飯，可免費加飯加醬',                                    price:'$140', p:'P 35g' },
-  { name:'祥記炒燴',               shortName:'祥記炒燴',     addr:'水源市場62號攤 羅斯福路四段92號',      order:'肉片滑蛋燴飯',                                                  price:'$120', p:'P 28g' },
-  { name:'龍記炒燴',               shortName:'龍記炒燴',     addr:'水源市場內',                           order:'干炒牛河 / 滑蛋牛肉燴飯',                                       price:'$130', p:'P 25g' },
-  { name:'藍家割包',               shortName:'藍家割包',     addr:'羅斯福路三段316巷8弄3號',              order:'割包 瘦肉＋茶葉蛋x2＋無糖豆漿',                                price:'$115', p:'P 32g' },
-  { name:'龍哥無骨雞腿排',         shortName:'龍哥雞腿排',   addr:'羅斯福路四段108巷10號',                order:'無骨雞腿排1份＋超商白飯＋茶葉蛋（店內無附飯）',                price:'$115', p:'P 35g' },
-  { name:'京阪豚骨拉麵',           shortName:'京阪拉麵',     addr:'羅斯福路四段136巷6弄6號',              order:'豚骨拉麵 1碗',                                                  price:'$120', p:'P 25g' },
-  { name:'潮味決湯滷專門店',       shortName:'潮味決',       addr:'羅斯福路三段284巷8號',                 order:'滷味套餐 豚骨湯底 選雞肉+豆腐+青菜',                           price:'$140', p:'P 30g' },
-  { name:'uPoke 夏威夷生魚飯',     shortName:'uPoke',        addr:'台大禮客OUTLET內',                     order:'鮭魚Poke碗，飯量正常',                                          price:'$180', p:'P 35g' },
-  { name:'麥當勞 公館店',          shortName:'麥當勞 早',    addr:'羅斯福路四段78號',                     order:'早：豬肉滿福堡加蛋',                                            price:'$65',  p:'P 20g' },
-  { name:'麥當勞 公館店 (晚)',     shortName:'麥當勞 晚',    addr:'羅斯福路四段78號',                     order:'晚：勁辣雞腿堡 單點',                                           price:'$89',  p:'P 25g' },
-  { name:'Subway 公館店',          shortName:'Subway',       addr:'羅斯福路四段119號',                    order:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加',               price:'$129', p:'P 25g' },
-  { name:'八方雲集 公館店',        shortName:'八方雲集',     addr:'羅斯福路四段120號',                    order:'鍋貼10顆＋無糖豆漿1瓶',                                        price:'$105', p:'P 25g' },
-  { name:'摩斯漢堡 公館店',        shortName:'摩斯',         addr:'公館商圈',                             order:'海洋珍珠堡＋無糖紅茶',                                          price:'$85',  p:'P 18g' },
-  { name:'全家 / 7-11',            shortName:'超商補給',     addr:'國青大樓樓下',                         order:'茶葉蛋 $10/7g · 無糖豆漿 $30/15g · 即食雞胸 $55/25g',         price:'–',    p:'補給站' },
+/* 訓練週期：A-B-休-A-B-休-休，31 天一輪（沿用原本的排程，一天都沒變動）。
+   這份資料原本藏在 MEALS 裡，每個元素同時帶著餐點和 train 欄位；
+   餐點功能移除後把訓練別獨立出來。 */
+const TRAINING_CYCLE = [
+  {day:1,train:'A'}, {day:2,train:'B'}, {day:3,train:'休'}, {day:4,train:'A'}, {day:5,train:'B'}, {day:6,train:'休'}, {day:7,train:'休'},
+  {day:8,train:'A'}, {day:9,train:'B'}, {day:10,train:'休'}, {day:11,train:'A'}, {day:12,train:'B'}, {day:13,train:'休'}, {day:14,train:'休'},
+  {day:15,train:'A'}, {day:16,train:'B'}, {day:17,train:'休'}, {day:18,train:'A'}, {day:19,train:'B'}, {day:20,train:'休'}, {day:21,train:'休'},
+  {day:22,train:'A'}, {day:23,train:'B'}, {day:24,train:'休'}, {day:25,train:'A'}, {day:26,train:'B'}, {day:27,train:'休'}, {day:28,train:'休'},
+  {day:29,train:'A'}, {day:30,train:'B'}, {day:31,train:'休'},
 ];
 
-const ORDER_DICT = RESTAURANTS.map(r => [r.shortName, r.order]);
-
-const MEALS = [
-  {day:1,  train:'A', junk:false, b:{shop:'麥當勞 公館店',      item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'龍哥無骨雞腿排',   item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',          addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'無糖豆漿1瓶＋茶葉蛋x2',   price:50},  p:138, kcal:2150, total:335},
-  {day:2,  train:'B', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:80},  l:{shop:'鳳城燒臘',           item:'三寶飯：燒鴨＋油雞＋叉燒',                addr:'新生南路三段58-3號',     price:125}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:132, kcal:2100, total:330},
-  {day:3,  train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'小鹿亭',             item:'日式咖哩雞肉飯',                          addr:'公館商圈 羅斯福路',      price:100}, d:{shop:'大福利排骨大王',  item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, sup:{text:'無糖豆漿1瓶＋茶葉蛋1顆', price:35},  p:134, kcal:2200, total:350},
-  {day:4,  train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'厚宅咖哩',           item:'雞肉咖哩飯，可免費加飯加醬',              addr:'羅斯福路四段1號',        price:140}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:131, kcal:2150, total:330},
-  {day:5,  train:'B', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋x2',            addr:'國青樓下',                      price:95},  l:{shop:'祥記炒燴',           item:'肉片滑蛋燴飯',                            addr:'水源市場62號攤 羅斯福路四段92號', price:120}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2100, total:365},
-  {day:6,  train:'休', junk:true,  b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml',                  addr:'國青樓下',                      price:70},  l:{shop:'龍記炒燴',           item:'干炒牛河',                                addr:'水源市場內',             price:130}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋x2',               price:20},  p:133, kcal:2050, total:349},
-  {day:7,  train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',                    addr:'台大禮客OUTLET內',       price:180}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2100, total:384},
-  {day:8,  train:'A', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'藍家割包',        item:'割包 瘦肉＋茶葉蛋x2＋無糖豆漿1瓶',         addr:'羅斯福路三段316巷8弄3號',price:115}, sup:{text:'無糖豆漿1瓶',            price:30},  p:142, kcal:2100, total:320},
-  {day:9,  train:'B', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'鳳城燒臘',           item:'燒臘雙拼飯',                              addr:'新生南路三段58-3號',     price:125}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋1顆',              price:10},  p:140, kcal:2150, total:335},
-  {day:10, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋1顆',           addr:'國青樓下',                      price:65},  l:{shop:'大福利排骨大王',     item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:135, kcal:2150, total:320},
-  {day:11, train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'小鹿亭',             item:'豬排丼',                                  addr:'公館商圈 羅斯福路',      price:120}, d:{shop:'潮味決湯滷專門店', item:'滷味套餐 豚骨湯底 雞肉+豆腐+青菜',        addr:'羅斯福路三段284巷8號',   price:140}, sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2120, total:355},
-  {day:12, train:'B', junk:false, b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'厚宅咖哩',           item:'咖哩牛',                                  addr:'羅斯福路四段1號',        price:140}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'—',                      price:0},   p:130, kcal:2200, total:355},
-  {day:13, train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'祥記炒燴',           item:'肉片滑蛋燴飯',                            addr:'水源市場62號攤',         price:120}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋x2',               price:20},  p:132, kcal:2050, total:354},
-  {day:14, train:'休', junk:true,  b:{shop:'全家 國青門市',       item:'鮮奶500ml＋香蕉1根＋茶葉蛋x2',              addr:'國青樓下',                      price:65},  l:{shop:'龍記炒燴',           item:'干炒牛河',                                addr:'水源市場內',             price:130}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'即食雞胸1包',            price:55},  p:138, kcal:2100, total:339},
-  {day:15, train:'A', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',                    addr:'台大禮客OUTLET內',       price:180}, d:{shop:'摩斯漢堡 公館店', item:'海洋珍珠堡＋無糖紅茶',                    addr:'公館商圈',               price:85},  sup:{text:'無糖豆漿1瓶',            price:30},  p:130, kcal:2050, total:360},
-  {day:16, train:'B', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋1顆',              price:10},  p:140, kcal:2120, total:320},
-  {day:17, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋x2',            addr:'國青樓下',                      price:95},  l:{shop:'鳳城燒臘',           item:'三寶飯：燒鴨＋油雞＋叉燒',                addr:'新生南路三段58-3號',     price:125}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋1顆',              price:10},  p:132, kcal:2100, total:335},
-  {day:18, train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'大福利排骨大王',     item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'無糖豆漿1瓶＋茶葉蛋1顆', price:40},  p:135, kcal:2200, total:355},
-  {day:19, train:'B', junk:true,  b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'小鹿亭',             item:'日式咖哩雞肉飯',                          addr:'公館商圈 羅斯福路',      price:100}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋x2',               price:20},  p:137, kcal:2050, total:344},
-  {day:20, train:'休', junk:true,  b:{shop:'摩斯漢堡 公館店',    item:'海洋珍珠堡＋無糖紅茶',                      addr:'公館商圈',                      price:85},  l:{shop:'厚宅咖哩',           item:'雞肉咖哩飯',                              addr:'羅斯福路四段1號',        price:140}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'無糖豆漿1瓶＋茶葉蛋1顆', price:40},  p:130, kcal:2150, total:354},
-  {day:21, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml',                  addr:'國青樓下',                      price:70},  l:{shop:'祥記炒燴',           item:'廣州炒飯',                                addr:'水源市場62號攤',         price:120}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋x2',               price:20},  p:135, kcal:2100, total:320},
-  {day:22, train:'A', junk:false, b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'龍記炒燴',           item:'滑蛋牛肉燴飯',                            addr:'水源市場內',             price:130}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'茶葉蛋x2',               price:20},  p:131, kcal:2080, total:320},
-  {day:23, train:'B', junk:true,  b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋1顆',           addr:'國青樓下',                      price:65},  l:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',                    addr:'台大禮客OUTLET內',       price:180}, d:{shop:'藍家割包',        item:'割包 瘦肉＋茶葉蛋1顆＋無糖豆漿1瓶',        addr:'羅斯福路三段316巷8弄3號',price:105}, sup:{text:'—',                      price:0},   p:132, kcal:2000, total:350},
-  {day:24, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'京阪豚骨拉麵',   item:'豚骨拉麵 1碗',                            addr:'羅斯福路四段136巷6弄6號',price:120}, sup:{text:'無糖豆漿1瓶',            price:30},  p:133, kcal:2150, total:350},
-  {day:25, train:'A', junk:true,  b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'鳳城燒臘',           item:'三寶飯：燒鴨＋油雞＋叉燒',                addr:'新生南路三段58-3號',     price:125}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋1顆',              price:10},  p:136, kcal:2050, total:359},
-  {day:26, train:'B', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'大福利排骨大王',     item:'雞腿飯 1份',                              addr:'羅斯福路三段286巷12號',  price:130}, d:{shop:'摩斯漢堡 公館店', item:'海洋珍珠堡＋無糖紅茶',                    addr:'公館商圈',               price:85},  sup:{text:'無糖豆漿1瓶＋茶葉蛋x2',  price:50},  p:132, kcal:2100, total:330},
-  {day:27, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'雞胸三明治1個＋無糖豆漿450ml',              addr:'國青樓下',                      price:95},  l:{shop:'小鹿亭',             item:'豬排丼',                                  addr:'公館商圈 羅斯福路',      price:120}, d:{shop:'龍哥無骨雞腿排',  item:'無骨雞腿排1份＋超商白飯1碗＋茶葉蛋1顆',   addr:'羅斯福路四段108巷10號',  price:110}, sup:{text:'茶葉蛋1顆',              price:10},  p:139, kcal:2120, total:335},
-  {day:28, train:'休', junk:false, b:{shop:'全家 國青門市',       item:'希臘優格1杯＋香蕉1根＋茶葉蛋x2',            addr:'國青樓下',                      price:95},  l:{shop:'厚宅咖哩',           item:'咖哩牛',                                  addr:'羅斯福路四段1號',        price:140}, d:{shop:'八方雲集 公館店', item:'鍋貼10顆＋無糖豆漿1瓶',                   addr:'羅斯福路四段120號',      price:105}, sup:{text:'—',                      price:0},   p:125, kcal:2100, total:340},
-  {day:29, train:'A', junk:true,  b:{shop:'麥當勞 公館店',       item:'豬肉滿福堡加蛋',                            addr:'羅斯福路四段78號',              price:65},  l:{shop:'祥記炒燴',           item:'肉片滑蛋燴飯',                            addr:'水源市場62號攤',         price:120}, d:{shop:'麥當勞 公館店',   item:'勁辣雞腿堡 單點',                         addr:'羅斯福路四段78號',       price:89},  sup:{text:'無糖豆漿1瓶＋茶葉蛋x2',  price:50},  p:132, kcal:2150, total:324},
-  {day:30, train:'B', junk:true,  b:{shop:'全家 國青門市',       item:'御飯糰1個＋無糖豆漿450ml＋茶葉蛋1顆',       addr:'國青樓下',                      price:90},  l:{shop:'龍記炒燴',           item:'干炒牛河',                                addr:'水源市場內',             price:130}, d:{shop:'Subway 公館店',   item:'6吋烤雞胸潛艇堡，全麥 / 蜂蜜芥末少 / 蔬菜全加', addr:'羅斯福路四段119號', price:129}, sup:{text:'茶葉蛋1顆',              price:10},  p:130, kcal:2050, total:359},
-  {day:31, train:'休', junk:true,  b:{shop:'全家 國青門市',       item:'鮮奶500ml＋香蕉1根＋茶葉蛋x2',              addr:'國青樓下',                      price:65},  l:{shop:'台大女九 小福自助餐', item:'滷雞腿1隻＋滷豆腐1份＋青菜2樣＋白飯半碗', addr:'新生南路三段 女九宿舍B1', price:110}, d:{shop:'uPoke 夏威夷生魚飯', item:'鮭魚Poke碗，飯量正常',               addr:'台大禮客OUTLET內',       price:180}, sup:{text:'—',                      price:0},   p:132, kcal:2000, total:355},
-];
 
 /* ══════════════════════════════════════════════
    UTILITIES
@@ -2276,7 +2265,7 @@ function getPlanForDate(dateObj){
   const d    = new Date(dateObj);    d.setHours(12,0,0,0);
   const diff = Math.round((d - base) / 86400000);
   const planDay = ((diff % PLAN_CYCLE) + PLAN_CYCLE) % PLAN_CYCLE + 1;
-  const plan = MEALS.find(m => m.day === planDay) || MEALS[0];
+  const plan = TRAINING_CYCLE.find(m => m.day === planDay) || TRAINING_CYCLE[0];
   _planCache.set(cacheKey, plan);
   return plan;
 }
@@ -2288,6 +2277,7 @@ let calYear, calMonth;
 let selectedDateObj = null;
 let weeklyOffset = 0;
 let SEARCH_INDEX = [];
+let bwRangeDays = 90;   /* 體重圖時間範圍，0 = 全部 */
 let searchFilter = 'all';
 
 function atNoon(dateLike){
@@ -2500,21 +2490,29 @@ function computeMonthSummaryData(year, month){
       restDays++;
     }
 
-    if(plan.junk) junkDays++;
-    if(isPast){
-      pastDays++;
-      spend += plan.total;
-      if(lsGet(`recomp_eaten_${dateStr}`, '0') === '1') eatenDays++;
-    }
+    if(isPast) pastDays++;
   }
 
   const trainPct = trainDaysTotal ? Math.round(trainDaysDone / trainDaysTotal * 100) : 0;
-  const eatenPct = pastDays ? Math.round(eatenDays / pastDays * 100) : 0;
-  const avgSpend = pastDays ? Math.round(spend / pastDays) : 0;
+
+  /* 總組數：比「有沒有打滿」更能反映實際做了多少 */
+  let setsDone = 0, setsPlanned = 0;
+  for(let d = 1; d <= daysInMonth; d++){
+    const dateObj = new Date(year, month, d);
+    const dateStr = formatDateStr(dateObj);
+    const plan = getPlanForDate(dateObj);
+    if(plan.train === '休') continue;
+    WORKOUTS[plan.train].forEach(ex => {
+      setsPlanned += ex.sets;
+      for(let n = 1; n <= ex.sets; n++){
+        if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${n}`, '0') !== '0') setsDone++;
+      }
+    });
+  }
 
   return {
     daysInMonth, trainDaysTotal, trainDaysDone, restDays,
-    eatenDays, pastDays, spend, junkDays, trainPct, eatenPct, avgSpend
+    pastDays, trainPct, setsDone, setsPlanned
   };
 }
 
@@ -2559,7 +2557,6 @@ function renderCalendar(year, month){
       selectedDateObj.getFullYear() === year &&
       selectedDateObj.getMonth() === month &&
       selectedDateObj.getDate() === d;
-    const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
 /* heatmap classes */
 const isPast = dateObj <= new Date();
 let heatClass = '';
@@ -2582,7 +2579,6 @@ if(isPast && getPref('heatmap')){
       heatBar = `<div class="cal-heat-bar partial" style="width:${pct}%"></div>`;
     }
   }
-  if(eaten) heatClass += ' heat-eaten';
 }
 
     html += `<div
@@ -2595,16 +2591,7 @@ if(isPast && getPref('heatmap')){
         <span class="cal-daynum">${d}</span>
         <span class="cal-tag">${plan.train}</span>
       </div>
-      <div class="cal-meta mono-num">
-        <div>P${plan.p}g</div>
-        <div class="cal-meta-row">
-          <span>${plan.kcal}</span>
-          <span class="cal-flags">
-            <span class="eaten-indicator"${eaten ? '' : ' hidden'}>✓</span>
-            ${plan.junk ? '<span class="junk-dot"></span>' : ''}
-          </span>
-        </div>
-      </div>
+
       ${heatBar}
     </div>`;
   }
@@ -2634,19 +2621,13 @@ function renderMonthSummary(){
       <div class="progress-track"><div class="progress-fill" style="width:${s.trainPct}%"></div></div>
     </div>
     <div class="msum-cell">
-      <div class="kicker" style="margin-bottom:2px">飲食達標 (已過天數)</div>
-      <div class="msum-num mono-num">${s.eatenDays}<span style="font-size:13px;color:var(--concrete)">/${s.pastDays} 天</span></div>
-      <div class="progress-track"><div class="progress-fill" style="width:${s.eatenPct}%"></div></div>
+      <div class="kicker" style="margin-bottom:2px">完成組數</div>
+      <div class="msum-num mono-num">${s.setsDone}<span style="font-size:13px;color:var(--concrete)">/${s.setsPlanned}</span></div>
+      <div class="progress-track"><div class="progress-fill" style="width:${s.setsPlanned ? Math.round(s.setsDone / s.setsPlanned * 100) : 0}%"></div></div>
     </div>
     <div class="msum-cell">
-      <div class="kicker" style="margin-bottom:2px">本月累積花費</div>
-      <div class="msum-num mono-num">$${s.spend}</div>
-      <div class="small muted" style="margin-top:4px">日均 $${s.avgSpend} · 預算 ≤$350/天</div>
-    </div>
-    <div class="msum-cell">
-      <div class="kicker" style="margin-bottom:2px">休息 / 垃圾食物日</div>
-      <div class="msum-num mono-num">${s.restDays}<span style="font-size:13px;color:var(--concrete)"> 休 · </span>${s.junkDays}<span style="font-size:13px;color:var(--concrete)"> junk</span></div>
-      <div class="small muted" style="margin-top:4px">全月共 ${s.daysInMonth} 天</div>
+      <div class="kicker" style="margin-bottom:2px">休息日</div>
+      <div class="msum-num mono-num">${s.restDays}<span style="font-size:13px;color:var(--concrete)"> / ${s.daysInMonth} 天</span></div>
     </div>`;
 }
 
@@ -2655,185 +2636,202 @@ function renderBwStats(){
   if(!el) return;
   const entries = getAllBwEntries();
   if(entries.length === 0){
-    el.innerHTML = `<span class="small muted">還沒有任何紀錄，量完體重後在上面輸入並按「紀錄」。</span>`;
+    el.innerHTML = `<div class="stat-empty">還沒有紀錄。量完體重後在上面輸入。</div>`;
     return;
   }
   const first  = entries[0];
   const latest = entries[entries.length - 1];
-  const prev   = entries.length > 1 ? entries[entries.length - 2] : null;
-
-  function deltaHtml(curVal, baseVal){
-    if(baseVal === null || baseVal === undefined) return '';
-    const diff = +(curVal - baseVal).toFixed(1);
-    if(diff === 0) return `<span class="small muted">持平</span>`;
-    const cls  = diff < 0 ? 'bw-delta-down' : 'bw-delta-up';
-    const sign = diff > 0 ? '+' : '';
-    return `<span class="small ${cls}">${sign}${diff}kg</span>`;
-  }
-  function fmtDate(e){
-    return `${e.year}-${String(e.month+1).padStart(2,'0')}-${String(e.day).padStart(2,'0')}`;
-  }
+  const diff   = +(latest.w - first.w).toFixed(1);
+  const cls    = diff < 0 ? 'is-down' : diff > 0 ? 'is-up' : '';
+  const sign   = diff > 0 ? '+' : '';
 
   el.innerHTML = `
-    <div class="bw-stat">
-      <div class="bw-stat-label">起始</div>
-      <div class="bw-stat-val mono-num">${first.w}kg</div>
-      <div class="small muted">${fmtDate(first)}</div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">目前</div>
+      <div class="stat-cell-val mono-num">${latest.w}<span class="unit">kg</span></div>
     </div>
-    <div class="bw-stat">
-      <div class="bw-stat-label">最新</div>
-      <div class="bw-stat-val mono-num">${latest.w}kg</div>
-      <div class="small">${deltaHtml(latest.w, first.w)} 累積</div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">累積變化</div>
+      <div class="stat-cell-val mono-num ${cls}">${diff === 0 ? '±0' : sign + diff}<span class="unit">kg</span></div>
     </div>
-    ${prev ? `<div class="bw-stat">
-      <div class="bw-stat-label">較上次</div>
-      <div class="bw-stat-val mono-num">${deltaHtml(latest.w, prev.w)}</div>
-      <div class="small muted">共 ${entries.length} 筆紀錄</div>
-    </div>` : ''}
-    ${latest.bf !== null && latest.bf !== undefined ? `<div class="bw-stat">
-      <div class="bw-stat-label">最新體脂</div>
-      <div class="bw-stat-val mono-num">${latest.bf}%</div>
-    </div>` : ''}`;
+    <div class="stat-cell">
+      <div class="stat-cell-label">紀錄</div>
+      <div class="stat-cell-val mono-num">${entries.length}<span class="unit">筆</span></div>
+    </div>`;
 }
+
 
 function renderBwChart(){
   const wrap = document.getElementById('bwChartWrap');
   if(!wrap) return;
-  const entries = getAllBwEntries();
-  if(entries.length < 2){
-    wrap.innerHTML = entries.length === 0
+
+  const all = getAllBwEntries();
+  if(all.length < 2){
+    wrap.innerHTML = all.length === 0
       ? `<div class="bw-empty">
            <i class="ph ph-chart-line empty-icon" aria-hidden="true"></i>
            <div class="empty-title">還沒有體重紀錄</div>
-           <div class="empty-hint">在上面輸入今天的體重，累積兩筆之後這裡就會長出趨勢線。</div>
+           <div class="empty-hint">上面輸入今天的體重，累積兩筆之後這裡就會長出趨勢線。</div>
          </div>`
       : `<div class="bw-empty">
            <i class="ph ph-chart-line empty-icon" aria-hidden="true"></i>
            <div class="empty-title">再一筆就能畫圖</div>
-           <div class="empty-hint">目前有 1 筆紀錄。趨勢線至少需要兩個時間點才畫得出來。</div>
+           <div class="empty-hint">趨勢線至少需要兩個時間點。</div>
          </div>`;
     return;
   }
 
-  const W    = Math.max(560, entries.length * 48);
-  const H    = 240;
-  const padL = 44, padR = 44, padT = 16, padB = 32;
+  /* ── 時間範圍 ── */
+  const toDate = e => new Date(e.year, e.month, e.day);
+  let entries = all;
+  if(bwRangeDays > 0){
+    const cutoff = new Date();
+    cutoff.setHours(0,0,0,0);
+    cutoff.setDate(cutoff.getDate() - bwRangeDays);
+    entries = all.filter(e => toDate(e) >= cutoff);
+    /* 範圍內太少就退回全部，免得切一切變空白 */
+    if(entries.length < 2) entries = all;
+  }
+
+  /* ── 幾何：填滿容器寬度，不再無限往右長 ──
+     原本 W = entries.length * 48 會讓資料越多圖越寬、
+     只能橫向捲動，趨勢反而完全看不出來。 */
+  const W = 700, H = 260;
+  const padL = 40, padR = 52, padT = 22, padB = 30;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
+  const t0 = toDate(entries[0]).getTime();
+  const t1 = toDate(entries[entries.length-1]).getTime();
+  const span = Math.max(1, t1 - t0);
+
   const weights = entries.map(e => e.w);
-  let minW = Math.min(...weights), maxW = Math.max(...weights);
-  if(minW === maxW){ minW -= 1; maxW += 1; }
-  const wPad = (maxW - minW) * 0.15 || 1;
-  minW -= wPad; maxW += wPad;
+  let lo = Math.min(...weights), hi = Math.max(...weights);
+  if(lo === hi){ lo -= 0.5; hi += 0.5; }
+  const pad = (hi - lo) * 0.18 || 0.5;
+  lo -= pad; hi += pad;
 
-  const bfEntries = entries.filter(e => e.bf !== null && e.bf !== undefined);
-  const hasBf = bfEntries.length >= 2;
-  let minBf = 0, maxBf = 1;
-  if(hasBf){
-    const bfVals = bfEntries.map(e => e.bf);
-    minBf = Math.min(...bfVals); maxBf = Math.max(...bfVals);
-    if(minBf === maxBf){ minBf -= 1; maxBf += 1; }
-    const bfPad = (maxBf - minBf) * 0.15 || 1;
-    minBf -= bfPad; maxBf += bfPad;
-  }
+  const xFor = e => padL + ((toDate(e).getTime() - t0) / span) * plotW;
+  const yFor = w => padT + plotH - ((w - lo) / (hi - lo)) * plotH;
 
-  function xFor(i){ return padL + (entries.length === 1 ? plotW/2 : (i / (entries.length-1)) * plotW); }
-  function yForW(w){ return padT + plotH - ((w - minW) / (maxW - minW)) * plotH; }
-  function yForBf(bf){ return padT + plotH - ((bf - minBf) / (maxBf - minBf)) * plotH; }
+  /* ── 7 日移動平均：主角 ── */
+  const ma = entries.map((e,i) => {
+    const from = toDate(e).getTime() - 6*86400000;
+    const win = entries.filter((x,j) => j <= i && toDate(x).getTime() >= from);
+    return { e, v: win.reduce((sum,x) => sum + x.w, 0) / win.length };
+  });
 
-  const gridLines = [];
+  /* ── 格線：實線髮絲，退到背景 ── */
+  let grid = '';
   for(let i = 0; i <= 3; i++){
-    const val = minW + (maxW - minW) * (i/3);
-    const y   = yForW(val);
-    gridLines.push(
-      `<line x1="${padL}" y1="${y}" x2="${W-padR}" y2="${y}" stroke="var(--line)" stroke-width="1"/>`,
-      `<text x="${padL-6}" y="${y+4}" text-anchor="end" font-size="10" fill="var(--concrete)" font-family="Fragment Mono,monospace">${val.toFixed(1)}</text>`
-    );
-    if(hasBf){
-      const bfVal = minBf + (maxBf - minBf) * (i/3);
-      gridLines.push(
-        `<text x="${W-padR+6}" y="${y+4}" text-anchor="start" font-size="10" fill="#2a8" font-family="Fragment Mono,monospace">${bfVal.toFixed(1)}%</text>`
-      );
-    }
+    const val = lo + (hi - lo) * (i/3);
+    const y = yFor(val);
+    grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`
+         +  `<text x="${padL-8}" y="${(y+3.5).toFixed(1)}" text-anchor="end" class="chart-axis">${val.toFixed(1)}</text>`;
   }
 
-  const wPoints = entries.map((e,i) => `${xFor(i)},${yForW(e.w)}`).join(' ');
-/* 7-day moving average */
-let maPolyline = '';
-if(entries.length >= 3 && getPref('chartMA')){
-  const maPoints = entries.map((e,i) => {
-    const start = Math.max(0, i - 6);
-    const window = entries.slice(start, i + 1);
-    const avg = window.reduce((s, x) => s + x.w, 0) / window.length;
-    return `${xFor(i)},${yForW(avg)}`;
-  }).join(' ');
-  maPolyline = `<polyline points="${maPoints}" fill="none" stroke="#f0a020" stroke-width="1.5" stroke-dasharray="4,3" opacity=".7"/>`;
-}
-  const dots = entries.map((e,i) => {
-    const x = xFor(i), y = yForW(e.w);
-    return `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--signal)" stroke="var(--card)" stroke-width="1.5">
-      <title>${e.year}-${String(e.month+1).padStart(2,'0')}-${String(e.day).padStart(2,'0')}: ${e.w}kg</title>
-    </circle>`;
-  }).join('');
+  /* ── 區間帶：期間內的最低到最高 ── */
+  const realLo = Math.min(...weights), realHi = Math.max(...weights);
+  const bandY = yFor(realHi), bandH = yFor(realLo) - yFor(realHi);
+  const band = `<rect x="${padL}" y="${bandY.toFixed(1)}" width="${plotW}" height="${Math.max(1,bandH).toFixed(1)}"
+                  fill="var(--ink)" opacity=".045"/>`;
 
-  let bfPolyline = '';
-  if(hasBf){
-    const bfPoints = entries
-      .map((e,i) => e.bf !== null && e.bf !== undefined ? `${xFor(i)},${yForBf(e.bf)}` : null)
-      .filter(Boolean).join(' ');
-    const bfDots = entries.map((e,i) => {
-      if(e.bf === null || e.bf === undefined) return '';
-      const x = xFor(i), y = yForBf(e.bf);
-      return `<circle cx="${x}" cy="${y}" r="3" fill="#2a8" stroke="var(--card)" stroke-width="1.5">
-        <title>體脂 ${e.bf}%</title>
-      </circle>`;
-    }).join('');
-    bfPolyline = `
-      <polyline points="${bfPoints}" fill="none" stroke="#2a8" stroke-width="1.5" stroke-dasharray="5,3"/>
-      ${bfDots}`;
+  /* ── 原始點：弱化 ── */
+  const dots = entries.map(e =>
+    `<circle cx="${xFor(e).toFixed(1)}" cy="${yFor(e.w).toFixed(1)}" r="2.5"
+       fill="var(--concrete)" opacity=".5"/>`).join('');
+
+  /* ── 趨勢線 ── */
+  const maPath = ma.map((m,i) =>
+    `${i ? 'L' : 'M'}${xFor(m.e).toFixed(1)},${yFor(m.v).toFixed(1)}`).join(' ');
+  const trend = `<path d="${maPath}" fill="none" stroke="var(--signal)" stroke-width="2"
+                   stroke-linecap="round" stroke-linejoin="round"/>`;
+
+  /* ── 里程碑：只標端點與極值，不是每個點都標 ── */
+  const first = entries[0], last = entries[entries.length-1];
+  const loEntry = entries.find(e => e.w === realLo);
+  const hiEntry = entries.find(e => e.w === realHi);
+  const fmt = e => `${String(e.month+1).padStart(2,'0')}/${String(e.day).padStart(2,'0')}`;
+
+  let marks = '';
+  if(hiEntry && hiEntry !== last && hiEntry !== first){
+    marks += `<circle cx="${xFor(hiEntry).toFixed(1)}" cy="${yFor(realHi).toFixed(1)}" r="3.5"
+                fill="none" stroke="var(--concrete)" stroke-width="1.5"/>`
+          +  `<text x="${xFor(hiEntry).toFixed(1)}" y="${(yFor(realHi)-9).toFixed(1)}"
+                text-anchor="middle" class="chart-note">最高 ${realHi}</text>`;
+  }
+  if(loEntry && loEntry !== last && loEntry !== first && loEntry !== hiEntry){
+    marks += `<circle cx="${xFor(loEntry).toFixed(1)}" cy="${yFor(realLo).toFixed(1)}" r="3.5"
+                fill="none" stroke="var(--concrete)" stroke-width="1.5"/>`
+          +  `<text x="${xFor(loEntry).toFixed(1)}" y="${(yFor(realLo)+16).toFixed(1)}"
+                text-anchor="middle" class="chart-note">最低 ${realLo}</text>`;
   }
 
-  const labelEvery = Math.max(1, Math.ceil(entries.length / 8));
-  const dateLabels = entries.map((e,i) => {
-    if(i !== 0 && i !== entries.length-1 && i % labelEvery !== 0) return '';
-    return `<text x="${xFor(i)}" y="${H-10}" text-anchor="middle" font-size="9" fill="var(--concrete)" font-family="Fragment Mono,monospace">${e.month+1}/${e.day}</text>`;
-  }).join('');
+  /* 最新值直接標在線尾 */
+  const endX = xFor(last), endY = yFor(last.w);
+  const endLabel =
+    `<circle cx="${endX.toFixed(1)}" cy="${endY.toFixed(1)}" r="4" fill="var(--signal)"
+       stroke="var(--card)" stroke-width="2"/>`
+    + `<text x="${(endX+9).toFixed(1)}" y="${(endY+4).toFixed(1)}" class="chart-value">${last.w}</text>`;
 
-/* target zone band (73-77kg) */
-const targetLow = 73, targetHigh = 77;
-let targetBand = '';
-if(getPref('chartTarget') && minW < targetHigh && maxW > targetLow){
-  const bandTop = yForW(Math.min(targetHigh, maxW));
-  const bandBot = yForW(Math.max(targetLow, minW));
-  const bandH = bandBot - bandTop;
-  if(bandH > 0){
-    targetBand = `<rect x="${padL}" y="${bandTop}" width="${plotW}" height="${bandH}" fill="#2a8" opacity=".06" rx="2"/>
-    <text x="${W-padR-2}" y="${bandTop+10}" text-anchor="end" font-size="9" fill="#2a8" opacity=".5" font-family="Fragment Mono,monospace">目標區間</text>`;
-  }
-}
-  const maLabel = entries.length >= 3
-  ? `<text x="${padL + (hasBf ? 140 : 70)}" y="${padT-4}" font-size="9" fill="#f0a020" opacity=".7" font-family="Fragment Mono,monospace">--- 7日均線</text>`
-  : '';
-const legend = `
-    <text x="${padL}" y="${padT-4}" font-size="9" fill="var(--signal)" font-family="Fragment Mono,monospace">— 體重 (kg)</text>
-    ${hasBf ? `<text x="${padL+70}" y="${padT-4}" font-size="9" fill="#2a8" font-family="Fragment Mono,monospace">--- 體脂 (%)</text>` : ''}
-    ${maLabel}`;
-  wrap.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" style="max-width:100%;display:block">
-    ${legend}
-    ${gridLines.join('')}
-    ${targetBand}
-    <polyline points="${wPoints}" fill="none" stroke="var(--signal)" stroke-width="2"/>
-    ${maPolyline}
-    ${bfPolyline}
-    ${dots}
-    ${dateLabels}
-  </svg>`;
+  /* ── X 軸：只標頭尾 ── */
+  const xAxis =
+    `<text x="${padL}" y="${H-10}" text-anchor="start" class="chart-axis">${fmt(first)}</text>`
+  + `<text x="${W-padR}" y="${H-10}" text-anchor="end" class="chart-axis">${fmt(last)}</text>`;
+
+  /* ── 懸停層 ── */
+  const hot = entries.map((e,i) =>
+    `<rect class="chart-hot" x="${(xFor(e)-8).toFixed(1)}" y="${padT}" width="16" height="${plotH}"
+       fill="transparent" data-i="${i}" data-x="${xFor(e).toFixed(1)}" data-y="${yFor(e.w).toFixed(1)}"
+       data-label="${fmt(e)} · ${e.w}kg"/>`).join('');
+
+  const delta = +(last.w - first.w).toFixed(1);
+  const deltaText = delta === 0 ? '持平' : `${delta > 0 ? '+' : ''}${delta}kg`;
+
+  wrap.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="bw-svg" role="img"
+         aria-label="體重趨勢，${fmt(first)} 到 ${fmt(last)}，變化 ${deltaText}">
+      ${grid}${band}${dots}${trend}${marks}${endLabel}${xAxis}
+      <g class="chart-cursor" hidden>
+        <line y1="${padT}" y2="${padT+plotH}" stroke="var(--ink)" stroke-width="1" opacity=".3"/>
+        <circle r="4" fill="var(--signal)" stroke="var(--card)" stroke-width="2"/>
+      </g>
+      ${hot}
+    </svg>
+    <div class="chart-foot">
+      <span>${entries.length} 筆 · ${fmt(first)} – ${fmt(last)}</span>
+      <span class="chart-foot-delta ${delta < 0 ? 'is-down' : delta > 0 ? 'is-up' : ''}">${deltaText}</span>
+    </div>
+    <div class="chart-tip" hidden></div>
+    <div class="chart-key">
+      <span><i class="key-line"></i>7 日平均</span>
+      <span><i class="key-dot"></i>單次量測</span>
+    </div>`;
+
+  /* 懸停 / 點擊顯示數值 */
+  const svg = wrap.querySelector('.bw-svg');
+  const tip = wrap.querySelector('.chart-tip');
+  const cursor = wrap.querySelector('.chart-cursor');
+  const show = el => {
+    cursor.hidden = false;
+    cursor.querySelector('line').setAttribute('x1', el.dataset.x);
+    cursor.querySelector('line').setAttribute('x2', el.dataset.x);
+    cursor.querySelector('circle').setAttribute('cx', el.dataset.x);
+    cursor.querySelector('circle').setAttribute('cy', el.dataset.y);
+    tip.hidden = false;
+    tip.textContent = el.dataset.label;
+    tip.style.left = (el.dataset.x / W * 100) + '%';
+  };
+  const hide = () => { cursor.hidden = true; tip.hidden = true; };
+  svg.querySelectorAll('.chart-hot').forEach(el => {
+    el.addEventListener('mouseenter', () => show(el));
+    el.addEventListener('touchstart', () => show(el), { passive:true });
+  });
+  svg.addEventListener('mouseleave', hide);
+  svg.addEventListener('touchend', hide);
 }
 
-/* ══════════════════════════════════════════════
-   DAY PANEL
-   ══════════════════════════════════════════════ */
+
 function selectDate(dateObj){
   selectedDateObj = new Date(dateObj);
   if(selectedDateObj.getFullYear() !== calYear || selectedDateObj.getMonth() !== calMonth){
@@ -2857,8 +2855,6 @@ function selectDate(dateObj){
 
   renderDayHeader(plan, dateStr);
   renderWorkoutSection(plan, dateStr);
-  renderEatenToggle(dateStr);
-  renderMealSection(plan);
   prefillBwInputs();
   refreshChestWeightStat();
 }
@@ -2868,11 +2864,14 @@ function renderDayHeader(plan, dateStr){
   const [y,m,d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m-1, d);
 
+  const isToday = formatDateStr(new Date()) === dateStr;
   document.getElementById('dpKicker').textContent =
-    `${String(y)}-${String(m).padStart(2,'0')}-${String(d).padStart(2,'0')} · ${wdays[dateObj.getDay()]} · Day ${plan.day} / 31`;
-  document.getElementById('dpTitle').textContent = `Day ${plan.day} — ${getTrainText(plan.train)}`;
-  document.getElementById('dpMacros').innerHTML = `P ${plan.p}g<br>${plan.kcal} kcal<br>$${plan.total}`;
-  document.getElementById('todayTopLabel').textContent = `Day ${plan.day} — ${getTrainText(plan.train)}`;
+    `${isToday ? '今天 · ' : ''}${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} ${wdays[dateObj.getDay()]}`;
+  document.getElementById('dpTitle').textContent = getTrainText(plan.train);
+  document.getElementById('todayTopLabel').textContent =
+    `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} · ${getTrainText(plan.train)}`;
+  const entryDate = document.getElementById('bwEntryDate');
+  if(entryDate) entryDate.textContent = `紀錄到 ${formatDateStrPad(dateObj)}${isToday ? '（今天）' : ''}`;
 }
 
 function renderWorkoutSection(plan, dateStr){
@@ -2922,51 +2921,16 @@ function renderWorkoutSection(plan, dateStr){
       </div>
     </div>`;
   }).join('') +
-  `<div class="ex-hint">RPE 7-8 · 組間 90s · 點兩下變紅 = 達上限 → 全紅自動加重 · 點擊重量數字可手動調整</div>` +   `<button type="button" id="exportTrainCardBtn" class="btn" style="width:100%;margin-top:12px">     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）   </button>`;
+  `<div class="ex-hint">點兩下變紅 = 達上限，全紅自動加重 · 點重量數字可手動調整</div>` +   `<button type="button" id="exportTrainCardBtn" class="btn" style="width:100%;margin-top:12px">     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）   </button>`;
 }
 
-function renderEatenToggle(dateStr){
-  const eatenKey = `recomp_eaten_${dateStr}`;
-  const eatenBtn = document.getElementById('dpEatenToggle');
-  const isEaten = lsGet(eatenKey, '0') === '1';
-  eatenBtn.textContent = isEaten ? '☑ 今日三餐已照計畫吃' : '☐ 標記今日三餐已照計畫吃';
-  eatenBtn.classList.toggle('on', isEaten);
-  eatenBtn.dataset.k = eatenKey;
-}
 
-function renderMealSection(plan){
-  const mealsEl = document.getElementById('dpMeals');
-
-  function mealBlock(label, m){
-    return `<div class="meal-block">
-      <div class="meal-block-label">${label}</div>
-      <div class="meal-block-shop">${escapeHtml(m.shop)}</div>
-      <div class="meal-block-item">${escapeHtml(m.item)}</div>
-      <div class="meal-block-addr">${escapeHtml(m.addr)} · $${m.price}</div>
-            <div class="meal-block-actions">
-        <button type="button" class="meal-copy-btn copy-meal-btn"
-          data-copy="${escapeHtml(m.shop)}：${escapeHtml(m.item)}"><i class="ph ph-copy icon" aria-hidden="true"></i>複製點餐</button>
-        <a style="text-decoration:underline" target="_blank" rel="noopener"
-          href="https://www.google.com/maps/search/${encodeURIComponent(m.shop + ' ' + m.addr)}"><i class="ph ph-map-pin icon" aria-hidden="true"></i>地圖導航</a>
-      </div>
-    </div>`;
-  }
-
-  mealsEl.innerHTML =
-    mealBlock('早餐', plan.b) +
-    mealBlock('午餐', plan.l) +
-    mealBlock('晚餐', plan.d) +
-    `<div class="meal-sup">
-      <b>補充：</b>${escapeHtml(plan.sup.text)} · $${plan.sup.price}<br>
-      <span style="color:var(--concrete)">蛋白質外掛：茶葉蛋 $10/7g · 無糖豆漿 $30/15g · 即食雞胸 $55/25g</span>
-    </div>`;
-}
 
 function prefillBwInputs(){
   const bwWeightInput = document.getElementById('bwWeightInput');
-  const bwFatInput = document.getElementById('bwFatInput');
+
   const bwSaveBtn = document.getElementById('bwSaveBtn');
-  if(!bwWeightInput || !bwFatInput || !selectedDateObj) return;
+  if(!bwWeightInput || !selectedDateObj) return;
 
   const existing = getBwEntry(
     selectedDateObj.getFullYear(),
@@ -2974,7 +2938,7 @@ function prefillBwInputs(){
     selectedDateObj.getDate()
   );
   bwWeightInput.value = existing ? existing.w : '';
-  bwFatInput.value = (existing && existing.bf !== null && existing.bf !== undefined) ? existing.bf : '';
+
 
   if(bwSaveBtn){
     bwSaveBtn.textContent = `紀錄 ${selectedDateObj.getMonth()+1}/${selectedDateObj.getDate()} 的體重`;
@@ -3002,8 +2966,7 @@ function computeWeeklyReport(offset){
   const end = atNoon(new Date(start));
   end.setDate(end.getDate() + 6);
 
-  let trainPlanned = 0, trainDone = 0, eatenDays = 0, junkDays = 0;
-  let totalSpend = 0, totalProtein = 0, totalKcal = 0;
+  let trainPlanned = 0, trainDone = 0;
   const days = [];
 
   for(let i = 0; i < 7; i++){
@@ -3012,7 +2975,6 @@ function computeWeeklyReport(offset){
     const plan = getPlanForDate(d);
     const dateStr = formatDateStr(d);
     const fullyTrained = isDayFullyTrained(dateStr, plan.train);
-    const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
     const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
     const exerciseText = plan.train === '休'
       ? '休息 / 恢復'
@@ -3020,19 +2982,10 @@ function computeWeeklyReport(offset){
 
     if(plan.train !== '休') trainPlanned++;
     if(fullyTrained) trainDone++;
-    if(eaten) eatenDays++;
-    if(plan.junk) junkDays++;
 
-    totalSpend += plan.total;
-    totalProtein += plan.p;
-    totalKcal += plan.kcal;
-
-    days.push({ date: d, dateStr, plan, fullyTrained, eaten, bw, exerciseText });
+    days.push({ date: d, dateStr, plan, fullyTrained, bw, exerciseText });
   }
 
-  const avgProtein = Math.round(totalProtein / 7);
-  const avgKcal = Math.round(totalKcal / 7);
-  const avgSpend = Math.round(totalSpend / 7);
 
   const allBw = getAllBwEntries();
   const bwEntries = allBw.filter(e => {
@@ -3071,8 +3024,8 @@ function computeWeeklyReport(offset){
   });
 
   return {
-    offset, start, end, days, trainPlanned, trainDone, eatenDays, junkDays,
-    totalSpend, avgSpend, avgProtein, avgKcal, bwEntries, bwSummary, bwDelta, weightChanges
+    offset, start, end, days, trainPlanned, trainDone,
+    bwEntries, bwSummary, bwDelta, weightChanges
   };
 }
 
@@ -3095,12 +3048,10 @@ function buildWeeklyReportText(offset){
   r.days.forEach(day => {
     const flags = [
       day.plan.train,
-      day.fullyTrained ? '訓練✓' : '訓練—',
-      day.eaten ? '飲食✓' : '飲食—',
-      day.plan.junk ? 'junk' : ''
+      day.fullyTrained ? '訓練✓' : '訓練—'
     ].filter(Boolean).join(' · ');
-    const bwText = day.bw ? ` · BW ${day.bw.w}kg${day.bw.bf !== null && day.bw.bf !== undefined ? ` / BF ${day.bw.bf}%` : ''}` : '';
-    lines.push(`${formatDateStrPad(day.date)}｜${flags}｜P${day.plan.p}g / ${day.plan.kcal} kcal / $${day.plan.total}${bwText}`);
+    const bwText = day.bw ? ` · BW ${day.bw.w}kg` : '';
+    lines.push(`${formatDateStrPad(day.date)}｜${flags}${bwText}`);
   });
 
   return lines.join('\n');
@@ -3114,7 +3065,7 @@ function renderWeeklyReport(offset){
   const range = document.getElementById('weeklyRangeLabel');
   const newerBtn = document.getElementById('weeklyNewerBtn');
 
-  title.textContent = `${weekLabelFromOffset(offset)} · 訓練 / 飲食週報`;
+  title.textContent = `${weekLabelFromOffset(offset)} · 訓練週報`;
   range.textContent = `${formatDateStrPad(r.start)} → ${formatDateStrPad(r.end)} · Mon–Sun`;
   newerBtn.disabled = offset >= 0;
 
@@ -3127,22 +3078,16 @@ function renderWeeklyReport(offset){
     : `<div class="small muted">無升級</div>`;
 
   const dailyHtml = r.days.map(day => {
-    const bwTag = day.bw
-      ? `<span class="search-tag">BW ${day.bw.w}kg${day.bw.bf !== null && day.bw.bf !== undefined ? ` / BF ${day.bw.bf}%` : ''}</span>`
-      : '';
+    const bwTag = day.bw ? `<span class="search-tag">BW ${day.bw.w}kg</span>` : '';
     return `<button type="button" class="week-day-link" data-week-open="${day.dateStr}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div>
           <div style="font-weight:700;font-size:13px">${formatDateStrPad(day.date)} · ${getTrainText(day.plan.train)}</div>
-          <div class="small muted" style="margin-top:3px">Day ${day.plan.day} · P ${day.plan.p}g · ${day.plan.kcal} kcal · $${day.plan.total}</div>
         </div>
-        <div class="mono-num small">$${day.plan.total}</div>
       </div>
       <div style="font-size:12px;line-height:1.6;margin-top:8px">${escapeHtml(day.exerciseText)}</div>
       <div class="search-tags">
-        ${day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`}
-        ${day.eaten ? `<span class="search-tag ok">已吃</span>` : `<span class="search-tag">未打勾</span>`}
-        ${day.plan.junk ? `<span class="search-tag warn">垃圾食物日</span>` : ''}
+        ${day.plan.train === '休' ? '' : (day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`)}
         ${bwTag}
       </div>
     </button>`;
@@ -3531,7 +3476,6 @@ function drawCalendarToCanvas(){
       dateObj = new Date(calYear, calMonth, dayNum);
       dateStr = formatDateStr(dateObj);
       plan = getPlanForDate(dateObj);
-      eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
       isToday = calYear === today.getFullYear() && calMonth === today.getMonth() && dayNum === today.getDate();
       isSelected = selectedDateObj &&
         selectedDateObj.getFullYear() === calYear &&
@@ -3570,22 +3514,26 @@ function drawCalendarToCanvas(){
     ctx.fillText(plan.train, tagX + 16, tagY + 3);
     ctx.textAlign = 'left';
 
-    ctx.fillStyle = muted;
-    ctx.font = '12px monospace';
-    ctx.fillText(`P${plan.p}g`, x + 12, y + 46);
-    ctx.fillText(`${plan.kcal}kcal`, x + 12, y + 64);
-    ctx.fillText(`$${plan.total}`, x + 12, y + 82);
-
-    if(plan.junk){
-      ctx.fillStyle = colors.signal;
-      ctx.beginPath();
-      ctx.arc(x + boxW - 38, y + boxH - 16, 4, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    if(eaten){
-      ctx.fillStyle = colors.ok;
-      ctx.font = '700 16px sans-serif';
-      ctx.fillText('✓', x + boxW - 22, y + boxH - 28);
+    /* 該日完成的組數比例，取代原本的 P/kcal/$ */
+    if(plan.train !== '休'){
+      const list = WORKOUTS[plan.train];
+      let done = 0, tot = 0;
+      list.forEach(ex => {
+        tot += ex.sets;
+        for(let n = 1; n <= ex.sets; n++){
+          if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${n}`, '0') !== '0') done++;
+        }
+      });
+      ctx.fillStyle = muted;
+      ctx.font = '12px monospace';
+      ctx.fillText(`${done}/${tot}`, x + 12, y + 50);
+      if(tot){
+        const bw2 = boxW - 24;
+        ctx.fillStyle = isSelected ? '#555' : '#DDD8D1';
+        ctx.fillRect(x + 12, y + boxH - 22, bw2, 4);
+        ctx.fillStyle = done === tot ? colors.ok : colors.signal;
+        ctx.fillRect(x + 12, y + boxH - 22, bw2 * done / tot, 4);
+      }
     }
   }
 
@@ -3611,22 +3559,18 @@ function buildSearchIndex(){
     const dateStr = formatDateStr(d);
     const trainText = getTrainText(plan.train);
     const fullyTrained = isDayFullyTrained(dateStr, plan.train);
-    const eaten = lsGet(`recomp_eaten_${dateStr}`, '0') === '1';
     const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
     const exercises = plan.train === '休'
       ? '休息 / 恢復'
       : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
-    const mealText = [
-      plan.b.shop, plan.b.item, plan.l.shop, plan.l.item, plan.d.shop, plan.d.item, plan.sup.text
-    ].join(' ');
 
     const searchText = [
-      formatDateStrPad(d), dateStr, `day ${plan.day}`, plan.train, trainText, exercises, mealText,
-      fullyTrained ? '已完成訓練' : '', eaten ? '已吃' : '', plan.junk ? '垃圾食物日' : '',
-      bw ? `體重 ${bw.w} 體脂 ${bw.bf === null || bw.bf === undefined ? '' : bw.bf}` : ''
+      formatDateStrPad(d), dateStr, plan.train, trainText, exercises,
+      fullyTrained ? '已完成訓練' : '',
+      bw ? `體重 ${bw.w}` : ''
     ].join(' ').toLowerCase();
 
-    SEARCH_INDEX.push({ date: d, dateStr, plan, fullyTrained, eaten, bw, exercises, searchText });
+    SEARCH_INDEX.push({ date: d, dateStr, plan, fullyTrained, bw, exercises, searchText });
   }
   SEARCH_INDEX.sort((a,b) => b.date - a.date);
 }
@@ -3646,8 +3590,6 @@ function runSearch(){
       case 'B': return item.plan.train === 'B';
       case 'rest': return item.plan.train === '休';
       case 'trained': return item.fullyTrained;
-      case 'eaten': return item.eaten;
-      case 'junk': return item.plan.junk;
       default: return true;
     }
   });
@@ -3662,26 +3604,18 @@ function runSearch(){
   }
 
   resultsEl.innerHTML = shown.map(item => {
-    const bwTag = item.bw
-      ? `<span class="search-tag">BW ${item.bw.w}kg${item.bw.bf !== null && item.bw.bf !== undefined ? ` / ${item.bw.bf}%` : ''}</span>`
-      : '';
+    const bwTag = item.bw ? `<span class="search-tag">BW ${item.bw.w}kg</span>` : '';
 
     return `<button type="button" class="search-item" data-open-date="${item.dateStr}">
       <div class="search-item-head">
         <div>
           <div class="search-item-title">${formatDateStrPad(item.date)} · ${getTrainText(item.plan.train)}</div>
-          <div class="search-item-sub">Day ${item.plan.day} · P ${item.plan.p}g · ${item.plan.kcal} kcal · $${item.plan.total}</div>
         </div>
-        <div class="mono-num small">$${item.plan.total}</div>
       </div>
       <div class="search-item-body">${escapeHtml(item.exercises)}</div>
-      <div class="search-item-sub" style="margin-top:6px">
-        ${escapeHtml(item.plan.b.shop)} / ${escapeHtml(item.plan.l.shop)} / ${escapeHtml(item.plan.d.shop)}
-      </div>
       <div class="search-tags">
         <span class="search-tag">${item.plan.train}</span>
         ${item.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : ''}
-        ${item.eaten ? `<span class="search-tag ok">已吃</span>` : ''}
         ${item.plan.junk ? `<span class="search-tag warn">垃圾食物日</span>` : ''}
         ${bwTag}
       </div>
@@ -4055,22 +3989,10 @@ function initApp(){
     backdrop.classList.toggle('show', drawer.classList.contains('open') || searchDrawer.classList.contains('open'));
   }
 
-  function openOrderDrawer(){
-    closeSearchDrawer(false);
-    drawer.classList.add('open');
-    drawer.setAttribute('aria-hidden','false');
-    syncBackdrop();
-    document.getElementById('closeDrawer').focus();
-  }
-  function closeOrderDrawer(restoreFocus = true){
-    drawer.classList.remove('open');
-    drawer.setAttribute('aria-hidden','true');
-    syncBackdrop();
-    if(restoreFocus) document.getElementById('orderFab').focus();
-  }
+
+
 
   function openSearchDrawer(){
-    closeOrderDrawer(false);
     searchDrawer.classList.add('open');
     searchDrawer.setAttribute('aria-hidden','false');
     syncBackdrop();
@@ -4082,7 +4004,7 @@ function initApp(){
     searchDrawer.classList.remove('open');
     searchDrawer.setAttribute('aria-hidden','true');
     syncBackdrop();
-    if(restoreFocus) document.getElementById('searchFab').focus();
+    if(restoreFocus) document.getElementById('searchOpenBtn').focus();
   }
 
   function openWeeklyModal(){
@@ -4118,6 +4040,8 @@ function initApp(){
     if(!cell) return;
     const [y,m,d] = cell.dataset.ymd.split('-').map(Number);
     selectDate(new Date(y, m-1, d));
+    /* 月曆的工作是選日期，選完就把人帶到那天的訓練畫面 */
+    showScreen('today');
   });
   calGrid.addEventListener('keydown', e => {
     if(e.key !== 'Enter' && e.key !== ' ') return;
@@ -4257,28 +4181,6 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     }
   });
 
-  document.getElementById('dpEatenToggle').addEventListener('click', e => {
-    const btn = e.target;
-    const k = btn.dataset.k;
-    const isOn = lsGet(k, '0') === '1';
-    const next = isOn ? '0' : '1';
-    lsSet(k, next);
-    btn.textContent = next === '1' ? '☑ 今日三餐已照計畫吃' : '☐ 標記今日三餐已照計畫吃';
-    btn.classList.toggle('on', next === '1');
-
-    if(selectedDateObj){
-      const key = formatDateStr(selectedDateObj);
-      const cell = document.querySelector(`#calGrid .cal-cell[data-ymd="${key}"]`);
-      if(cell){
-        const indicator = cell.querySelector('.eaten-indicator');
-        if(indicator){
-          indicator.textContent = '✓';
-          indicator.hidden = next !== '1';
-        }
-      }
-    }
-    renderMonthSummary(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
-  });
 
   const bwSaveMsg = document.getElementById('bwSaveMsg');
   function showBwMsg(msg, isError){
@@ -4288,12 +4190,12 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
   document.getElementById('bwSaveBtn').addEventListener('click', () => {
     if(!selectedDateObj){ showBwMsg('請先在月曆選擇日期', true); return; }
     const wInput = document.getElementById('bwWeightInput');
-    const bfInput = document.getElementById('bwFatInput');
     const w = parseFloat(wInput.value);
     if(isNaN(w) || w < 30 || w > 200){ showBwMsg('體重需介於 30–200kg 之間', true); return; }
-    let bf = parseFloat(bfInput.value);
-    if(bfInput.value.trim() !== '' && (isNaN(bf) || bf < 3 || bf > 60)){ showBwMsg('體脂需介於 3–60% 之間', true); return; }
-    if(bfInput.value.trim() === '') bf = null;
+
+    /* 體脂欄位已移除；若歷史紀錄有值就原樣保留，不因為重存體重而被抹掉 */
+    const prev = getBwEntry(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate());
+    const bf = prev && prev.bf !== undefined ? prev.bf : null;
 
     setBwEntry(selectedDateObj.getFullYear(), selectedDateObj.getMonth(), selectedDateObj.getDate(), w, bf);
     showBwMsg('已紀錄');
@@ -4310,52 +4212,22 @@ if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
     renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
   });
 
-  document.getElementById('dpMeals').addEventListener('click', e => {
-    const btn = e.target.closest('.copy-meal-btn');
-    if(btn) copyText(btn.dataset.copy);
+  document.getElementById('bwRangeSwitch').addEventListener('click', e => {
+    const btn = e.target.closest('[data-range]');
+    if(!btn) return;
+    bwRangeDays = Number(btn.dataset.range);
+    document.querySelectorAll('#bwRangeSwitch .range-btn')
+      .forEach(b => b.classList.toggle('is-active', b === btn));
+    renderBwChart();
   });
 
-  const rGrid = document.getElementById('restaurantGrid');
-  rGrid.innerHTML = RESTAURANTS.map(r => `
-    <div class="swiss-card" style="padding:14px">
-      <div class="rest-card-header"><div class="rest-card-name">${escapeHtml(r.name)}</div><span class="rest-card-p mono-num">${escapeHtml(r.p)}</span></div>
-      <div class="rest-card-addr">${escapeHtml(r.addr)}</div>
-      <div class="rest-card-order">點：${escapeHtml(r.order)}</div>
-      <div class="rest-card-footer mono-num"><span>${escapeHtml(r.price)}</span>
-                <div class="rest-card-actions">
-          <button type="button" class="copy-btn"
-            data-copy="${escapeHtml(r.name)}：${escapeHtml(r.order)}"><i class="ph ph-copy icon" aria-hidden="true"></i>複製</button>
-          <a style="text-decoration:underline" target="_blank" rel="noopener"
-            href="https://www.google.com/maps/search/${encodeURIComponent(r.name + ' ' + r.addr)}"><i class="ph ph-map-pin icon" aria-hidden="true"></i>地圖</a>
-        </div>
-      </div>
-    </div>`).join('');
-  rGrid.addEventListener('click', e => {
-    const btn = e.target.closest('.copy-btn');
-    if(btn) copyText(btn.dataset.copy);
+  document.getElementById('dpToday').addEventListener('click', () => {
+    const now = new Date();
+    renderCalendar(now.getFullYear(), now.getMonth());
+    selectDate(now);
   });
 
-  document.getElementById('orderFab').addEventListener('click', openOrderDrawer);
-  document.getElementById('closeDrawer').addEventListener('click', () => closeOrderDrawer());
-  backdrop.addEventListener('click', () => { closeOrderDrawer(false); closeSearchDrawer(false); });
-
-  const orderList = document.getElementById('orderList');
-  orderList.innerHTML = ORDER_DICT.map(([shop, order]) => `
-    <div style="border-bottom:1px dotted var(--line);padding-bottom:10px;margin-bottom:10px">
-      <div style="font-weight:700;font-size:13px">${escapeHtml(shop)}</div>
-      <div style="color:var(--concrete);font-size:12px;margin-top:2px">${escapeHtml(order)}</div>
-      <button type="button" class="copy-btn"
-        data-copy="${escapeHtml(shop)}：${escapeHtml(order)}"
-        style="font-size:11px;text-decoration:underline;background:none;border:none;padding:0;cursor:pointer;margin-top:4px;display:flex;align-items:center;gap:4px">
-        <i class="ph ph-copy" style="font-size:14px" aria-hidden="true"></i>複製點餐口令
-      </button>
-    </div>`).join('');
-  orderList.addEventListener('click', e => {
-    const btn = e.target.closest('.copy-btn');
-    if(btn) copyText(btn.dataset.copy);
-  });
-
-  document.getElementById('searchFab').addEventListener('click', openSearchDrawer);
+  document.getElementById('searchOpenBtn').addEventListener('click', openSearchDrawer);
   document.getElementById('closeSearchDrawer').addEventListener('click', () => closeSearchDrawer());
   const searchInput = document.getElementById('searchInput');
 const searchClearBtn = document.getElementById('searchClearBtn');
@@ -4384,6 +4256,7 @@ searchClearBtn.addEventListener('click', () => {
     if(!btn) return;
     const [y,m,d] = btn.dataset.openDate.split('-').map(Number);
     closeSearchDrawer(false); selectDate(new Date(y, m-1, d));
+    showScreen('today');
   });
 
   document.getElementById('weekReportBtn').addEventListener('click', () => { renderWeeklyReport(0); openWeeklyModal(); });
@@ -4397,6 +4270,7 @@ searchClearBtn.addEventListener('click', () => {
     if(!btn) return;
     const [y,m,d] = btn.dataset.weekOpen.split('-').map(Number);
     closeWeeklyModal(false); selectDate(new Date(y, m-1, d));
+    showScreen('today');
   });
 
   document.getElementById('exportCalBtn').addEventListener('click', openExportCalModal);
@@ -4417,7 +4291,6 @@ searchClearBtn.addEventListener('click', () => {
     if(weeklyModal.classList.contains('show')) closeWeeklyModal();
     else if(exportCalModal.classList.contains('show')) closeExportCalModal();
     else if(searchDrawer.classList.contains('open')) closeSearchDrawer();
-    else if(drawer.classList.contains('open')) closeOrderDrawer();
   });
 
   function showDataMsg(msg, isError){
@@ -4584,23 +4457,39 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     '今日訓練卡'
   );
 });  /* ── Tab switching ── */
-document.querySelector('.tab-bar').addEventListener('click', e => {
-  const btn = e.target.closest('[data-tab]');
-  if(!btn) return;
-  const tabId = btn.dataset.tab;
-
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  const panel = document.getElementById(tabId === 'main' ? 'tabMain' : 'tabRestaurants');
-  if(panel) panel.classList.add('active');
+document.querySelector('.tabbar').addEventListener('click', e => {
+  const btn = e.target.closest('[data-screen]');
+  if(btn) showScreen(btn.dataset.screen);
 });
   /* version label */
 const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
 console.log('RECOMP', APP_VERSION, 'schema', SCHEMA_VERSION);
 }
+/* ══════════════════════════════════════════════
+   畫面切換
+   ══════════════════════════════════════════════ */
+function showScreen(name){
+  const map = { today:'screenToday', calendar:'screenCalendar', weight:'screenWeight' };
+  const targetId = map[name];
+  if(!targetId) return;
+
+  document.querySelectorAll('.screen').forEach(sc => {
+    const on = sc.id === targetId;
+    sc.classList.toggle('is-active', on);
+    sc.hidden = !on;
+  });
+  document.querySelectorAll('.tabbar-btn').forEach(b => {
+    const on = b.dataset.screen === name;
+    b.classList.toggle('is-active', on);
+    b.setAttribute('aria-selected', on ? 'true' : 'false');
+  });
+
+  /* 切到體重頁時重畫，因為隱藏時量不到寬度 */
+  if(name === 'weight'){ renderBwStats(); renderBwChart(); }
+  window.scrollTo({ top:0, behavior:'instant' in window ? 'instant' : 'auto' });
+}
+
 /* iOS Safari :active fix */
 document.addEventListener('touchstart', function(){}, true);
 try{
