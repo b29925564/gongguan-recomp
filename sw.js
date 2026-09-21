@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'recomp-v5';
+const CACHE_NAME = 'recomp-v7';
 const CORE_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 /* 安裝：先把核心資源存起來 */
@@ -68,6 +68,13 @@ self.addEventListener('fetch', event => {
         return cached || networkFetch;
       })
     );
+    return;
+  }
+
+  /* version.json 永遠走網路：它就是用來判斷有沒有新版的，
+     被快取住的話會一直回報舊版本，更新提示就關不掉 */
+  if(url.pathname.endsWith('version.json')){
+    event.respondWith(fetch(req).catch(() => caches.match(req)));
     return;
   }
 
