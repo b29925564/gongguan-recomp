@@ -586,11 +586,15 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   position:fixed;left:0;top:0;height:100%;width:390px;
   max-width:92vw;background:var(--card);
   border-right:var(--stroke);z-index:50;
+  /* 關閉時連同邊框一起藏起來。只用 translateX(-100%) 的話，
+     寬度四捨五入後右邊那條 1px 邊框會剛好停在 x=0，
+     三個畫面的左側都會看到一條線。 */
+  visibility:hidden;
   transform:translateX(-100%);
   transition:transform .24s cubic-bezier(.16,1,.3,1);
   box-shadow:6px 0 0 var(--ink);
 }
-#searchDrawer.open{transform:translateX(0)}
+#searchDrawer.open{transform:translateX(0);visibility:visible}
 .drawer-head{
   padding:16px 18px;border-bottom:1px solid var(--line);
   display:flex;justify-content:space-between;align-items:center;
@@ -642,7 +646,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .modal{
   position:fixed;inset:0;background:rgba(0,0,0,.26);
   display:flex;align-items:center;justify-content:center;
-  padding:18px;z-index:60;
+  padding:18px;z-index:66;
   opacity:0;pointer-events:none;
   transition:opacity .2s;
 }
@@ -724,8 +728,12 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
   flex-wrap:wrap;
 }
 #backupNagBanner.show{display:flex;animation:bannerSlideIn .28s ease both}
-#backupNagBanner .nag-text{font-size:13px;line-height:1.4;flex:1 1 180px}
-#backupNagBanner .nag-actions{display:flex;gap:8px;flex-wrap:wrap}
+#backupNagBanner .nag-text,
+#versionUpdateBanner .nag-text{font-size:13px;line-height:1.45;flex:1 1 180px}
+#backupNagBanner .nag-actions,
+#versionUpdateBanner .nag-actions{display:flex;gap:8px;flex-wrap:wrap}
+#backupNagBanner .nag-text .muted,
+#versionUpdateBanner .nag-text .muted{font-size:12px;margin-top:2px}
 @keyframes bannerSlideIn{
   from{opacity:0;transform:translateY(12px)}
   to{opacity:1;transform:none}
@@ -736,7 +744,7 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 
 /* ── 圖片儲存退路（iOS 無法觸發下載時顯示） ── */
 #imgSaveLayer{
-  position:fixed;inset:0;z-index:70;display:none;
+  position:fixed;inset:0;z-index:78;display:none;
   align-items:center;justify-content:center;
   padding:18px;background:rgba(0,0,0,.62);
   overflow:auto;
@@ -776,9 +784,10 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 #pwaUpdateBanner.show{display:flex}
 #versionUpdateBanner{
   position:fixed;
-  left:18px;
-  right:18px;
-  top:calc(18px + env(safe-area-inset-top, 0px));
+  left:16px;
+  right:16px;
+  /* 要落在固定的上方列底下，不然會蓋住標題 */
+  top:calc(var(--bar-h) + env(safe-area-inset-top, 0px) + 12px);
   z-index:57;
   display:none;
   justify-content:space-between;
@@ -1448,15 +1457,15 @@ body{
 .bw-svg{width:100%;height:auto;display:block;overflow:visible}
 .chart-axis{
   font-family:'Fragment Mono',ui-monospace,monospace;
-  font-size:10px;fill:var(--concrete);
+  font-size:15px;fill:var(--concrete);
 }
 .chart-note{
   font-family:'Fragment Mono',ui-monospace,monospace;
-  font-size:9px;fill:var(--concrete);
+  font-size:14px;font-weight:600;fill:var(--concrete);
 }
 .chart-value{
   font-family:'Fragment Mono',ui-monospace,monospace;
-  font-size:13px;font-weight:700;fill:var(--ink);
+  font-size:20px;font-weight:700;fill:var(--ink);
 }
 .chart-hot{cursor:crosshair}
 .chart-cursor[hidden]{display:none}
@@ -1494,6 +1503,84 @@ body{
 .stat-empty{
   grid-column:1/-1;font-size:var(--fs-small);color:var(--concrete);
   border:1px dashed var(--line);padding:var(--s4);text-align:center;
+}
+
+
+/* ── 本週進度 ── */
+.week-dots{display:grid;grid-template-columns:repeat(7,1fr);gap:var(--s1);margin-bottom:var(--s3)}
+.week-dot{
+  display:grid;gap:3px;justify-items:center;
+  padding:var(--s2) 0;border:1px solid var(--line);
+  background:var(--paper);cursor:pointer;font-family:inherit;
+  border-radius:0;
+}
+.week-dot-day{font-size:10px;color:var(--concrete);font-weight:600}
+.week-dot-mark{font-size:12px;font-weight:800;color:var(--concrete)}
+.week-dot.is-full{background:#2a8;border-color:#2a8}
+.week-dot.is-full .week-dot-day,.week-dot.is-full .week-dot-mark{color:#fff}
+.week-dot.is-partial{background:rgba(42,170,136,.2);border-color:rgba(42,170,136,.5)}
+.week-dot.is-partial .week-dot-mark{color:var(--ink)}
+.week-dot.is-miss{border-color:var(--line)}
+.week-dot.is-miss .week-dot-mark{color:var(--signal)}
+.week-dot.is-future .week-dot-mark{color:var(--ink)}
+.week-dot.is-rest{background:none;border-style:dashed}
+.week-dot:active{opacity:.6}
+.week-sum{
+  display:flex;gap:var(--s4);margin-bottom:var(--s2);
+  font-size:var(--fs-small);color:var(--concrete);
+}
+.week-sum b{color:var(--ink);font-size:var(--fs-lead);font-weight:800}
+.week-next{
+  margin-top:var(--s3);padding-top:var(--s3);
+  border-top:1px solid var(--line);
+  font-size:var(--fs-small);color:var(--concrete);
+}
+.week-next b{color:var(--ink)}
+
+/* ── 組間計時器 ── */
+#restTimer{
+  position:fixed;left:16px;right:16px;
+  bottom:calc(var(--tabbar-h) + 12px + env(safe-area-inset-bottom,0px));
+  z-index:58;display:none;
+  align-items:center;gap:var(--s3);
+  padding:var(--s3) var(--s4);
+  background:var(--ink);color:var(--paper);
+  box-shadow:var(--hard-shadow-lg);
+}
+#restTimer.show{display:flex;animation:bannerSlideIn .22s ease both}
+.rest-timer-num{
+  font-family:'Fragment Mono',ui-monospace,monospace;
+  font-size:30px;font-weight:700;line-height:1;
+  font-variant-numeric:tabular-nums;min-width:74px;
+}
+.rest-timer-label{flex:1;font-size:var(--fs-micro);opacity:.75;line-height:1.4}
+.rest-timer-bar{
+  position:absolute;left:0;bottom:0;height:3px;
+  background:var(--signal);transition:width 1s linear;
+}
+#restTimer button{
+  background:none;border:1px solid rgba(255,255,255,.35);
+  color:var(--paper);font-family:inherit;font-size:var(--fs-micro);font-weight:700;
+  padding:8px 12px;cursor:pointer;border-radius:0;min-height:36px;
+}
+#restTimer button:active{opacity:.6}
+
+/* ── 上次表現 ── */
+.ex-last{
+  font-size:var(--fs-micro);color:var(--concrete);
+  margin-top:2px;font-family:'Fragment Mono',ui-monospace,monospace;
+}
+.ex-last.is-better{color:#2a8}
+
+/* ── 匯出預覽 ── */
+#exportPreviewModal .modal-card{width:min(560px,100%)}
+.export-preview-img{
+  width:100%;height:auto;display:block;
+  border:1px solid var(--line);background:var(--paper);
+}
+.export-preview-note{
+  font-size:var(--fs-micro);color:var(--concrete);
+  margin-top:var(--s2);line-height:1.5;
 }
 
 </style>
@@ -1550,6 +1637,14 @@ body{
         <div id="dpWorkout"></div>
       </div>
 
+      <div class="card" id="weekProgressCard">
+        <div class="card-head">
+          <span class="kicker">本週</span>
+          <span class="card-head-note mono-num" id="weekRangeNote">—</span>
+        </div>
+        <div id="weekProgressBody"></div>
+      </div>
+
       <div class="card card-tight">
         <div class="progress-strip">
           <div class="progress-strip-label">
@@ -1589,6 +1684,12 @@ body{
         </button>
       </div>
 
+      <div class="action-row">
+        <button type="button" id="calToday" class="btn btn-quiet">回到今天</button>
+        <button type="button" id="weekReportBtn" class="btn btn-quiet">週報</button>
+        <button type="button" id="exportCalBtn" class="btn btn-quiet">匯出 PNG</button>
+      </div>
+
       <div class="card card-tight">
         <div class="cal-grid cal-dow mono-num">
           <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
@@ -1609,11 +1710,6 @@ body{
         <div class="msum-grid" id="msumGrid"></div>
       </div>
 
-      <div class="action-row">
-        <button type="button" id="calToday" class="btn btn-quiet">回到今天</button>
-        <button type="button" id="weekReportBtn" class="btn btn-quiet">週報</button>
-        <button type="button" id="exportCalBtn" class="btn btn-quiet">匯出 PNG</button>
-      </div>
 
     </div>
   </section>
@@ -1653,10 +1749,49 @@ body{
         <div class="bw-chart-wrap" id="bwChartWrap"></div>
       </div>
 
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker">每週增減</span>
+          <span class="card-head-note">往下＝變輕</span>
+        </div>
+        <div class="bw-chart-wrap" id="bwWeeklyWrap"></div>
+      </div>
+
     </div>
   </section>
 
 </main>
+
+<div id="restTimer" role="status" aria-live="polite">
+  <div class="rest-timer-num" id="restTimerNum">1:30</div>
+  <div class="rest-timer-label" id="restTimerLabel">組間休息</div>
+  <button type="button" id="restTimerAdd">+30s</button>
+  <button type="button" id="restTimerStop">結束</button>
+  <div class="rest-timer-bar" id="restTimerBar"></div>
+</div>
+
+<!-- 匯出預覽 -->
+<div id="exportPreviewModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="exportPreviewTitle" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="kicker">預覽</div>
+        <div class="modal-title" id="exportPreviewTitle">匯出圖片</div>
+      </div>
+      <button type="button" id="exportPreviewClose" class="icon-btn" aria-label="關閉">
+        <i class="ph ph-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <img id="exportPreviewImg" class="export-preview-img" alt="匯出圖片預覽">
+      <div class="export-preview-note" id="exportPreviewNote"></div>
+      <div class="action-row" style="margin-top:14px">
+        <button type="button" id="exportPreviewCancel" class="btn btn-quiet">取消</button>
+        <button type="button" id="exportPreviewConfirm" class="btn btn-primary">儲存 / 分享</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <nav class="tabbar" role="tablist" aria-label="主要導覽">
   <button type="button" class="tabbar-btn is-active" data-screen="today" role="tab" aria-selected="true">
@@ -1818,7 +1953,7 @@ body{
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v3.0.0';
+const APP_VERSION = 'v3.1.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -2474,8 +2609,7 @@ function computeMonthSummaryData(year, month){
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const today = atNoon(new Date());
 
-  let trainDaysTotal = 0, trainDaysDone = 0, restDays = 0,
-      eatenDays = 0, pastDays = 0, spend = 0, junkDays = 0;
+  let trainDaysTotal = 0, trainDaysDone = 0, restDays = 0, pastDays = 0;
 
   for(let d = 1; d <= daysInMonth; d++){
     const dateObj = atNoon(new Date(year, month, d));
@@ -2661,6 +2795,100 @@ function renderBwStats(){
 }
 
 
+/* ══════════════════════════════════════════════
+   每週增減量
+   折線圖看的是「現在在哪」，這張看的是「變得多快」。
+   做 recomp 時速率比絕對值重要，也看得出哪一週停滯。
+   ══════════════════════════════════════════════ */
+function renderBwWeekly(){
+  const wrap = document.getElementById('bwWeeklyWrap');
+  if(!wrap) return;
+
+  const all = getAllBwEntries();
+  const toDate = e => new Date(e.year, e.month, e.day);
+
+  /* 以週一為界分組，取每週平均，再算週與週之間的差 */
+  const buckets = new Map();
+  all.forEach(e => {
+    const d = toDate(e);
+    const dow = (d.getDay() + 6) % 7;          /* 週一 = 0 */
+    const monday = new Date(d);
+    monday.setDate(d.getDate() - dow);
+    monday.setHours(0,0,0,0);
+    const k = monday.getTime();
+    if(!buckets.has(k)) buckets.set(k, []);
+    buckets.get(k).push(e.w);
+  });
+
+  const weeks = [...buckets.entries()]
+    .sort((a,b) => a[0] - b[0])
+    .map(([k, ws]) => ({ start:new Date(k), avg: ws.reduce((s,x)=>s+x,0) / ws.length }));
+
+  if(weeks.length < 2){
+    wrap.innerHTML = `<div class="bw-empty">
+        <i class="ph ph-chart-bar empty-icon" aria-hidden="true"></i>
+        <div class="empty-title">還需要跨兩週的紀錄</div>
+        <div class="empty-hint">這張圖比較每週的平均體重，至少要有兩個不同週次的資料。</div>
+      </div>`;
+    return;
+  }
+
+  const deltas = weeks.slice(1).map((w,i) => ({
+    start: w.start,
+    d: +(w.avg - weeks[i].avg).toFixed(2),
+  })).slice(-12);   /* 最多顯示近 12 週 */
+
+  const W = 700, H = 300;
+  const padL = 58, padR = 24, padT = 30, padB = 64;
+  const plotW = W - padL - padR;
+  const plotH = H - padT - padB;
+
+  const maxAbs = Math.max(0.3, ...deltas.map(x => Math.abs(x.d)));
+  const zeroY = padT + plotH / 2;
+  /* 留 26px 給長條外側的數值標籤，不然最長的那根會把數字
+     推進下面的日期列裡 */
+  const scale = (plotH / 2 - 26) / maxAbs;
+
+  const slot = plotW / deltas.length;
+  const barW = Math.min(46, slot * 0.6);
+
+  const fmtWeek = d => `${d.getMonth()+1}/${d.getDate()}`;
+
+  let bars = '', labels = '';
+  deltas.forEach((x, i) => {
+    const cx = padL + slot * i + slot / 2;
+    const h = Math.abs(x.d) * scale;
+    const y = x.d <= 0 ? zeroY : zeroY - h;
+    const color = x.d < 0 ? '#2a8' : x.d > 0 ? 'var(--signal)' : 'var(--concrete)';
+    bars += `<rect x="${(cx - barW/2).toFixed(1)}" y="${y.toFixed(1)}"
+               width="${barW.toFixed(1)}" height="${Math.max(2, h).toFixed(1)}"
+               fill="${color}"/>`;
+    /* 只在每隔一根標週次，避免擠在一起 */
+    if(deltas.length <= 8 || i % 2 === 0){
+      labels += `<text x="${cx.toFixed(1)}" y="${H - 16}" text-anchor="middle" class="chart-axis">${fmtWeek(x.start)}</text>`;
+    }
+    /* 數值標在長條外側 */
+    const vy = x.d <= 0 ? y + h + 19 : y - 9;
+    labels += `<text x="${cx.toFixed(1)}" y="${vy.toFixed(1)}" text-anchor="middle" class="chart-note">${x.d > 0 ? '+' : ''}${x.d}</text>`;
+  });
+
+  const avgDelta = +(deltas.reduce((s,x) => s + x.d, 0) / deltas.length).toFixed(2);
+
+  wrap.innerHTML = `
+    <svg viewBox="0 0 ${W} ${H}" class="bw-svg" role="img"
+         aria-label="每週體重增減，近 ${deltas.length} 週，平均每週 ${avgDelta}kg">
+      <line x1="${padL}" y1="${zeroY}" x2="${W-padR}" y2="${zeroY}" stroke="var(--ink)" stroke-width="1.5"/>
+      <text x="${padL-10}" y="${zeroY+5}" text-anchor="end" class="chart-axis">0</text>
+      ${bars}${labels}
+    </svg>
+    <div class="chart-foot">
+      <span>近 ${deltas.length} 週 · 每格為該週平均與前一週的差</span>
+      <span class="chart-foot-delta ${avgDelta < 0 ? 'is-down' : avgDelta > 0 ? 'is-up' : ''}">
+        平均 ${avgDelta > 0 ? '+' : ''}${avgDelta}kg / 週
+      </span>
+    </div>`;
+}
+
 function renderBwChart(){
   const wrap = document.getElementById('bwChartWrap');
   if(!wrap) return;
@@ -2696,8 +2924,8 @@ function renderBwChart(){
   /* ── 幾何：填滿容器寬度，不再無限往右長 ──
      原本 W = entries.length * 48 會讓資料越多圖越寬、
      只能橫向捲動，趨勢反而完全看不出來。 */
-  const W = 700, H = 260;
-  const padL = 40, padR = 52, padT = 22, padB = 30;
+  const W = 700, H = 300;
+  const padL = 58, padR = 76, padT = 30, padB = 42;
   const plotW = W - padL - padR;
   const plotH = H - padT - padB;
 
@@ -2727,7 +2955,7 @@ function renderBwChart(){
     const val = lo + (hi - lo) * (i/3);
     const y = yFor(val);
     grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`
-         +  `<text x="${padL-8}" y="${(y+3.5).toFixed(1)}" text-anchor="end" class="chart-axis">${val.toFixed(1)}</text>`;
+         +  `<text x="${padL-10}" y="${(y+5).toFixed(1)}" text-anchor="end" class="chart-axis">${val.toFixed(1)}</text>`;
   }
 
   /* ── 區間帶：期間內的最低到最高 ── */
@@ -2758,13 +2986,13 @@ function renderBwChart(){
     marks += `<circle cx="${xFor(hiEntry).toFixed(1)}" cy="${yFor(realHi).toFixed(1)}" r="3.5"
                 fill="none" stroke="var(--concrete)" stroke-width="1.5"/>`
           +  `<text x="${xFor(hiEntry).toFixed(1)}" y="${(yFor(realHi)-9).toFixed(1)}"
-                text-anchor="middle" class="chart-note">最高 ${realHi}</text>`;
+                text-anchor="middle" class="chart-note">${realHi}</text>`;
   }
   if(loEntry && loEntry !== last && loEntry !== first && loEntry !== hiEntry){
     marks += `<circle cx="${xFor(loEntry).toFixed(1)}" cy="${yFor(realLo).toFixed(1)}" r="3.5"
                 fill="none" stroke="var(--concrete)" stroke-width="1.5"/>`
           +  `<text x="${xFor(loEntry).toFixed(1)}" y="${(yFor(realLo)+16).toFixed(1)}"
-                text-anchor="middle" class="chart-note">最低 ${realLo}</text>`;
+                text-anchor="middle" class="chart-note">${realLo}</text>`;
   }
 
   /* 最新值直接標在線尾 */
@@ -2772,12 +3000,12 @@ function renderBwChart(){
   const endLabel =
     `<circle cx="${endX.toFixed(1)}" cy="${endY.toFixed(1)}" r="4" fill="var(--signal)"
        stroke="var(--card)" stroke-width="2"/>`
-    + `<text x="${(endX+9).toFixed(1)}" y="${(endY+4).toFixed(1)}" class="chart-value">${last.w}</text>`;
+    + `<text x="${(endX+11).toFixed(1)}" y="${(endY+7).toFixed(1)}" class="chart-value">${last.w}</text>`;
 
   /* ── X 軸：只標頭尾 ── */
   const xAxis =
-    `<text x="${padL}" y="${H-10}" text-anchor="start" class="chart-axis">${fmt(first)}</text>`
-  + `<text x="${W-padR}" y="${H-10}" text-anchor="end" class="chart-axis">${fmt(last)}</text>`;
+    `<text x="${padL}" y="${H-18}" text-anchor="start" class="chart-axis">${fmt(first)}</text>`
+  + `<text x="${W-padR}" y="${H-18}" text-anchor="end" class="chart-axis">${fmt(last)}</text>`;
 
   /* ── 懸停層 ── */
   const hot = entries.map((e,i) =>
@@ -2855,6 +3083,7 @@ function selectDate(dateObj){
 
   renderDayHeader(plan, dateStr);
   renderWorkoutSection(plan, dateStr);
+  renderWeekProgress();
   prefillBwInputs();
   refreshChestWeightStat();
 }
@@ -2872,6 +3101,107 @@ function renderDayHeader(plan, dateStr){
     `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} · ${getTrainText(plan.train)}`;
   const entryDate = document.getElementById('bwEntryDate');
   if(entryDate) entryDate.textContent = `紀錄到 ${formatDateStrPad(dateObj)}${isToday ? '（今天）' : ''}`;
+}
+
+/* 本週進度：休息日時這頁幾乎沒東西，這張卡補上「這週做了多少」 */
+function renderWeekProgress(){
+  const body = document.getElementById('weekProgressBody');
+  const note = document.getElementById('weekRangeNote');
+  if(!body || !selectedDateObj) return;
+
+  const base = atNoon(selectedDateObj);
+  const dow = (base.getDay() + 6) % 7;          /* 週一 = 0 */
+  const monday = new Date(base); monday.setDate(base.getDate() - dow);
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  const today = atNoon(new Date());
+
+  let dayDone = 0, dayTotal = 0, setsDone = 0, setsTotal = 0;
+  let nextTrain = null;
+  const dots = [];
+
+  for(let i = 0; i < 7; i++){
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    const ds = formatDateStr(d);
+    const plan = getPlanForDate(d);
+    const isFuture = d > today;
+
+    if(plan.train === '休'){
+      dots.push({ state:'rest', label:plan.train, d });
+      continue;
+    }
+    dayTotal++;
+    const list = WORKOUTS[plan.train];
+    let done = 0, tot = 0;
+    list.forEach(ex => {
+      tot += ex.sets;
+      for(let n = 1; n <= ex.sets; n++){
+        if(lsGet(`recomp_set_id_${ds}_${ex.id}_${n}`, '0') !== '0') done++;
+      }
+    });
+    setsTotal += tot; setsDone += done;
+    if(done === tot && tot > 0) dayDone++;
+
+    dots.push({
+      state: isFuture ? 'future' : (tot && done === tot ? 'full' : done ? 'partial' : 'miss'),
+      label: plan.train, d, done, tot
+    });
+  }
+
+  note.textContent = `${monday.getMonth()+1}/${monday.getDate()} – ${sunday.getMonth()+1}/${sunday.getDate()}`;
+
+  /* 只有休息日才需要「下次訓練」—— 訓練日看著眼前的清單就好。
+     而且要找選取日之後的，不是本週第一個未來訓練日。 */
+  if(getPlanForDate(base).train === '休'){
+    const cur = new Date(base);
+    for(let i = 1; i <= 14; i++){
+      cur.setDate(cur.getDate() + 1);
+      const p = getPlanForDate(cur);
+      if(p.train !== '休'){ nextTrain = { d:new Date(cur), plan:p }; break; }
+    }
+  }
+
+  const pct = setsTotal ? Math.round(setsDone / setsTotal * 100) : 0;
+  const wd = ['一','二','三','四','五','六','日'];
+
+  body.innerHTML = `
+    <div class="week-dots">
+      ${dots.map((x,i) => `
+        <button type="button" class="week-dot is-${x.state}" data-ymd="${formatDateStr(x.d)}"
+          aria-label="${x.d.getMonth()+1}月${x.d.getDate()}日 ${x.label}">
+          <span class="week-dot-day">${wd[i]}</span>
+          <span class="week-dot-mark">${x.label}</span>
+        </button>`).join('')}
+    </div>
+    <div class="week-sum">
+      <span><b class="mono-num">${dayDone}</b>/${dayTotal} 天完成</span>
+      <span><b class="mono-num">${setsDone}</b>/${setsTotal} 組</span>
+    </div>
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+    ${nextTrain ? `<div class="week-next">下次訓練　<b>${nextTrain.d.getMonth()+1}/${nextTrain.d.getDate()}</b>　${getTrainText(nextTrain.plan.train)}</div>` : ''}`;
+}
+
+/* 往回找同一個動作最近一次有紀錄的日子。
+   漸進超負荷需要參考點 —— 不知道上次做到什麼程度，
+   就只能憑感覺決定今天要不要加重。 */
+function findLastPerformance(ex, beforeDateStr, trainType){
+  const [y,m,d] = beforeDateStr.split('-').map(Number);
+  const cursor = new Date(y, m-1, d);
+  for(let i = 1; i <= 60; i++){
+    cursor.setDate(cursor.getDate() - 1);
+    const plan = getPlanForDate(cursor);
+    if(plan.train !== trainType) continue;
+    const ds = formatDateStr(cursor);
+    let done = 0;
+    for(let n = 1; n <= ex.sets; n++){
+      if(lsGet(`recomp_set_id_${ds}_${ex.id}_${n}`, '0') !== '0') done++;
+    }
+    if(done === 0) continue;
+    /* 重量沒有逐日存檔，但可以還原：起始重量 + 那天為止的升重次數 × 增量
+       （週報的升重清單用的也是同一套算法） */
+    const kg = +(ex.kg + countExerciseBumpsUntil(ex, cursor) * getIncrement(ex.id)).toFixed(1);
+    return { date:new Date(cursor), done, total:ex.sets, kg };
+  }
+  return null;
 }
 
 function renderWorkoutSection(plan, dateStr){
@@ -2917,7 +3247,16 @@ function renderWorkoutSection(plan, dateStr){
           <span class="mono-num ex-weight-label weight-display" data-ex-weight="${escapeHtml(ex.id)}">
             <span class="ex-weight-display" data-edit-weight="${escapeHtml(ex.id)}" title="點擊修改重量">${liveKg}kg</span> · ${ex.reps}
           </span>
-        </div>        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
+        </div>
+        ${(() => {
+          const prev = findLastPerformance(ex, dateStr, plan.train);
+          if(!prev) return '';
+          const md = `${prev.date.getMonth()+1}/${prev.date.getDate()}`;
+          const kgText = `${prev.kg}kg`;
+          const better = liveKg > prev.kg;
+          return `<div class="ex-last${better ? ' is-better' : ''}">上次 ${md} · ${kgText} · ${prev.done}/${prev.total} 組${better ? ' ↑' : ''}</div>`;
+        })()}
+        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
       </div>
     </div>`;
   }).join('') +
@@ -2966,7 +3305,7 @@ function computeWeeklyReport(offset){
   const end = atNoon(new Date(start));
   end.setDate(end.getDate() + 6);
 
-  let trainPlanned = 0, trainDone = 0;
+  let trainPlanned = 0, trainDone = 0, setsDone = 0, setsPlanned = 0, volume = 0;
   const days = [];
 
   for(let i = 0; i < 7; i++){
@@ -2982,6 +3321,19 @@ function computeWeeklyReport(offset){
 
     if(plan.train !== '休') trainPlanned++;
     if(fullyTrained) trainDone++;
+
+    if(plan.train !== '休'){
+      WORKOUTS[plan.train].forEach(ex => {
+        const kg = getExerciseWeight(ex);
+        for(let n = 1; n <= ex.sets; n++){
+          setsPlanned++;
+          if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${n}`, '0') !== '0'){
+            setsDone++;
+            volume += kg;
+          }
+        }
+      });
+    }
 
     days.push({ date: d, dateStr, plan, fullyTrained, bw, exerciseText });
   }
@@ -3025,6 +3377,7 @@ function computeWeeklyReport(offset){
 
   return {
     offset, start, end, days, trainPlanned, trainDone,
+    setsDone, setsPlanned, volume,
     bwEntries, bwSummary, bwDelta, weightChanges
   };
 }
@@ -3036,12 +3389,10 @@ function buildWeeklyReportText(offset){
   lines.push(`RECOMP 週報｜${weekLabelFromOffset(offset)}`);
   lines.push(`${formatDateStrPad(r.start)} ~ ${formatDateStrPad(r.end)}`);
   lines.push(`訓練完成：${r.trainDone}/${r.trainPlanned} 天`);
-  lines.push(`飲食達標：${r.eatenDays}/7 天`);
-  lines.push(`垃圾食物日：${r.junkDays} 天`);
-  lines.push(`平均攝取：P ${r.avgProtein}g / ${r.avgKcal} kcal`);
-  lines.push(`花費：$${r.totalSpend}（日均 $${r.avgSpend}）`);
+
   lines.push(`體重：${r.bwSummary}`);
   lines.push(`升重：${r.weightChanges.length ? r.weightChanges.map(x => `${x.name} ${x.before}→${x.after}kg`).join('；') : '無升級'}`);
+  lines.push(`完成組數：${r.setsDone}/${r.setsPlanned}　訓練量：${r.volume.toLocaleString()}kg`);
   lines.push('');
   lines.push('每日明細：');
 
@@ -3100,22 +3451,13 @@ function renderWeeklyReport(offset){
         <div class="msum-num mono-num">${r.trainDone}<span style="font-size:13px;color:var(--concrete)">/${r.trainPlanned} 天</span></div>
       </div>
       <div class="week-cell">
-        <div class="kicker" style="margin-bottom:2px">飲食達標</div>
-        <div class="msum-num mono-num">${r.eatenDays}<span style="font-size:13px;color:var(--concrete)">/7 天</span></div>
+        <div class="kicker" style="margin-bottom:2px">完成組數</div>
+        <div class="msum-num mono-num">${r.setsDone}<span style="font-size:13px;color:var(--concrete)">/${r.setsPlanned}</span></div>
       </div>
       <div class="week-cell">
-        <div class="kicker" style="margin-bottom:2px">平均蛋白 / 熱量</div>
-        <div class="msum-num mono-num" style="font-size:18px">P${r.avgProtein}g</div>
-        <div class="small muted" style="margin-top:4px">${r.avgKcal} kcal / day</div>
-      </div>
-      <div class="week-cell">
-        <div class="kicker" style="margin-bottom:2px">花費</div>
-        <div class="msum-num mono-num">$${r.totalSpend}</div>
-        <div class="small muted" style="margin-top:4px">日均 $${r.avgSpend}</div>
-      </div>
-      <div class="week-cell">
-        <div class="kicker" style="margin-bottom:2px">垃圾食物日</div>
-        <div class="msum-num mono-num">${r.junkDays}<span style="font-size:13px;color:var(--concrete)"> 天</span></div>
+        <div class="kicker" style="margin-bottom:2px">訓練量</div>
+        <div class="msum-num mono-num" style="font-size:18px">${r.volume.toLocaleString()}<span style="font-size:13px;color:var(--concrete)">kg</span></div>
+        <div class="small muted" style="margin-top:4px">重量 × 組數</div>
       </div>
       <div class="week-cell">
         <div class="kicker" style="margin-bottom:2px">體重摘要</div>
@@ -3439,7 +3781,7 @@ function drawCalendarToCanvas(){
   const s = computeMonthSummaryData(calYear, calMonth);
   ctx.font = '12px monospace';
   ctx.fillText(
-    `訓練 ${s.trainDaysDone}/${s.trainDaysTotal} · 飲食 ${s.eatenDays}/${s.pastDays} · 花費 $${s.spend} · junk ${s.junkDays}`,
+    `訓練 ${s.trainDaysDone}/${s.trainDaysTotal} 天 · 組數 ${s.setsDone}/${s.setsPlanned} · 休息 ${s.restDays} 天`,
     padX, 118
   );
 
@@ -3738,11 +4080,12 @@ function initPwa(){
    SETTINGS
    ══════════════════════════════════════════════ */
 const PREFS = {
-  vibration:  { key:'recomp_pref_vibration',  label:'震動回饋',       desc:'訓練打勾、升重、體重儲存時震動', default:'1' },
-  heatmap:    { key:'recomp_pref_heatmap',    label:'月曆 Heatmap',  desc:'根據完成度顯示月曆格子底色',     default:'1' },
-  chartMA:    { key:'recomp_pref_chart_ma',   label:'圖表 7日均線',  desc:'體重圖表顯示 7 日移動平均線',    default:'1' },
-  chartTarget:{ key:'recomp_pref_chart_zone', label:'圖表目標區間',  desc:'體重圖表顯示 73–77kg 目標帶',    default:'1' },
+  restTimer:  { key:'recomp_pref_rest_timer', label:'組間計時器',    desc:'打完一組自動開始倒數 90 秒',     default:'1' },
+  vibration:  { key:'recomp_pref_vibration',  label:'震動回饋',      desc:'訓練打勾、升重、體重儲存時震動', default:'1' },
+  heatmap:    { key:'recomp_pref_heatmap',    label:'月曆熱力圖',    desc:'依完成度顯示月曆格子底色',       default:'1' },
+  exportPreview:{ key:'recomp_pref_export_preview', label:'匯出前預覽', desc:'儲存或分享圖片前先看一次成品', default:'1' },
 };
+const REST_SECONDS = 90;
 
 /* ── Exercise increment ── */
 function getIncrement(exId){
@@ -3875,9 +4218,7 @@ document.getElementById('settingsList').addEventListener('click', e => {
       renderCalendar(calYear, calMonth);
       if(selectedDateObj) selectDate(selectedDateObj);
     }
-    if(prefId === 'chartMA' || prefId === 'chartTarget'){
-      renderBwChart();
-    }
+    if(prefId === 'restTimer' && val === '0') stopRestTimer();
   });
 
   /* Escape 關閉 */
@@ -3890,48 +4231,79 @@ function checkRemoteVersion(){
     .then(res => res.ok ? res.json() : null)
     .then(data => {
       if(!data || !data.version) return;
-      if(data.version !== APP_VERSION){
-        showVersionUpdateBanner(data.version);
+
+      /* 版本相同就什麼都不做，並清掉重整記號 */
+      if(data.version === APP_VERSION){
+        try{ localStorage.removeItem('rcmeta_reloadedFor'); }catch(e){}
+        return;
       }
+
+      /* 已經為了這個版本重整過一次卻還是舊的，
+         代表拿到的是快取或 CDN 還沒更新，再跳一樣的提示只會變成
+         「按了沒用、只能按稍後」的迴圈。改成說明狀況、不再請使用者重整。 */
+      if(lsGet('rcmeta_reloadedFor', '') === data.version){
+        showVersionUpdateBanner(data.version, true);
+        return;
+      }
+      showVersionUpdateBanner(data.version, false);
     })
     .catch(() => {});
 }
 
-function showVersionUpdateBanner(remoteVer){
+function showVersionUpdateBanner(remoteVer, stuck){
   let banner = document.getElementById('versionUpdateBanner');
   if(!banner){
     banner = document.createElement('div');
     banner.id = 'versionUpdateBanner';
-    banner.innerHTML = `
-      <div>
-        <div class="kicker">版本更新</div>
-        <div style="font-weight:800;font-size:14px;margin-top:2px">有新版本 ${escapeHtml(remoteVer)}</div>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button type="button" id="versionLaterBtn" class="btn">稍後</button>
-        <button type="button" id="versionReloadBtn" class="btn-signal">重新載入</button>
-      </div>`;
     document.body.appendChild(banner);
+  }
 
-    document.getElementById('versionLaterBtn').addEventListener('click', () => {
-      banner.classList.remove('show');
-    });
-    document.getElementById('versionReloadBtn').addEventListener('click', () => {
-      if('serviceWorker' in navigator){
-        navigator.serviceWorker.getRegistrations().then(regs => {
-          regs.forEach(r => r.unregister());
-          if('caches' in window){
-            caches.keys().then(keys => keys.forEach(k => caches.delete(k)))
-              .finally(() => window.location.reload(true));
-          }else{
-            window.location.reload(true);
-          }
-        });
-      }else{
-        window.location.reload(true);
-      }
+  banner.innerHTML = stuck
+    ? `<div class="nag-text">
+         <strong>更新還沒生效</strong>
+         <div class="muted">伺服器上是 ${escapeHtml(remoteVer)}，這台裝置仍是 ${escapeHtml(APP_VERSION)}。
+         重整過一次了，通常是 CDN 還在送舊檔，過幾分鐘會自己好。</div>
+       </div>
+       <div class="nag-actions">
+         <button type="button" id="versionLaterBtn" class="btn">知道了</button>
+       </div>`
+    : `<div class="nag-text">
+         <strong>有新版本 ${escapeHtml(remoteVer)}</strong>
+         <div class="muted">目前是 ${escapeHtml(APP_VERSION)}</div>
+       </div>
+       <div class="nag-actions">
+         <button type="button" id="versionLaterBtn" class="btn">稍後</button>
+         <button type="button" id="versionReloadBtn" class="btn-primary">更新</button>
+       </div>`;
+
+  document.getElementById('versionLaterBtn').addEventListener('click', () => {
+    banner.classList.remove('show');
+  });
+
+  const reloadBtn = document.getElementById('versionReloadBtn');
+  if(reloadBtn){
+    reloadBtn.addEventListener('click', async () => {
+      reloadBtn.disabled = true;
+      reloadBtn.textContent = '更新中…';
+      /* 記下這次是為了哪個版本重整，下次還是舊的就不再要求重整 */
+      lsSet('rcmeta_reloadedFor', remoteVer);
+      try{
+        if('serviceWorker' in navigator){
+          const regs = await navigator.serviceWorker.getRegistrations();
+          await Promise.all(regs.map(r => r.unregister()));
+        }
+        if('caches' in window){
+          const keys = await caches.keys();
+          await Promise.all(keys.map(k => caches.delete(k)));
+        }
+      }catch(e){}
+      /* reload(true) 的布林參數現代瀏覽器已忽略，
+         所以改成帶一個新的查詢字串重新導向，強制抓新文件 */
+      const url = location.pathname + '?v=' + Date.now();
+      location.replace(url);
     });
   }
+
   banner.classList.add('show');
 }
   
@@ -4129,8 +4501,12 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     btn.classList.toggle('done', next !== '0');
     btn.classList.toggle('cap', next === '2');
     if(getPref('vibration') && navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
+    /* 剛打完一組（不是取消）就開始倒數 */
+    if(next !== '0') startRestTimer(REST_SECONDS);
+    else stopRestTimer();
     _bumpCountCache.clear();
     renderMonthSummary();
+    renderWeekProgress();
     refreshWeeklyIfOpen();
     refreshSearchIfOpen();
 
@@ -4209,7 +4585,35 @@ if(bwFlashInput){
 }
 /* haptic feedback */
 if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
-    renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+    renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+  });
+
+  /* 計時器 */
+  document.getElementById('restTimerStop').addEventListener('click', stopRestTimer);
+  document.getElementById('restTimerAdd').addEventListener('click', () => {
+    if(!_restTick && _restEnd < Date.now()) return;
+    _restEnd += 30000; _restTotal += 30;
+    paintRest();
+  });
+
+  /* 匯出預覽 */
+  const epModal = document.getElementById('exportPreviewModal');
+  document.getElementById('exportPreviewClose').addEventListener('click', closeExportPreview);
+  document.getElementById('exportPreviewCancel').addEventListener('click', closeExportPreview);
+  epModal.addEventListener('click', e => { if(e.target === epModal) closeExportPreview(); });
+  document.getElementById('exportPreviewConfirm').addEventListener('click', () => {
+    if(!_pendingExport) return;
+    const { canvas, filename, okMsg, title } = _pendingExport;
+    closeExportPreview();
+    saveCanvasAsImage(canvas, filename, okMsg, title);
+  });
+
+  /* 本週進度的日期方塊 */
+  document.getElementById('weekProgressBody').addEventListener('click', e => {
+    const dot = e.target.closest('.week-dot[data-ymd]');
+    if(!dot) return;
+    const [y,m,d] = dot.dataset.ymd.split('-').map(Number);
+    selectDate(new Date(y, m-1, d));
   });
 
   document.getElementById('bwRangeSwitch').addEventListener('click', e => {
@@ -4278,17 +4682,19 @@ searchClearBtn.addEventListener('click', () => {
   exportCalModal.addEventListener('click', e => { if(e.target === exportCalModal) closeExportCalModal(); });
   document.getElementById('downloadCalBtn').addEventListener('click', () => {
     if(!exportCanvasRef) return;
-    saveCanvasAsImage(
-      exportCanvasRef,
-      `recomp-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`,
-      '已匯出 PNG',
-      '月曆 PNG'
-    );
+    const fname = `recomp-calendar-${calYear}-${String(calMonth+1).padStart(2,'0')}.png`;
+    if(getPref('exportPreview')){
+      closeExportCalModal(false);
+      openExportPreview(exportCanvasRef, fname, '已匯出 PNG', '月曆 PNG', '確認後才會儲存或分享');
+    }else{
+      saveCanvasAsImage(exportCanvasRef, fname, '已匯出 PNG', '月曆 PNG');
+    }
   });
 
   document.addEventListener('keydown', e => {
     if(e.key !== 'Escape') return;
-    if(weeklyModal.classList.contains('show')) closeWeeklyModal();
+    if(document.getElementById('exportPreviewModal').classList.contains('show')) closeExportPreview();
+    else if(weeklyModal.classList.contains('show')) closeWeeklyModal();
     else if(exportCalModal.classList.contains('show')) closeExportCalModal();
     else if(searchDrawer.classList.contains('open')) closeSearchDrawer();
   });
@@ -4387,7 +4793,7 @@ searchClearBtn.addEventListener('click', () => {
         showDataMsg(parts.join('，'));
 
         renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
-        refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+        refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
         renderStorageStatus();
       }catch(err){
         showDataMsg('匯入失敗：' + (err && err.message ? err.message : '檔案格式不正確'), true);
@@ -4407,7 +4813,7 @@ searchClearBtn.addEventListener('click', () => {
     _bumpCountCache.clear();
     showDataMsg(`已清除 ${n} 筆紀錄，可按「還原上一次變更」救回`);
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
-    refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+    refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
     renderStorageStatus();
   });
 
@@ -4422,7 +4828,7 @@ searchClearBtn.addEventListener('click', () => {
     _bumpCountCache.clear();
     showDataMsg(`已還原 ${n} 筆紀錄`);
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
-    refreshChestWeightStat(); renderBwStats(); renderBwChart(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+    refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
     renderStorageStatus();
   });
 
@@ -4431,6 +4837,7 @@ searchClearBtn.addEventListener('click', () => {
   selectDate(initDate);
   renderBwStats();
   renderBwChart();
+  renderBwWeekly();
   initPwa();
   checkRemoteVersion();
   initSettings();
@@ -4450,12 +4857,12 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     flashToast('休息日無訓練可匯出');
     return;
   }
-  saveCanvasAsImage(
-    canvas,
-    `recomp-training-${formatDateStrPad(selectedDateObj)}.png`,
-    '已匯出訓練卡',
-    '今日訓練卡'
-  );
+  const fname = `recomp-training-${formatDateStrPad(selectedDateObj)}.png`;
+  if(getPref('exportPreview')){
+    openExportPreview(canvas, fname, '已匯出訓練卡', '今日訓練卡', '確認後才會儲存或分享');
+  }else{
+    saveCanvasAsImage(canvas, fname, '已匯出訓練卡', '今日訓練卡');
+  }
 });  /* ── Tab switching ── */
 document.querySelector('.tabbar').addEventListener('click', e => {
   const btn = e.target.closest('[data-screen]');
@@ -4466,6 +4873,84 @@ const verLabel = document.getElementById('appVersionLabel');
 if(verLabel) verLabel.textContent = APP_VERSION;
 console.log('RECOMP', APP_VERSION, 'schema', SCHEMA_VERSION);
 }
+/* ══════════════════════════════════════════════
+   組間休息計時器
+   訓練規則寫著組間 90 秒，但原本要另外開一個 app 才能計時。
+   打完一組自動開始倒數。
+   ══════════════════════════════════════════════ */
+let _restTick = null, _restEnd = 0, _restTotal = 0;
+
+function stopRestTimer(){
+  clearInterval(_restTick); _restTick = null;
+  const el = document.getElementById('restTimer');
+  if(el) el.classList.remove('show');
+}
+
+function paintRest(){
+  const left = Math.max(0, Math.round((_restEnd - Date.now()) / 1000));
+  const num = document.getElementById('restTimerNum');
+  const bar = document.getElementById('restTimerBar');
+  if(num) num.textContent = `${Math.floor(left/60)}:${String(left%60).padStart(2,'0')}`;
+  if(bar) bar.style.width = (_restTotal ? (left / _restTotal * 100) : 0) + '%';
+
+  if(left <= 0){
+    clearInterval(_restTick); _restTick = null;
+    const lab = document.getElementById('restTimerLabel');
+    if(lab) lab.textContent = '休息結束，可以下一組了';
+    if(num) num.textContent = '0:00';
+    if(getPref('vibration') && navigator.vibrate) navigator.vibrate([90,60,90]);
+    setTimeout(stopRestTimer, 6000);
+  }
+}
+
+function startRestTimer(seconds){
+  if(!getPref('restTimer')) return;
+  const el = document.getElementById('restTimer');
+  if(!el) return;
+  _restTotal = seconds;
+  _restEnd = Date.now() + seconds * 1000;
+  document.getElementById('restTimerLabel').textContent = '組間休息';
+  el.classList.add('show');
+  clearInterval(_restTick);
+  paintRest();
+  _restTick = setInterval(paintRest, 250);
+}
+
+/* ══════════════════════════════════════════════
+   匯出預覽
+   原本按下去就直接跳系統儲存 / 分享，使用者根本
+   沒看過自己會存到什麼圖。改成先給預覽再決定。
+   ══════════════════════════════════════════════ */
+let _pendingExport = null;
+
+function openExportPreview(canvas, filename, okMsg, title, note){
+  const modal = document.getElementById('exportPreviewModal');
+  if(!modal){ saveCanvasAsImage(canvas, filename, okMsg, title); return; }
+  /* 預覽要看清楚，浮動提醒先讓開 */
+  hideBackupNag();
+  stopRestTimer();
+  let dataUrl = '';
+  try{ dataUrl = canvas.toDataURL('image/png'); }
+  catch(e){ flashToast('產生圖片失敗'); return; }
+
+  _pendingExport = { canvas, filename, okMsg, title };
+  document.getElementById('exportPreviewImg').src = dataUrl;
+  document.getElementById('exportPreviewTitle').textContent = title;
+  document.getElementById('exportPreviewNote').textContent =
+    `${note || ''}${note ? ' · ' : ''}${canvas.width}×${canvas.height}px · ${filename}`;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  document.getElementById('exportPreviewClose').focus();
+}
+
+function closeExportPreview(){
+  const modal = document.getElementById('exportPreviewModal');
+  if(!modal) return;
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+  _pendingExport = null;
+}
+
 /* ══════════════════════════════════════════════
    畫面切換
    ══════════════════════════════════════════════ */
@@ -4486,7 +4971,7 @@ function showScreen(name){
   });
 
   /* 切到體重頁時重畫，因為隱藏時量不到寬度 */
-  if(name === 'weight'){ renderBwStats(); renderBwChart(); }
+  if(name === 'weight'){ renderBwStats(); renderBwChart(); renderBwWeekly(); }
   window.scrollTo({ top:0, behavior:'instant' in window ? 'instant' : 'auto' });
 }
 
