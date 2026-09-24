@@ -296,6 +296,118 @@ test.describe('主題與設定', () => {
 });
 
 
+test.describe('今日畫面', () => {
+  test('做完最後一組 → 完成畫面，含升重與訓練量', async ({ page }) => {
+    await open(page);
+    const rows = page.locator('#dpWorkout [data-ex-row]');
+    const n = await rows.count();
+    for(let r = 0; r < n; r++){
+      const sets = rows.nth(r).locator('.set-check');
+      const c = await sets.count();
+      for(let i = 0; i < c; i++){
+        await sets.nth(i).click();
+        if(r === 0) await sets.nth(i).click();          /* 胸推全紅 → 升重 */
+      }
+    }
+    const layer = page.locator('#finishLayer');
+    await expect(layer).toBeVisible();
+    await expect(page.locator('#finishSetsTotal')).toHaveText('/16 組');
+    await expect(page.locator('#finishLetter')).toHaveText('A');
+    await expect(page.locator('#finishBumps')).toContainText('36 → 38.5kg');
+    await expect(page.locator('#sessionBar .sb-seg.is-cap')).toHaveCount(4);
+    await expect(page.locator('#dpSessionCount')).toHaveText('16/16 組');
+    await page.click('#finishCloseBtn');
+    await expect(layer).toBeHidden();
+    /* 取消一組再打回來，不會再跳一次 */
+    const last = rows.nth(n - 1).locator('.set-check').last();
+    await last.click(); await last.click();
+    await page.waitForTimeout(600);
+    await expect(layer).toBeHidden();
+    /* Esc 也能關 */
+    await page.evaluate(() => showFinish('2026-9-23'));
+    await expect(layer).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(layer).toBeHidden();
+  });
+
+  test('計時器告訴你下一組是什麼', async ({ page }) => {
+    await open(page);
+    await page.locator('[data-ex-row="chest_press"] .set-check').first().click();
+    await expect(page.locator('#restTimerLabel')).toContainText('第 2 組');
+    await expect(page.locator('#restTimerLabel b')).toHaveText('合式胸部推舉機');
+  });
+
+  test('日期列直接跳到那一天；回到今天', async ({ page }) => {
+    await open(page);
+    await expect(page.locator('#dpToday')).toBeHidden();
+    await page.click('#weekStrip .ws-day[data-ymd="2026-9-21"]');
+    await expect(page.locator('#dpKicker')).toContainText('09/21');
+    await expect(page.locator('#weekStrip .ws-day.is-selected')).toHaveAttribute('data-ymd', '2026-9-21');
+    await page.click('#dpToday');
+    await expect(page.locator('#dpKicker')).toContainText('今天');
+  });
+
+  test('休息日的恢復清單會存起來', async ({ page }) => {
+    await open(page);
+    await page.click('#dpPrev');                       /* 9/22 休 */
+    await expect(page.locator('#dpTitle')).toHaveText('休息日');
+    await page.click('[data-recovery="sleep"]');
+    await expect(page.locator('[data-recovery="sleep"]')).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.locator('#dpSessionCount')).toHaveText('1/3 項');
+    expect(await stored(page, 'recomp_rest_2026-9-22_sleep')).toBe('1');
+    await page.reload();
+    await page.click('#dpPrev');
+    await expect(page.locator('[data-recovery="sleep"]')).toHaveClass(/is-done/);
+    /* 點「下次訓練」直接跳過去 */
+    await page.click('.rest-next');
+    await expect(page.locator('#dpTitle')).toContainText('A日');
+  });
+});
+
+
+test.describe('升級安全', () => {
+  /* fixtures/v3.2.0-storage.json：用真正的 v3.2.0（commit 40c98ad）在瀏覽器裡
+     操作出來的 localStorage —— 三個月的打勾、體重、手動改過的重量、偏好設定。
+     舊紀錄只存在使用者手機裡，升級絕對不能動到任何一筆。 */
+  const FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests/fixtures/v3.2.0-storage.json'), 'utf8'));
+  const load = `(() => { const d = ${JSON.stringify(FIXTURE.data)}; for(const k in d) localStorage.setItem(k, d[k]); })()`;
+  const dump = page => page.evaluate(() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)])));
+  const records = obj => Object.fromEntries(Object.entries(obj).filter(([k]) => k.startsWith('recomp_')));
+
+  test('打開新版、逛過每一頁，舊紀錄一筆都沒變', async ({ page }) => {
+    await open(page, load);
+    for(const s of ['calendar', 'progress', 'weight', 'today']) await page.click(`.tabbar-btn[data-screen="${s}"]`);
+    await page.click('#searchOpenBtn'); await page.keyboard.press('Escape');
+    await page.click('#settingsBtn'); await page.keyboard.press('Escape');
+    expect(records(await dump(page))).toEqual(records(FIXTURE.data));
+  });
+
+  test('新版讀得懂舊資料', async ({ page }) => {
+    await open(page, load);
+    await page.click('.tabbar-btn[data-screen="weight"]');
+    await expect(page.locator('#bwStatsRow .stat-cell-val').first()).toHaveText('75.8kg');
+    await page.click('.tabbar-btn[data-screen="progress"]');
+    await expect(page.locator('#pgTitle')).toHaveText(/^\+\d/);
+    await expect(page.locator('.pg-lift[data-lift="triceps_press"] .pg-lift-meta')).toContainText('45kg');
+    await expect(page.locator('html')).toHaveAttribute('data-theme-pref', 'light');
+  });
+
+  test('在新版打勾，只會新增紀錄，不會改到其他天', async ({ page }) => {
+    await open(page, load);
+    const todayKey = 'recomp_set_id_2026-9-23_pec_fly_1';
+    const orig = records(FIXTURE.data);
+    const beforeToday = orig[todayKey] ?? null;
+    await page.locator('[data-ex-row="pec_fly"] .set-check').first().click();
+    const now = records(await dump(page));
+    for(const [k, v] of Object.entries(orig)){
+      if(k === todayKey) continue;
+      expect(now[k], k).toBe(v);
+    }
+    expect(now[todayKey]).not.toBe(beforeToday);
+  });
+});
+
+
 test('每個分頁都能正常切換', async ({ page }) => {
   await open(page);
   for(const name of ['calendar', 'progress', 'weight', 'today']){

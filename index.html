@@ -2059,6 +2059,312 @@ body{
 .chart-bar-now{fill:var(--signal-fill)}
 .chart-bar{fill:var(--ink);opacity:.82}
 
+
+/* ══════════════════════════════════════════════════════════════
+   今日 v5
+   ──────────────────────────────────────────────────────────────
+   這個畫面是在健身房裡、兩組之間、手上還有汗的時候用的。
+   所以：
+   · 打勾按鈕從 21px 放大到 52px（Apple 建議的觸控下限是 44px）
+   · 一眼看到「今天練到哪」：每一組一格的進度條
+   · 導覽換成一週七天的日期列，同時就是本週完成度
+   · 動態只用在「回饋」上：打勾、完成、升重，其餘保持安靜
+   全部限定在 #screenToday 底下，蓋過前面幾層歷史樣式。
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 標題 ── */
+#screenToday .day-head{gap:6px;margin-bottom:0}
+.day-kicker-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);min-height:28px}
+#screenToday .day-title{
+  font-size:clamp(40px, 12vw, 56px);
+  line-height:1;letter-spacing:-.035em;
+}
+.day-meta{font-size:var(--fs-small);color:var(--concrete);letter-spacing:.01em}
+.today-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  height:28px;padding:0 12px;
+  background:var(--ink);color:var(--paper);border:none;border-radius:999px;
+  font-family:inherit;font-size:var(--fs-micro);font-weight:var(--fw-strong);
+  cursor:pointer;animation:popIn var(--dur-base) var(--ease-out);
+}
+.today-pill[hidden]{display:none}
+.today-pill:active{opacity:.7}
+
+/* 進場：標題由下往上浮出，一次一行 */
+#screenToday.is-active .day-head > *,
+#screenToday.is-active .day-nav{animation:rowIn 520ms var(--ease-out) both}
+#screenToday.is-active .day-head > :nth-child(2){animation-delay:40ms}
+#screenToday.is-active .day-head > :nth-child(3){animation-delay:80ms}
+#screenToday.is-active .day-nav{animation-delay:120ms}
+@keyframes rowIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── 一週日期列 ── */
+#screenToday .day-nav{
+  display:grid;grid-template-columns:28px 1fr 28px;align-items:stretch;gap:2px;
+  margin-top:calc(var(--s2) * -1);
+}
+#screenToday .day-nav .icon-btn{width:28px;height:auto;font-size:16px;color:var(--concrete)}
+.week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.ws-day{
+  position:relative;
+  display:grid;justify-items:center;gap:3px;
+  padding:8px 0 10px;
+  background:none;border:none;border-radius:0;
+  color:var(--ink);font-family:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);
+}
+.ws-dow{font-size:10px;font-weight:var(--fw-medium);color:var(--concrete);letter-spacing:.04em}
+.ws-num{font-family:'Fragment Mono',ui-monospace,monospace;font-size:17px;font-weight:700;line-height:1.15}
+.ws-tag{font-size:10px;font-weight:var(--fw-strong);color:var(--concrete);line-height:1}
+.ws-bar{position:absolute;left:22%;right:22%;bottom:3px;height:3px;background:var(--line);overflow:hidden}
+.ws-bar i{display:block;height:100%;background:var(--positive-fill);transition:width var(--dur-slow) var(--ease-out)}
+.ws-day.is-rest .ws-bar{background:none}
+.ws-day.is-rest .ws-num{color:var(--concrete);font-weight:500}
+.ws-day.is-miss .ws-bar{background:color-mix(in srgb,var(--signal-fill) 45%,transparent)}
+.ws-day.is-today .ws-dow{color:var(--signal-text);font-weight:var(--fw-strong)}
+.ws-day.is-selected{background:var(--ink);color:var(--paper)}
+.ws-day.is-selected .ws-dow,.ws-day.is-selected .ws-tag,.ws-day.is-selected .ws-num{color:var(--paper)}
+.ws-day.is-selected .ws-bar{background:color-mix(in srgb,var(--paper) 25%,transparent)}
+.ws-day.is-selected.is-today .ws-dow{color:var(--signal-fill)}
+.ws-day:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.ws-day:active{opacity:.6}
+
+/* ── 本次訓練進度條：一組一格，動作之間留大一點的縫 ── */
+.session-bar{display:flex;gap:8px;margin:0 0 var(--s2)}
+.session-bar:empty{display:none}
+.sb-group{display:flex;gap:3px;min-width:0}
+.sb-seg{flex:1;height:6px;background:var(--line);transition:background var(--dur-base) var(--ease-out)}
+.sb-seg.is-done{background:var(--ink)}
+.sb-seg.is-cap{background:var(--signal-fill)}
+#dpSessionCount b{color:var(--ink);font-weight:var(--fw-strong)}
+
+/* ── 動作列 ── */
+#screenToday .ex-row{
+  display:block;
+  padding:var(--s4) 0;
+  border-top:none;border-bottom:var(--hairline) solid var(--line);
+  animation:rowIn 460ms var(--ease-out) both;
+  animation-delay:calc(var(--i, 0) * 45ms + 60ms);
+}
+#screenToday .ex-row:last-of-type{border-bottom:var(--hairline) solid var(--line)}
+#screenToday .ex-name{
+  display:flex;align-items:center;gap:var(--s2);
+  font-size:var(--fs-lead);font-weight:var(--fw-strong);
+  letter-spacing:var(--tr-title);line-height:var(--lh-snug);
+}
+.ex-done{
+  color:var(--positive);font-size:18px;line-height:1;
+  opacity:0;transform:scale(.5);
+  transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out);
+}
+.ex-row.is-complete .ex-done{opacity:1;transform:none}
+.ex-sub{
+  margin-top:2px;
+  font-size:var(--fs-small);color:var(--concrete);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:0 var(--s2);
+}
+#screenToday .ex-weight-label{color:var(--concrete);font-size:var(--fs-small)}
+#screenToday .ex-weight-display{
+  color:var(--ink);font-weight:var(--fw-strong);
+  border-bottom:1px dashed color-mix(in srgb,var(--ink) 35%,transparent);
+  padding-bottom:1px;
+}
+#screenToday .ex-note{font-size:var(--fs-small);color:var(--concrete)}
+#screenToday .ex-note::before{content:'·';margin-right:var(--s2)}
+.ex-body{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
+  margin-top:var(--s3);
+}
+#screenToday .ex-checks{display:flex;gap:8px;padding:0}
+#screenToday .ex-last{
+  margin:0;text-align:right;line-height:1.5;
+  font-size:var(--fs-micro);color:var(--concrete);
+}
+#screenToday .ex-last b{color:var(--ink);font-weight:var(--fw-strong)}
+#screenToday .ex-last.is-better b{color:var(--positive)}
+#screenToday .ex-hint{
+  padding-top:var(--s3);font-size:var(--fs-micro);color:var(--concrete);line-height:1.6;
+}
+
+/* ── 打勾按鈕 ── */
+#screenToday .set-check{
+  width:52px;height:52px;flex:0 0 52px;
+  display:grid;place-items:center;position:relative;
+  background:var(--card);
+  border:1.5px solid var(--line);border-radius:0;box-shadow:none;
+  color:var(--concrete);
+  font-family:'Fragment Mono',ui-monospace,monospace;font-size:13px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background var(--dur-fast) var(--ease-out),
+             border-color var(--dur-fast) var(--ease-out),
+             color var(--dur-fast) var(--ease-out),
+             transform 160ms var(--ease-out);
+}
+#screenToday .set-check::after{display:none}
+#screenToday .set-check:hover{border-color:var(--concrete)}
+#screenToday .set-check:active{transform:scale(.9);box-shadow:none;opacity:1}
+#screenToday .set-check svg{
+  position:absolute;width:26px;height:26px;
+  fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:square;stroke-linejoin:miter;
+  stroke-dasharray:24;stroke-dashoffset:24;
+  transition:stroke-dashoffset 280ms var(--ease-out) 30ms;
+}
+.set-n{transition:opacity 120ms linear}
+#screenToday .set-check.done{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+#screenToday .set-check.done svg{stroke-dashoffset:0}
+#screenToday .set-check.done .set-n{opacity:0}
+#screenToday .set-check.cap{background:var(--signal-fill);border-color:var(--signal-fill);color:#fff}
+#screenToday .set-check.cap::before{
+  content:'上限';position:absolute;bottom:3px;left:0;right:0;text-align:center;
+  font-family:'Inter','Noto Sans TC',sans-serif;font-size:8px;font-weight:700;letter-spacing:.08em;
+}
+#screenToday .set-check.cap svg{transform:translateY(-3px)}
+[data-theme="dark"] #screenToday .set-check.cap{color:#18181b}
+#screenToday .set-check.pop{animation:setPop 340ms var(--ease-out)}
+@keyframes setPop{0%{transform:scale(.86)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
+
+#screenToday .bump-badge{
+  display:inline-flex;align-items:center;
+  background:var(--signal-fill);color:#fff;border-radius:0;
+  font-family:'Fragment Mono',ui-monospace,monospace;font-size:10px;font-weight:700;
+  padding:2px 6px;margin-left:6px;vertical-align:1px;
+}
+[data-theme="dark"] #screenToday .bump-badge{color:#18181b}
+#screenToday .bump-undo{font-size:var(--fs-micro)}
+
+/* ── 休息日 ── */
+.rest-lead{font-size:var(--fs-body);line-height:var(--lh-loose);color:var(--concrete);margin-bottom:var(--s4)}
+.recovery-list{display:grid;gap:0;border-top:var(--hairline) solid var(--line)}
+.recovery-item{
+  display:grid;grid-template-columns:44px 1fr;align-items:center;gap:var(--s3);
+  padding:var(--s3) 0;
+  background:none;border:none;border-bottom:var(--hairline) solid var(--line);
+  color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  animation:rowIn 460ms var(--ease-out) both;animation-delay:calc(var(--i, 0) * 60ms + 60ms);
+}
+.recovery-check{
+  width:44px;height:44px;display:grid;place-items:center;
+  border:1.5px solid var(--line);border-radius:50%;
+  color:var(--paper);
+  transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),transform 160ms var(--ease-out);
+}
+.recovery-check svg{
+  width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:square;
+  stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset 280ms var(--ease-out) 30ms;
+}
+.recovery-item.is-done .recovery-check{background:var(--positive-fill);border-color:var(--positive-fill)}
+.recovery-item.is-done .recovery-check svg{stroke-dashoffset:0}
+.recovery-item:active .recovery-check{transform:scale(.9)}
+.recovery-text b{display:block;font-size:var(--fs-lead);font-weight:var(--fw-strong);letter-spacing:var(--tr-title)}
+.recovery-text span{display:block;font-size:var(--fs-small);color:var(--concrete);margin-top:1px}
+.recovery-item.is-done .recovery-text b{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--ink) 35%,transparent)}
+.rest-next{
+  margin-top:var(--s5);padding:var(--s4);
+  background:var(--ink);color:var(--paper);
+  display:grid;gap:4px;cursor:pointer;border:none;width:100%;text-align:left;font-family:inherit;
+}
+.rest-next .kicker{color:color-mix(in srgb,var(--paper) 60%,transparent)}
+.rest-next-title{font-size:var(--fs-title);font-weight:var(--fw-display);letter-spacing:var(--tr-title)}
+.rest-next-meta{font-size:var(--fs-small);opacity:.7}
+.rest-next:active{opacity:.85}
+
+/* ── 本週摘要（日期已經在上面的日期列） ── */
+#screenToday .week-sum{margin-bottom:var(--s3)}
+
+/* ── 下方分頁：滑動的紅色指示線 ── */
+.tabbar{position:fixed}
+.tabbar-ink{
+  position:absolute;top:0;left:0;width:25%;height:2px;
+  background:var(--signal-fill);
+  transform:translateX(calc(var(--tab-i, 0) * 100%));
+  transition:transform var(--dur-slow) var(--ease-out);
+}
+.tabbar-btn i{transition:transform var(--dur-base) var(--ease-out),color var(--dur-fast)}
+.tabbar-btn.is-active i{transform:translateY(-1px) scale(1.08)}
+
+/* ── 換日時的滑動 ── */
+#screenToday .screen-inner.slide-next{animation:slideNext 300ms var(--ease-out)}
+#screenToday .screen-inner.slide-prev{animation:slidePrev 300ms var(--ease-out)}
+@keyframes slideNext{from{opacity:.2;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes slidePrev{from{opacity:.2;transform:translateX(-24px)}to{opacity:1;transform:none}}
+
+/* ── 組間計時器：多一行「下一組」 ── */
+.rest-timer-label{min-width:0}
+.rest-timer-label b{
+  display:block;font-size:var(--fs-small);color:var(--paper);font-weight:var(--fw-strong);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#restTimer .rest-timer-label{opacity:1;color:color-mix(in srgb,var(--paper) 70%,transparent)}
+
+/* ══ 訓練完成 ══ */
+#finishLayer{
+  position:fixed;inset:0;z-index:var(--z-overlay);
+  background:var(--paper);color:var(--ink);
+  display:flex;align-items:flex-end;
+  padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 28px);
+  overflow:hidden;
+}
+#finishLayer[hidden]{display:none}
+.finish-wipe{
+  position:absolute;left:0;right:0;top:0;height:42%;
+  background:var(--signal-fill);
+  transform-origin:left center;
+  animation:finishWipe 700ms var(--ease-in-out) both;
+}
+@keyframes finishWipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* 紅色色塊裡放一個巨大的訓練代號 —— 瑞士海報的做法，字就是圖 */
+.finish-poster{
+  position:absolute;left:0;right:0;top:0;height:42%;
+  padding:calc(env(safe-area-inset-top,0px) + 20px) 24px 0;
+  color:var(--paper);pointer-events:none;overflow:hidden;
+}
+.finish-mark{
+  display:block;font-weight:900;font-size:var(--fs-lead);letter-spacing:-.02em;
+  animation:rowIn 480ms var(--ease-out) 520ms both;
+}
+.finish-letter{
+  position:absolute;right:16px;bottom:-.2em;
+  font-family:'Inter',sans-serif;font-weight:900;
+  font-size:min(52vh, 110vw);line-height:1;letter-spacing:-.06em;
+  animation:letterIn 760ms var(--ease-out) 300ms both;
+}
+@keyframes letterIn{from{opacity:0;transform:translateY(18%)}to{opacity:1;transform:none}}
+.finish-inner{position:relative;width:100%;max-width:560px;margin:0 auto;display:grid;gap:var(--s3)}
+.finish-inner > *{animation:rowIn 560ms var(--ease-out) both}
+.finish-inner > :nth-child(1){animation-delay:380ms}
+.finish-inner > :nth-child(2){animation-delay:440ms}
+.finish-inner > :nth-child(3){animation-delay:500ms}
+.finish-inner > :nth-child(4){animation-delay:580ms}
+.finish-inner > :nth-child(5){animation-delay:640ms}
+.finish-inner > :nth-child(6){animation-delay:700ms}
+.finish-title{
+  font-size:clamp(56px, 17vw, 96px);font-weight:900;
+  line-height:.95;letter-spacing:-.045em;margin:0;
+}
+.finish-big{font-size:clamp(64px, 22vw, 128px);font-weight:700;line-height:1;letter-spacing:-.06em;color:var(--signal-text)}
+.finish-big-unit{font-size:var(--fs-title);letter-spacing:0;color:var(--concrete);margin-left:6px}
+.finish-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:var(--hairline) solid var(--line);padding-top:var(--s4);margin-top:var(--s2);
+}
+.finish-stats > div{display:grid;gap:2px;padding:0 var(--s3);border-left:var(--hairline) solid var(--line)}
+.finish-stats > div:first-child{padding-left:0;border-left:none}
+.finish-stats b{font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-title);font-weight:700;letter-spacing:-.02em}
+.finish-bumps{display:grid;gap:4px;font-size:var(--fs-small)}
+.finish-bumps:empty{display:none}
+.finish-bump{display:flex;justify-content:space-between;gap:var(--s3);padding:6px 0;border-top:var(--hairline) solid var(--line)}
+.finish-bump b{font-family:'Fragment Mono',ui-monospace,monospace;color:var(--signal-text)}
+.finish-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s2);margin-top:var(--s3)}
+
+@media(prefers-reduced-motion:reduce){
+  #screenToday .ex-row,.recovery-item,
+  #screenToday.is-active .day-head > *,#screenToday.is-active .day-nav,
+  .finish-wipe,.finish-inner > *,.finish-mark,.finish-letter,
+  #screenToday .screen-inner.slide-next,#screenToday .screen-inner.slide-prev{animation:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -2092,16 +2398,22 @@ body{
     <div class="screen-inner">
 
       <div class="day-head">
-        <div class="day-kicker" id="dpKicker">—</div>
+        <div class="day-kicker-row">
+          <div class="day-kicker" id="dpKicker">—</div>
+          <button type="button" id="dpToday" class="today-pill" hidden>
+            <i class="ph ph-arrow-u-up-left" aria-hidden="true"></i>回到今天
+          </button>
+        </div>
         <h1 class="day-title" id="dpTitle">—</h1>
+        <div class="day-meta mono-num" id="dpMeta"></div>
       </div>
 
       <div class="day-nav">
-        <button type="button" id="dpPrev" class="btn btn-quiet" aria-label="前一天">
+        <button type="button" id="dpPrev" class="icon-btn" aria-label="前一天">
           <i class="ph ph-caret-left" aria-hidden="true"></i>
         </button>
-        <button type="button" id="dpToday" class="btn btn-quiet">今天</button>
-        <button type="button" id="dpNext" class="btn btn-quiet" aria-label="後一天">
+        <div class="week-strip" id="weekStrip" role="group" aria-label="本週日期"></div>
+        <button type="button" id="dpNext" class="icon-btn" aria-label="後一天">
           <i class="ph ph-caret-right" aria-hidden="true"></i>
         </button>
       </div>
@@ -2109,7 +2421,9 @@ body{
       <div class="card">
         <div class="card-head">
           <span class="kicker" id="dpWorkoutLabel">訓練</span>
+          <span class="card-head-note mono-num" id="dpSessionCount"></span>
         </div>
+        <div class="session-bar" id="sessionBar" aria-hidden="true"></div>
         <div id="dpWorkout"></div>
       </div>
 
@@ -2312,6 +2626,7 @@ body{
 </div>
 
 <nav class="tabbar" role="tablist" aria-label="主要導覽">
+  <span class="tabbar-ink" aria-hidden="true"></span>
   <button type="button" class="tabbar-btn is-active" data-screen="today" role="tab" aria-selected="true">
     <i class="ph ph-barbell" aria-hidden="true"></i><span>今日</span>
   </button>
@@ -2471,6 +2786,27 @@ body{
 
 </div>
 <div id="drawerBackdrop"></div>
+<!-- 訓練完成 -->
+<div id="finishLayer" role="dialog" aria-modal="true" aria-labelledby="finishTitle" hidden>
+  <div class="finish-wipe" aria-hidden="true"></div>
+  <div class="finish-poster" aria-hidden="true">
+    <span class="finish-mark">RECOMP</span>
+    <span class="finish-letter" id="finishLetter">A</span>
+  </div>
+  <div class="finish-inner">
+    <div class="kicker" id="finishKicker">—</div>
+    <h2 class="finish-title" id="finishTitle">訓練完成</h2>
+    <div class="finish-big mono-num"><span id="finishSets">0</span><span class="finish-big-unit" id="finishSetsTotal">/0 組</span></div>
+    <div class="finish-stats" id="finishStats"></div>
+    <div class="finish-bumps" id="finishBumps"></div>
+    <div class="finish-actions">
+      <button type="button" class="btn" id="finishCloseBtn">完成</button>
+      <button type="button" class="btn btn-primary" id="finishShareBtn">
+        <i class="ph ph-share-network icon" aria-hidden="true"></i>分享訓練卡
+      </button>
+    </div>
+  </div>
+</div>
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
@@ -3658,98 +3994,96 @@ function selectDate(dateObj){
   refreshChestWeightStat();
 }
 
+const WDAYS = ['週日','週一','週二','週三','週四','週五','週六'];
+const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+function planWeekNo(dateObj){
+  return Math.floor((atNoon(dateObj) - atNoon(PLAN_START)) / (7 * 86400000)) + 1;
+}
+
+/* 預估時間：每組約 40 秒 + 組間休息，取整到 5 分鐘 */
+function estimateMinutes(list){
+  const sets = list.reduce((s, ex) => s + ex.sets, 0);
+  return Math.max(5, Math.round(sets * (40 + REST_SECONDS) / 60 / 5) * 5);
+}
+
 function renderDayHeader(plan, dateStr){
-  const wdays = ['週日','週一','週二','週三','週四','週五','週六'];
   const [y,m,d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m-1, d);
-
   const isToday = formatDateStr(new Date()) === dateStr;
+  const md = `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+  const wk = planWeekNo(dateObj);
+
   const kicker = document.getElementById('dpKicker');
-  kicker.textContent =
-    `${isToday ? '今天 · ' : ''}${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} ${wdays[dateObj.getDay()]}`;
+  kicker.textContent = `${isToday ? '今天 · ' : ''}${WDAYS[dateObj.getDay()]} ${md}${wk >= 1 ? ` · 第 ${wk} 週` : ''}`;
   kicker.classList.toggle('is-today', isToday);
+  const todayBtn = document.getElementById('dpToday');
+  if(todayBtn) todayBtn.hidden = isToday;
   document.getElementById('dpTitle').textContent = getTrainText(plan.train);
-  document.getElementById('todayTopLabel').textContent =
-    `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} · ${getTrainText(plan.train)}`;
+
+  const meta = document.getElementById('dpMeta');
+  if(meta){
+    if(plan.train === 'A' || plan.train === 'B'){
+      const list = WORKOUTS[plan.train];
+      const sets = list.reduce((s, ex) => s + ex.sets, 0);
+      meta.textContent = `${list.length} 個動作 · ${sets} 組 · 約 ${estimateMinutes(list)} 分鐘`;
+    }else{
+      meta.textContent = '恢復日 · 不做重訓';
+    }
+  }
+
+  document.getElementById('todayTopLabel').textContent = `${md} · ${getTrainText(plan.train)}`;
   const entryDate = document.getElementById('bwEntryDate');
   if(entryDate) entryDate.textContent = `紀錄到 ${formatDateStrPad(dateObj)}${isToday ? '（今天）' : ''}`;
 }
 
-/* 本週進度：休息日時這頁幾乎沒東西，這張卡補上「這週做了多少」 */
+/* 本週：上方的七天日期列（同時是導覽）＋ 下方的摘要 */
 function renderWeekProgress(){
+  const strip = document.getElementById('weekStrip');
   const body = document.getElementById('weekProgressBody');
   const note = document.getElementById('weekRangeNote');
   if(!body || !selectedDateObj) return;
 
   const base = atNoon(selectedDateObj);
-  const dow = (base.getDay() + 6) % 7;          /* 週一 = 0 */
-  const monday = new Date(base); monday.setDate(base.getDate() - dow);
+  const monday = mondayOf(base);
   const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
   const today = atNoon(new Date());
-
-  let dayDone = 0, dayTotal = 0, setsDone = 0, setsTotal = 0;
-  let nextTrain = null;
-  const dots = [];
-
-  for(let i = 0; i < 7; i++){
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
-    const ds = formatDateStr(d);
-    const plan = getPlanForDate(d);
-    const isFuture = d > today;
-
-    if(plan.train === '休'){
-      dots.push({ state:'rest', label:plan.train, d });
-      continue;
-    }
-    dayTotal++;
-    const list = WORKOUTS[plan.train];
-    let done = 0, tot = 0;
-    list.forEach(ex => {
-      tot += ex.sets;
-      for(let n = 1; n <= ex.sets; n++){
-        if(lsGet(`recomp_set_id_${ds}_${ex.id}_${n}`, '0') !== '0') done++;
-      }
-    });
-    setsTotal += tot; setsDone += done;
-    if(done === tot && tot > 0) dayDone++;
-
-    dots.push({
-      state: isFuture ? 'future' : (tot && done === tot ? 'full' : done ? 'partial' : 'miss'),
-      label: plan.train, d, done, tot
-    });
-  }
-
-  note.textContent = `${monday.getMonth()+1}/${monday.getDate()} – ${sunday.getMonth()+1}/${sunday.getDate()}`;
-
-  /* 只有休息日才需要「下次訓練」—— 訓練日看著眼前的清單就好。
-     而且要找選取日之後的，不是本週第一個未來訓練日。 */
-  if(getPlanForDate(base).train === '休'){
-    const cur = new Date(base);
-    for(let i = 1; i <= 14; i++){
-      cur.setDate(cur.getDate() + 1);
-      const p = getPlanForDate(cur);
-      if(p.train !== '休'){ nextTrain = { d:new Date(cur), plan:p }; break; }
-    }
-  }
-
-  const pct = setsTotal ? Math.round(setsDone / setsTotal * 100) : 0;
   const wd = ['一','二','三','四','五','六','日'];
 
+  let dayDone = 0, dayTotal = 0, setsDone = 0, setsTotal = 0;
+  let html = '';
+  for(let i = 0; i < 7; i++){
+    const d = new Date(monday); d.setDate(monday.getDate() + i); d.setHours(12,0,0,0);
+    const c = dayCompletion(d);
+    let state = 'rest';
+    if(c.train === 'A' || c.train === 'B'){
+      dayTotal++; setsTotal += c.total; setsDone += c.done;
+      if(c.total && c.done === c.total) dayDone++;
+      state = c.total && c.done === c.total ? 'full'
+            : c.done ? 'partial'
+            : d >= today ? 'future' : 'miss';
+    }
+    const pct = c.total ? Math.round(c.done / c.total * 100) : 0;
+    const sel = +d === +base, now = +d === +today;
+    html += `<button type="button" class="ws-day is-${state}${sel ? ' is-selected' : ''}${now ? ' is-today' : ''}"
+        data-ymd="${formatDateStr(d)}" aria-pressed="${sel}"
+        aria-label="${d.getMonth()+1}月${d.getDate()}日 週${wd[i]} ${getTrainText(c.train)}${c.total ? `，完成 ${c.done}/${c.total} 組` : ''}">
+        <span class="ws-dow">${now ? '今天' : wd[i]}</span>
+        <span class="ws-num">${d.getDate()}</span>
+        <span class="ws-tag">${c.train}</span>
+        <span class="ws-bar"><i style="width:${pct}%"></i></span>
+      </button>`;
+  }
+  if(strip) strip.innerHTML = html;
+  if(note) note.textContent = `${monday.getMonth()+1}/${monday.getDate()} – ${sunday.getMonth()+1}/${sunday.getDate()}`;
+
+  const pct = setsTotal ? Math.round(setsDone / setsTotal * 100) : 0;
   body.innerHTML = `
-    <div class="week-dots">
-      ${dots.map((x,i) => `
-        <button type="button" class="week-dot is-${x.state}" data-ymd="${formatDateStr(x.d)}"
-          aria-label="${x.d.getMonth()+1}月${x.d.getDate()}日 ${x.label}">
-          <span class="week-dot-day">${wd[i]}</span>
-          <span class="week-dot-mark">${x.label}</span>
-        </button>`).join('')}
-    </div>
     <div class="week-sum">
       <span><b class="mono-num">${dayDone}</b>/${dayTotal} 天完成</span>
       <span><b class="mono-num">${setsDone}</b>/${setsTotal} 組</span>
     </div>
-    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-    ${nextTrain ? `<div class="week-next">下次訓練　<b>${nextTrain.d.getMonth()+1}/${nextTrain.d.getDate()}</b>　${getTrainText(nextTrain.plan.train)}</div>` : ''}`;
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>`;
 }
 
 /* 往回找同一個動作最近一次有紀錄的日子。
@@ -3786,21 +4120,83 @@ function setAriaLabel(ex, n, state){
   return `${escapeHtml(ex.name)} 第 ${n} 組：${s}`;
 }
 
+/* 休息日不是空白頁：恢復本身就是計畫的一部分。
+   原本只有一行「目標：走路 8000 步 · 睡滿 6.5hr+ · 水 2500ml」，
+   現在變成可以打勾的清單，每天分開存。 */
+const RECOVERY = [
+  { id:'walk',  label:'走路 8000 步',  hint:'低強度活動，幫助血液循環與恢復' },
+  { id:'sleep', label:'睡滿 6.5 小時', hint:'未滿 6 小時，隔天重量 −10%' },
+  { id:'water', label:'喝水 2500ml',   hint:'脫水 2% 力量就會明顯下降' },
+];
+function recoveryKey(dateStr, id){ return `recomp_rest_${dateStr}_${id}`; }
+
+/* 一組一格的進度條；休息日則是三項恢復目標 */
+function renderSessionBar(plan, dateStr){
+  const bar = document.getElementById('sessionBar');
+  const count = document.getElementById('dpSessionCount');
+  if(!bar || !count) return;
+  if(plan.train !== 'A' && plan.train !== 'B'){
+    const states = RECOVERY.map(r => lsGet(recoveryKey(dateStr, r.id), '0') === '1');
+    bar.innerHTML = `<div class="sb-group" style="flex:1">${states.map(on =>
+      `<i class="sb-seg${on ? ' is-done' : ''}"></i>`).join('')}</div>`;
+    count.innerHTML = `<b>${states.filter(Boolean).length}</b>/${RECOVERY.length} 項`;
+    return;
+  }
+  let done = 0, total = 0;
+  bar.innerHTML = WORKOUTS[plan.train].map(ex => {
+    let segs = '';
+    for(let s = 1; s <= ex.sets; s++){
+      const v = lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0');
+      total++; if(v !== '0') done++;
+      segs += `<i class="sb-seg${v === '2' ? ' is-cap' : v === '1' ? ' is-done' : ''}"></i>`;
+    }
+    return `<div class="sb-group" style="flex:${ex.sets}">${segs}</div>`;
+  }).join('');
+  count.innerHTML = `<b>${done}</b>/${total} 組`;
+}
+
+function nextTrainingAfter(dateObj){
+  const cur = atNoon(dateObj);
+  for(let i = 1; i <= 14; i++){
+    cur.setDate(cur.getDate() + 1);
+    const p = getPlanForDate(cur);
+    if(p.train === 'A' || p.train === 'B') return { d:new Date(cur), plan:p };
+  }
+  return null;
+}
+
 function renderWorkoutSection(plan, dateStr){
   const workoutLabel = document.getElementById('dpWorkoutLabel');
   const workoutDiv = document.getElementById('dpWorkout');
+  renderSessionBar(plan, dateStr);
 
-  if(plan.train === '休'){
+  if(plan.train !== 'A' && plan.train !== 'B'){
     workoutLabel.textContent = '休息 · 恢復';
-    workoutDiv.innerHTML = `<div style="font-size:13px;color:var(--concrete)">
-      休息日。不做重訓。<br>目標：走路 8000 步 · 睡滿 6.5hr+ · 水 2500ml
-    </div>`;
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const next = nextTrainingAfter(new Date(y, m-1, d));
+    const nextList = next ? WORKOUTS[next.plan.train] : null;
+    workoutDiv.innerHTML = `
+      <p class="rest-lead">今天不做重訓。肌肉是在休息的時候長出來的 —— 把恢復做好，下一次才推得動。</p>
+      <div class="recovery-list">${RECOVERY.map((r, i) => {
+        const on = lsGet(recoveryKey(dateStr, r.id), '0') === '1';
+        return `<button type="button" class="recovery-item${on ? ' is-done' : ''}" data-recovery="${r.id}"
+            aria-pressed="${on}" style="--i:${i}">
+          <span class="recovery-check">${CHECK_SVG}</span>
+          <span class="recovery-text"><b>${escapeHtml(r.label)}</b><span>${escapeHtml(r.hint)}</span></span>
+        </button>`;
+      }).join('')}</div>
+      ${next ? `<button type="button" class="rest-next" data-goto="${formatDateStr(next.d)}">
+        <span class="kicker">下次訓練 · ${WDAYS[next.d.getDay()]} ${fmtMD(next.d)}</span>
+        <span class="rest-next-title">${escapeHtml(getTrainText(next.plan.train))}</span>
+        <span class="rest-next-meta mono-num">${nextList.length} 個動作 · ${nextList.reduce((s, ex) => s + ex.sets, 0)} 組 · 約 ${estimateMinutes(nextList)} 分鐘 →</span>
+      </button>` : ''}`;
     return;
   }
 
   workoutLabel.textContent = `訓練 · ${getTrainText(plan.train)}`;
-    /* makeup reminder */
-  const reminders = findMakeupReminders(new Date(dateStr.split('-')[0], dateStr.split('-')[1]-1, dateStr.split('-')[2]));
+  /* makeup reminder */
+  const [yy, mm, dd] = dateStr.split('-').map(Number);
+  const reminders = findMakeupReminders(new Date(yy, mm-1, dd));
   let makeupHtml = '';
   if(reminders.length > 0){
     const r = reminders[0];
@@ -3811,38 +4207,144 @@ function renderWorkoutSection(plan, dateStr){
       <span class="muted">建議今天優先補回這些動作</span>
     </div>`;
   }
-    const list = WORKOUTS[plan.train];
+  const list = WORKOUTS[plan.train];
 
-    workoutDiv.innerHTML = makeupHtml + list.map(ex => {
+  workoutDiv.innerHTML = makeupHtml + list.map((ex, i) => {
+    const id = escapeHtml(ex.id);
     const liveKg = displayKg(ex, dateStr);
+    let done = 0;
     const setsHtml = Array.from({length: ex.sets}, (_, s) => {
       const k = `recomp_set_id_${dateStr}_${ex.id}_${s+1}`;
       const state = lsGet(k, '0');
+      if(state !== '0') done++;
       const cls = state === '2' ? 'done cap' : state === '1' ? 'done' : '';
-      return `<button type="button" class="set-check ${cls}" data-k="${k}" data-exid="${escapeHtml(ex.id)}" data-set="${s+1}" aria-label="${setAriaLabel(ex, s+1, state)}"></button>`;
+      return `<button type="button" class="set-check ${cls}" data-k="${k}" data-exid="${id}" data-set="${s+1}"
+        aria-label="${setAriaLabel(ex, s+1, state)}">${CHECK_SVG}<span class="set-n">${s+1}</span></button>`;
     }).join('');
 
-    return `<div class="ex-row" data-ex-row="${escapeHtml(ex.id)}">
-      <div class="ex-checks">${setsHtml}</div>
-      <div class="ex-info">
-<div class="ex-name">${escapeHtml(ex.name)}
-          <span class="mono-num ex-weight-label weight-display" data-ex-weight="${escapeHtml(ex.id)}">${weightLabelHtml(ex, dateStr)}</span>
-        </div>
-        ${(() => {
-          const prev = findLastPerformance(ex, dateStr, plan.train);
-          if(!prev) return '';
-          const md = `${prev.date.getMonth()+1}/${prev.date.getDate()}`;
-          const kgText = `${prev.kg}kg`;
-          const better = liveKg > prev.kg;
-          return `<div class="ex-last${better ? ' is-better' : ''}">上次 ${md} · ${kgText} · ${prev.done}/${prev.total} 組${better ? ' ↑' : ''}</div>`;
-        })()}
-        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
+    const prev = findLastPerformance(ex, dateStr, plan.train);
+    let lastHtml = '';
+    if(prev){
+      const better = liveKg > prev.kg;
+      lastHtml = `<div class="ex-last${better ? ' is-better' : ''}">上次 ${prev.date.getMonth()+1}/${prev.date.getDate()}<br>
+        <b>${prev.kg}kg</b> · ${prev.done}/${prev.total}${better ? ' ↑' : ''}</div>`;
+    }
+
+    return `<div class="ex-row${done === ex.sets ? ' is-complete' : ''}" data-ex-row="${id}" style="--i:${i}">
+      <div class="ex-name">${escapeHtml(ex.name)}<i class="ph ph-check-circle ex-done" aria-hidden="true"></i></div>
+      <div class="ex-sub">
+        <span class="mono-num ex-weight-label weight-display" data-ex-weight="${id}">${weightLabelHtml(ex, dateStr)}</span>
+        ${ex.note ? `<span class="ex-note">${escapeHtml(ex.note)}</span>` : ''}
+      </div>
+      <div class="ex-body">
+        <div class="ex-checks">${setsHtml}</div>
+        ${lastHtml}
       </div>
     </div>`;
   }).join('') +
-  `<div class="ex-hint">點兩下變紅 = 達上限，全紅自動加重 · 點重量數字可手動調整</div>` +   `<button type="button" id="exportTrainCardBtn" class="btn" style="width:100%;margin-top:12px">     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）   </button>`;
+  `<div class="ex-hint">點一下 = 完成，再點一下 = 達到次數上限（紅）<br>同一個動作全部紅色 → 下次自動加重 · 點重量數字可以修改</div>
+   <button type="button" id="exportTrainCardBtn" class="btn" style="width:100%">
+     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）
+   </button>`;
 }
 
+/* 目前這一天的下一個還沒做的組，用在計時器上：「下一組 · 蝴蝶機 第 2 組」 */
+function nextPendingSet(plan, dateStr){
+  if(plan.train !== 'A' && plan.train !== 'B') return null;
+  for(const ex of WORKOUTS[plan.train]){
+    for(let s = 1; s <= ex.sets; s++){
+      if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') === '0') return { ex, n:s };
+    }
+  }
+  return null;
+}
+
+/* 換日：帶一點方向感的滑動 */
+function goToDate(d, dir){
+  selectDate(d);
+  const inner = document.querySelector('#screenToday .screen-inner');
+  if(inner && dir){
+    inner.classList.remove('slide-next', 'slide-prev');
+    void inner.offsetWidth;
+    inner.classList.add(dir > 0 ? 'slide-next' : 'slide-prev');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   訓練完成
+   最後一組打下去的那一刻，值得一個畫面。
+   刻意做成純排版：一條紅色色塊掃過去、大字、數字 ——
+   跟整個 app 一樣，不用彩帶也不用表情符號。
+   ══════════════════════════════════════════════ */
+let _finishDate = null;
+const _finishShown = new Set();
+function showFinish(dateStr){
+  const layer = document.getElementById('finishLayer');
+  if(!layer) return;
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(y, m-1, d, 12);
+  const plan = getPlanForDate(dateObj);
+  if(plan.train !== 'A' && plan.train !== 'B') return;
+  _finishDate = dateStr;
+
+  const list = WORKOUTS[plan.train];
+  let sets = 0, total = 0, vol = 0;
+  const bumps = [];
+  list.forEach(ex => {
+    const n = setsDoneFor(ex, dateStr);
+    const kg = displayKg(ex, dateStr);
+    sets += n; total += ex.sets; vol += kg * n;
+    const inc = parseFloat(lsGet(bumpKey(dateStr, ex.id), '')) || 0;
+    if(inc > 0) bumps.push({ name:ex.name, from:kg, to:roundKg(kg + inc) });
+  });
+
+  const mon = mondayOf(dateObj);
+  let wDone = 0, wTotal = 0;
+  for(let i = 0; i < 7; i++){
+    const x = new Date(mon); x.setDate(mon.getDate() + i);
+    const c = dayCompletion(x);
+    if(c.total){ wTotal++; if(c.done === c.total) wDone++; }
+  }
+
+  document.getElementById('finishLetter').textContent = plan.train;
+  document.getElementById('finishKicker').textContent =
+    `${WDAYS[dateObj.getDay()]} ${fmtMD(dateObj)} · ${getTrainText(plan.train)}`;
+  document.getElementById('finishSetsTotal').textContent = `/${total} 組`;
+  document.getElementById('finishStats').innerHTML = `
+    <div><span class="stat-cell-label">訓練量</span><b>${fmtVol(vol)}</b></div>
+    <div><span class="stat-cell-label">升重</span><b>${bumps.length} 項</b></div>
+    <div><span class="stat-cell-label">本週</span><b>${wDone}/${wTotal} 天</b></div>`;
+  document.getElementById('finishBumps').innerHTML = bumps.map(b => `
+    <div class="finish-bump"><span>▲ ${escapeHtml(b.name)}</span><b>${b.from} → ${b.to}kg</b></div>`).join('');
+
+  layer.hidden = false;
+  document.body.style.overflow = 'hidden';
+  if(getPref('vibration') && navigator.vibrate) navigator.vibrate([40, 60, 40, 60, 140]);
+
+  /* 組數從 0 數上來 */
+  const numEl = document.getElementById('finishSets');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ numEl.textContent = sets; }
+  else{
+    numEl.textContent = '0';
+    const t0 = performance.now() + 450, dur = 700;
+    const tick = now => {
+      const k = Math.min(1, Math.max(0, (now - t0) / dur));
+      numEl.textContent = Math.round(sets * (1 - Math.pow(1 - k, 3)));
+      if(k < 1 && !layer.hidden) requestAnimationFrame(tick);
+      else numEl.textContent = sets;
+    };
+    requestAnimationFrame(tick);
+  }
+  document.getElementById('finishCloseBtn').focus();
+}
+
+function hideFinish(){
+  const layer = document.getElementById('finishLayer');
+  if(!layer || layer.hidden) return;
+  layer.hidden = true;
+  document.body.style.overflow = '';
+}
 
 
 function prefillBwInputs(){
@@ -5059,12 +5561,33 @@ function initApp(){
 
   document.getElementById('dpPrev').addEventListener('click', () => {
     if(!selectedDateObj) return;
-    const d = new Date(selectedDateObj); d.setDate(d.getDate() - 1); selectDate(d);
+    const d = new Date(selectedDateObj); d.setDate(d.getDate() - 1); goToDate(d, -1);
   });
   document.getElementById('dpNext').addEventListener('click', () => {
     if(!selectedDateObj) return;
-    const d = new Date(selectedDateObj); d.setDate(d.getDate() + 1); selectDate(d);
+    const d = new Date(selectedDateObj); d.setDate(d.getDate() + 1); goToDate(d, 1);
   });
+
+  /* 左右滑動換日：單手拿手機、另一手還握著把手的時候，
+     比伸到螢幕上方點箭頭容易得多 */
+  (function initSwipe(){
+    const screen = document.getElementById('screenToday');
+    let sx = 0, sy = 0, st = 0, tracking = false;
+    screen.addEventListener('touchstart', e => {
+      if(e.touches.length !== 1 || e.target.closest('input, .ex-weight-display, .bw-svg')) { tracking = false; return; }
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = Date.now(); tracking = true;
+    }, { passive:true });
+    screen.addEventListener('touchend', e => {
+      if(!tracking || !selectedDateObj) return;
+      tracking = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if(Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6 || Date.now() - st > 600) return;
+      const d = new Date(selectedDateObj);
+      d.setDate(d.getDate() + (dx < 0 ? 1 : -1));
+      goToDate(d, dx < 0 ? 1 : -1);
+    }, { passive:true });
+  })();
 /* ── Editable weight — click to edit ──
    今天 / 未來：改的是「現在的重量」（今天有打勾的話，順便更正今天的紀錄）
    過去：改的只有那一天的紀錄 —— 補登或更正歷史，不該動到今天要用的重量 */
@@ -5156,6 +5679,7 @@ document.getElementById('dpWorkout').addEventListener('keydown', e => {
     const before = states();
     const wasAllCapped = before.every(v => v === '2');
     const kgForDay = displayKg(ex, dateStr);
+    const dayBefore = dayCompletion(selectedDateObj);
 
     const k = btn.dataset.k;
     const current = lsGet(k, '0');
@@ -5164,10 +5688,9 @@ document.getElementById('dpWorkout').addEventListener('keydown', e => {
     btn.classList.toggle('done', next !== '0');
     btn.classList.toggle('cap', next === '2');
     btn.setAttribute('aria-label', setAriaLabel(ex, +btn.dataset.set || 1, next));
+    if(next !== '0'){ btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
     if(getPref('vibration') && navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
-    /* 剛打完一組（不是取消）就開始倒數 */
-    if(next !== '0') startRestTimer(REST_SECONDS);
-    else stopRestTimer();
+    const plan = getPlanForDate(selectedDateObj);
 
     const after = states();
     const isAllCapped = after.every(v => v === '2');
@@ -5200,6 +5723,24 @@ document.getElementById('dpWorkout').addEventListener('keydown', e => {
 
     const label = row.querySelector('[data-ex-weight]');
     if(label) label.innerHTML = weightLabelHtml(ex, dateStr);
+    row.classList.toggle('is-complete', doneAfter === ex.sets);
+    renderSessionBar(plan, dateStr);
+
+    /* 剛打完一組（不是取消）就開始倒數，並告訴你下一組是什麼；
+       最後一組打完 → 不用倒數了，直接進完成畫面 */
+    const dayAfter = dayCompletion(selectedDateObj);
+    if(next === '0') stopRestTimer();
+    else if(dayAfter.total && dayAfter.done === dayAfter.total){
+      stopRestTimer();
+      /* 同一天只慶祝一次：點錯一格再改回來，不該再跳一次 */
+      if(dayBefore.done < dayBefore.total && !_finishShown.has(dateStr)){
+        _finishShown.add(dateStr);
+        setTimeout(() => showFinish(dateStr), 420);
+      }
+    }else{
+      const np = nextPendingSet(plan, dateStr);
+      startRestTimer(REST_SECONDS, np);
+    }
 
     if(revoked > 0){
       refreshChestWeightStat();
@@ -5282,12 +5823,43 @@ if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
     saveCanvasAsImage(canvas, filename, okMsg, title);
   });
 
-  /* 本週進度的日期方塊 */
-  document.getElementById('weekProgressBody').addEventListener('click', e => {
-    const dot = e.target.closest('.week-dot[data-ymd]');
-    if(!dot) return;
-    const [y,m,d] = dot.dataset.ymd.split('-').map(Number);
-    selectDate(new Date(y, m-1, d));
+  /* 上方的一週日期列 */
+  document.getElementById('weekStrip').addEventListener('click', e => {
+    const day = e.target.closest('.ws-day[data-ymd]');
+    if(!day || !selectedDateObj) return;
+    const [y,m,d] = day.dataset.ymd.split('-').map(Number);
+    const target = new Date(y, m-1, d);
+    goToDate(target, Math.sign(atNoon(target) - atNoon(selectedDateObj)));
+  });
+
+  /* 休息日：恢復清單與「下次訓練」 */
+  document.getElementById('dpWorkout').addEventListener('click', e => {
+    const item = e.target.closest('[data-recovery]');
+    if(item && selectedDateObj){
+      const dateStr = formatDateStr(selectedDateObj);
+      const k = recoveryKey(dateStr, item.dataset.recovery);
+      const on = lsGet(k, '0') !== '1';
+      if(on) lsSet(k, '1'); else lsRemove(k);
+      item.classList.toggle('is-done', on);
+      item.setAttribute('aria-pressed', String(on));
+      renderSessionBar(getPlanForDate(selectedDateObj), dateStr);
+      if(getPref('vibration') && navigator.vibrate) navigator.vibrate(on ? 25 : 10);
+      if(on && RECOVERY.every(r => lsGet(recoveryKey(dateStr, r.id), '0') === '1')) flashToast('恢復日完成 ✓');
+      return;
+    }
+    const go = e.target.closest('[data-goto]');
+    if(go){
+      const [y,m,d] = go.dataset.goto.split('-').map(Number);
+      goToDate(new Date(y, m-1, d), 1);
+    }
+  });
+
+  /* 訓練完成畫面 */
+  document.getElementById('finishCloseBtn').addEventListener('click', hideFinish);
+  document.getElementById('finishShareBtn').addEventListener('click', () => {
+    hideFinish();
+    const btn = document.getElementById('exportTrainCardBtn');
+    if(btn) btn.click();
   });
 
   document.getElementById('bwRangeSwitch').addEventListener('click', e => {
@@ -5301,8 +5873,9 @@ if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
 
   document.getElementById('dpToday').addEventListener('click', () => {
     const now = new Date();
+    const dir = selectedDateObj ? Math.sign(atNoon(now) - atNoon(selectedDateObj)) : 0;
     renderCalendar(now.getFullYear(), now.getMonth());
-    selectDate(now);
+    goToDate(now, dir);
   });
 
   document.getElementById('searchOpenBtn').addEventListener('click', openSearchDrawer);
@@ -5367,7 +5940,8 @@ searchClearBtn.addEventListener('click', () => {
 
   document.addEventListener('keydown', e => {
     if(e.key !== 'Escape') return;
-    if(document.getElementById('exportPreviewModal').classList.contains('show')) closeExportPreview();
+    if(!document.getElementById('finishLayer').hidden) hideFinish();
+    else if(document.getElementById('exportPreviewModal').classList.contains('show')) closeExportPreview();
     else if(weeklyModal.classList.contains('show')) closeWeeklyModal();
     else if(exportCalModal.classList.contains('show')) closeExportCalModal();
     else if(searchDrawer.classList.contains('open')) closeSearchDrawer();
@@ -5429,7 +6003,7 @@ searchClearBtn.addEventListener('click', () => {
   document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
 
   const VALID_IMPORT_KEY = 
-    /^(recomp_(set_id|weight_id|log|bump|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|pref_\w+)$)/;
+    /^(recomp_(set_id|weight_id|log|bump|rest|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|pref_\w+)$)/;
   document.getElementById('importFileInput').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -5578,13 +6152,15 @@ function paintRest(){
   }
 }
 
-function startRestTimer(seconds){
+function startRestTimer(seconds, next){
   if(!getPref('restTimer')) return;
   const el = document.getElementById('restTimer');
   if(!el) return;
   _restTotal = seconds;
   _restEnd = Date.now() + seconds * 1000;
-  document.getElementById('restTimerLabel').textContent = '組間休息';
+  document.getElementById('restTimerLabel').innerHTML = next
+    ? `組間休息 · 下一組是第 ${next.n} 組<b>${escapeHtml(next.ex.name)}</b>`
+    : '組間休息';
   el.classList.add('show');
   clearInterval(_restTick);
   paintRest();
@@ -6163,6 +6739,8 @@ function showScreen(name){
     sc.classList.toggle('is-active', on);
     sc.hidden = !on;
   });
+  const tabbar = document.querySelector('.tabbar');
+  if(tabbar) tabbar.style.setProperty('--tab-i', ['today','calendar','progress','weight'].indexOf(name));
   document.querySelectorAll('.tabbar-btn').forEach(b => {
     const on = b.dataset.screen === name;
     b.classList.toggle('is-active', on);
