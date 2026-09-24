@@ -63,6 +63,8 @@ test.describe('發版', () => {
     const files = manifest.icons.map(i => i.src).concat(html.match(/rel="apple-touch-icon" href="([^"]+)"/)[1]);
     for(const f of files) expect(fs.existsSync(path.join(ROOT, f.replace(/^\.?\//, ''))), f).toBe(true);
     expect(manifest.icons.some(i => i.purpose === 'maskable')).toBe(true);
+    for(const s of manifest.screenshots) expect(fs.existsSync(path.join(ROOT, s.src.replace(/^\//, ''))), s.src).toBe(true);
+    for(const s of manifest.shortcuts) expect(s.url).toMatch(/^\/\?screen=(today|progress|weight|calendar)$/);
   });
 
   test('只有伺服器版本比較新才提示更新', async ({ page }) => {
@@ -524,6 +526,13 @@ test.describe('升級安全', () => {
   });
 });
 
+
+test('捷徑網址直接打開指定分頁', async ({ page }) => {
+  await open(page);
+  await page.goto('./?screen=progress');
+  await expect(page.locator('#screenProgress')).toBeVisible();
+  await expect(page.locator('.tabbar-btn[data-screen="progress"]')).toHaveAttribute('aria-selected', 'true');
+});
 
 test('每個分頁都能正常切換', async ({ page }) => {
   await open(page);

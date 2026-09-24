@@ -6485,6 +6485,11 @@ searchClearBtn.addEventListener('click', () => {
   initPlanEditor();
   renderPlanLabels();
   if(loadPlan.initial === 'new') showOnboarding();
+  /* 桌面圖示長按的捷徑：/?screen=progress 直接打開那一頁 */
+  try{
+    const want = new URLSearchParams(location.search).get('screen');
+    if(want && loadPlan.initial !== 'new') showScreen(want);
+  }catch(e){}
 
   /* 資料安全：申請永久儲存 → 更新狀態面板 → 必要時提醒備份 */
   cleanupNagFlags();

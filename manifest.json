@@ -1,12 +1,21 @@
 {
-  "name": "RECOMP",
+  "id": "/",
+  "name": "RECOMP 重訓紀錄",
   "short_name": "RECOMP",
-  "description": "Body Recomposition Dashboard",
+  "description": "自動漸進超負荷的重訓紀錄：打勾、自動加重、看見每個動作的力量曲線。資料只存在你的手機。",
+  "lang": "zh-Hant-TW",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#F5F3F0",
   "theme_color": "#E30613",
-  "orientation": "portrait-primary",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "/icons/icon-192.png",
@@ -27,5 +36,62 @@
       "purpose": "maskable"
     }
   ],
-  "id": "/"
+  "screenshots": [
+    {
+      "src": "/screenshots/today.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "今日訓練：一組一格的進度、52px 打勾按鈕"
+    },
+    {
+      "src": "/screenshots/progress.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "進步：每個動作的重量曲線與出席紀錄"
+    },
+    {
+      "src": "/screenshots/finish.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "練完最後一組的完成畫面"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日訓練",
+      "short_name": "今日",
+      "url": "/?screen=today",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "看進步",
+      "short_name": "進步",
+      "url": "/?screen=progress",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "記體重",
+      "short_name": "體重",
+      "url": "/?screen=weight",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ]
 }

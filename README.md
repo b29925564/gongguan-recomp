@@ -1,7 +1,11 @@
 # RECOMP
 
-公館重組計畫 —— 一個人用的減脂增肌（body recomposition）訓練紀錄 PWA。
+自動漸進超負荷的重訓紀錄 PWA：打勾、自動加重、看見每個動作的力量曲線。
+起源於「公館重組計畫」這份個人課表，現在任何人都能選一套課表或自己排。
 單一 `index.html`，不需要建置，部署在 [gongguan-recomp.vercel.app](https://gongguan-recomp.vercel.app)。
+
+第一次打開會先選課表：**全身入門**（每週 3 天）、**上下半身**（4 天）、**推拉腿**（6 天）、
+**公館重組計畫**（原版器械 A/B），或自己排。之後在 設定 → 訓練計畫 可以改動作、組數、次數、重量與每週排程。
 
 ## 畫面
 
@@ -27,6 +31,7 @@
 | `recomp_bump_{日期}_{動作}` | 那一天升重的增量，`0` = 升了又撤銷（v3.3 起） |
 | `recomp_rest_{日期}_{項目}` | 休息日恢復清單（v3.3 起） |
 | `recomp_bw_{日期}` | 體重 |
+| `recomp_plan` | 課表與排程（沒有這個 key 時沿用原版課表，舊使用者不受影響） |
 | `recomp_pref_*`、`recomp_theme` | 偏好設定 |
 
 v3.3 之前沒有逐次存重量，舊紀錄的重量是由「現在的重量」與升重紀錄往回推算的，進步頁上以虛線與 ≈ 標示。
@@ -43,6 +48,12 @@ npm ci
 npx playwright install chromium
 npx playwright test
 ```
+
+## 上架到 App Store / Google Play
+
+這是一個完整的 PWA（manifest 有圖示、maskable 圖示、截圖、分類與捷徑），
+可以直接用 [PWABuilder](https://www.pwabuilder.com) 輸入網址產生 iOS（Xcode 專案）與 Android（TWA）套件。
+上架需要自己的 Apple Developer（每年 US$99）/ Google Play（一次 US$25）帳號並通過審查。
 
 ## 發版前檢查
 
