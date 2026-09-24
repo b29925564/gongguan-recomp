@@ -2441,7 +2441,116 @@ body{
 .switch:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
 .settings-row{align-items:center}
 
+/* ══ 第一次打開 ══ */
+#onboard{
+  position:fixed;inset:0;z-index:90;overflow-y:auto;
+  background:var(--paper);color:var(--ink);
+}
+#onboard[hidden],.ob-step[hidden]{display:none}
+.ob-step{min-height:100%;display:flex;flex-direction:column}
+.ob-poster{
+  background:var(--signal-fill);color:#fff;
+  padding:calc(env(safe-area-inset-top,0px) + 22px) 24px 32px;
+  display:grid;gap:clamp(40px,12vh,120px);
+  animation:finishWipe 640ms var(--ease-in-out) both;transform-origin:left center;
+}
+[data-theme="dark"] .ob-poster{color:#18181b}
+.ob-mark{font-weight:900;font-size:var(--fs-lead);letter-spacing:-.02em}
+.ob-big{
+  margin:0;font-weight:900;font-size:clamp(60px,19vw,120px);
+  line-height:.92;letter-spacing:-.055em;
+  animation:rowIn 620ms var(--ease-out) 260ms both;
+}
+.ob-body{
+  width:100%;max-width:560px;margin:0 auto;flex:1;
+  padding:28px 24px calc(env(safe-area-inset-bottom,0px) + 28px);
+  display:grid;gap:18px;align-content:start;
+}
+.ob-points{list-style:none;margin:0;padding:0;border-top:var(--hairline) solid var(--line)}
+.ob-points li{
+  display:grid;gap:2px;padding:14px 0 14px 18px;position:relative;
+  border-bottom:var(--hairline) solid var(--line);
+  animation:rowIn 520ms var(--ease-out) both;
+}
+.ob-points li:nth-child(1){animation-delay:420ms}
+.ob-points li:nth-child(2){animation-delay:480ms}
+.ob-points li:nth-child(3){animation-delay:540ms}
+.ob-points li::before{content:'';position:absolute;left:0;top:22px;width:8px;height:8px;background:var(--signal-fill)}
+.ob-points b{font-size:var(--fs-lead);font-weight:var(--fw-strong)}
+.ob-points span{font-size:var(--fs-small);color:var(--concrete)}
+.ob-cta{min-height:56px;font-size:var(--fs-lead);width:100%}
+.ob-back{margin-left:-10px}
+.ob-h{font-size:clamp(40px,12vw,56px);font-weight:900;line-height:1;letter-spacing:-.04em;margin:0}
+.ob-sub{font-size:var(--fs-small);color:var(--concrete);line-height:1.6}
+.ob-plans{display:grid;border-top:var(--hairline) solid var(--line)}
+.ob-plan{
+  display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:center;gap:14px;
+  padding:16px 0;background:none;border:none;border-bottom:var(--hairline) solid var(--line);
+  color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.ob-plan:active{opacity:.6}
+.ob-plan:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.ob-plan-days{display:grid;justify-items:start}
+.ob-plan-days b{font-family:'Fragment Mono',ui-monospace,monospace;font-size:36px;line-height:1;font-weight:700;letter-spacing:-.04em}
+.ob-plan-days small{font-size:10px;color:var(--concrete);letter-spacing:.06em;margin-top:2px}
+.ob-plan-text b{display:block;font-size:var(--fs-lead);font-weight:var(--fw-strong)}
+.ob-plan-text span{display:block;font-size:var(--fs-small);color:var(--concrete);line-height:1.5;margin-top:2px}
+.ob-plan i{color:var(--concrete)}
+
+/* ══ 課表編輯 ══ */
+#planModal .modal-card{width:min(640px,100%);max-height:92vh;display:flex;flex-direction:column}
+#planModal .modal-body{overflow-y:auto;flex:1;min-height:0}
+.plan-foot{
+  display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;
+  padding:12px 18px calc(env(safe-area-inset-bottom,0px) + 12px);
+  border-top:var(--hairline) solid var(--line);
+}
+.pe-msg{font-size:var(--fs-small);color:var(--signal-text)}
+.pe-section{display:grid;gap:12px;margin-bottom:28px}
+.pe-hint{font-size:var(--fs-small);color:var(--concrete);line-height:1.6}
+.pe-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.pe-day{
+  display:grid;gap:2px;justify-items:center;padding:9px 0;
+  background:var(--ink);color:var(--paper);border:var(--hairline) solid var(--ink);
+  font-family:inherit;cursor:pointer;border-radius:0;-webkit-tap-highlight-color:transparent;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);
+}
+.pe-day span{font-size:10px;opacity:.7}
+.pe-day b{font-family:'Fragment Mono',ui-monospace,monospace;font-size:18px;line-height:1.1}
+.pe-day.is-rest{background:var(--card);color:var(--concrete);border-color:var(--line)}
+.pe-day:active{transform:scale(.94)}
+.pe-day:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.pe-workout{display:grid;gap:4px;border-top:2px solid var(--ink);padding-top:12px;margin-top:8px}
+.pe-w-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pe-code{font-family:'Fragment Mono',ui-monospace,monospace;font-weight:700;font-size:22px;min-width:22px}
+.pe-input{
+  font:inherit;font-size:16px;color:var(--ink);background:var(--card);
+  border:var(--hairline) solid var(--line);border-radius:0;
+  height:44px;padding:0 10px;min-width:0;width:100%;
+}
+.pe-input:focus{outline:none;border-color:var(--ink)}
+.pe-wname{font-weight:var(--fw-strong)}
+.pe-ex{display:grid;gap:6px;padding:10px 0;border-bottom:var(--hairline) solid var(--line)}
+.pe-ex-top{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:6px}
+.pe-ex-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pe-ex-row label{display:grid;gap:3px;font-size:10px;font-weight:var(--fw-strong);letter-spacing:.06em;color:var(--concrete)}
+.pe-num{font-family:'Fragment Mono',ui-monospace,monospace;text-align:center}
+.pe-add{justify-self:start;min-height:40px}
+.pe-add-workout{width:100%}
+.plan-summary{
+  width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:14px;margin-bottom:22px;
+  background:var(--card);border:var(--hairline) solid var(--line);color:var(--ink);
+  font-family:inherit;text-align:left;cursor:pointer;
+}
+.plan-summary b{display:block;font-size:var(--fs-body);font-weight:var(--fw-strong)}
+.plan-summary span span{display:block;font-size:var(--fs-small);color:var(--concrete);margin-top:2px}
+.plan-summary-cta{font-size:var(--fs-small);font-weight:var(--fw-strong);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.plan-summary:active{opacity:.7}
+
 @media(prefers-reduced-motion:reduce){
+  .ob-poster,.ob-big,.ob-points li{animation:none!important}
   #screenToday .ex-row,.recovery-item,
   #screenToday.is-active .day-head > *,#screenToday.is-active .day-nav,
   .finish-wipe,.finish-inner > *,.finish-mark,.finish-letter,
@@ -2518,7 +2627,7 @@ body{
         <div id="weekProgressBody"></div>
       </div>
 
-      <div class="card card-tight">
+      <div class="card card-tight" id="chestProgressCard">
         <div class="progress-strip">
           <div class="progress-strip-label">
             <span class="kicker">胸推進度</span>
@@ -2874,6 +2983,52 @@ body{
 
 </div>
 <div id="drawerBackdrop"></div>
+<!-- 第一次打開 -->
+<div id="onboard" role="dialog" aria-modal="true" aria-labelledby="obTitle" hidden>
+  <div class="ob-step" data-step="1">
+    <div class="ob-poster">
+      <span class="ob-mark">RECOMP</span>
+      <h2 class="ob-big" id="obTitle">每一組<br>都算數。</h2>
+    </div>
+    <div class="ob-body">
+      <ul class="ob-points">
+        <li><b>自動漸進超負荷</b><span>同一個動作每組都做到次數上限，下次自動加重。</span></li>
+        <li><b>看得見的進步</b><span>每個動作的重量曲線、出席紀錄、每週訓練量。</span></li>
+        <li><b>資料只在你的手機</b><span>不用註冊、不用網路，隨時匯出備份。</span></li>
+      </ul>
+      <button type="button" class="btn btn-primary ob-cta" id="obStartBtn">選一套課表 <i class="ph ph-arrow-right icon" aria-hidden="true"></i></button>
+    </div>
+  </div>
+  <div class="ob-step" data-step="2" hidden>
+    <div class="ob-body">
+      <button type="button" class="icon-btn ob-back" id="obBackBtn" aria-label="上一步"><i class="ph ph-arrow-left" aria-hidden="true"></i></button>
+      <div class="kicker">第一步</div>
+      <h2 class="ob-h">選一套課表</h2>
+      <p class="ob-sub">之後隨時可以在 設定 → 訓練計畫 修改動作、組數和每週排程。</p>
+      <div class="ob-plans" id="obPlans"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 課表編輯 -->
+<div id="planModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="planTitle" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="kicker">訓練計畫</div>
+        <div class="modal-title" id="planTitle">編輯課表</div>
+      </div>
+      <button type="button" id="planCloseBtn" class="icon-btn" aria-label="關閉"><i class="ph ph-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body" id="planBody"></div>
+    <div class="plan-foot">
+      <span class="pe-msg" id="planMsg" role="alert"></span>
+      <button type="button" id="planCancelBtn" class="btn">取消</button>
+      <button type="button" id="planSaveBtn" class="btn btn-primary">儲存課表</button>
+    </div>
+  </div>
+</div>
+
 <!-- 訓練完成 -->
 <div id="finishLayer" role="dialog" aria-modal="true" aria-labelledby="finishTitle" hidden>
   <div class="finish-wipe" aria-hidden="true"></div>
@@ -2917,7 +3072,7 @@ const SCHEMA_VERSION = 3;
 /* ══════════════════════════════════════════════
    DATA
    ══════════════════════════════════════════════ */
-const WORKOUTS = {
+const LEGACY_WORKOUTS = {
   A: [
     { id:'chest_press',         name:'合式胸部推舉機',   sets:4, reps:'6-10',  kg:36, note:'肩胛夾緊' },
     { id:'pec_fly',             name:'蝴蝶機',           sets:3, reps:'10-15', kg:36, note:'' },
@@ -2936,7 +3091,7 @@ const WORKOUTS = {
 /* 訓練週期：A-B-休-A-B-休-休，31 天一輪（沿用原本的排程，一天都沒變動）。
    這份資料原本藏在 MEALS 裡，每個元素同時帶著餐點和 train 欄位；
    餐點功能移除後把訓練別獨立出來。 */
-const TRAINING_CYCLE = [
+const LEGACY_CYCLE_DEF = [
   {day:1,train:'A'}, {day:2,train:'B'}, {day:3,train:'休'}, {day:4,train:'A'}, {day:5,train:'B'}, {day:6,train:'休'}, {day:7,train:'休'},
   {day:8,train:'A'}, {day:9,train:'B'}, {day:10,train:'休'}, {day:11,train:'A'}, {day:12,train:'B'}, {day:13,train:'休'}, {day:14,train:'休'},
   {day:15,train:'A'}, {day:16,train:'B'}, {day:17,train:'休'}, {day:18,train:'A'}, {day:19,train:'B'}, {day:20,train:'休'}, {day:21,train:'休'},
@@ -3247,7 +3402,7 @@ function setExerciseWeight(ex, kg){
   lsSet('recomp_weight_id_' + ex.id, String(kg));
 }
 function exerciseById(id){
-  return [...WORKOUTS.A, ...WORKOUTS.B].find(x => x.id === id) || null;
+  return allExercises().find(x => x.id === id) || null;
 }
 function setsDoneFor(ex, dateStr){
   let n = 0;
@@ -3259,7 +3414,7 @@ function setsDoneFor(ex, dateStr){
 
 function migrateLegacyExerciseKeys(){
   if(lsGet('recomp_migrated_v2','0') === '1') return;
-  const allExercises = [...WORKOUTS.A, ...WORKOUTS.B];
+  const allExercises = [...LEGACY_WORKOUTS.A, ...LEGACY_WORKOUTS.B];
   allExercises.forEach(ex => {
     const legacyKey = 'recomp_weight_' + ex.name;
     const legacyVal = lsGet(legacyKey, null);
@@ -3320,9 +3475,113 @@ function migrateSchema(){
   lsSet('recomp_schema_version', String(SCHEMA_VERSION));
 }
   
-const PLAN_START = new Date(2026, 5, 22);
-const PLAN_CYCLE = 31;
 const _planCache = new Map();
+
+/* ══════════════════════════════════════════════
+   訓練計畫
+   原本課表、排程、起始日都寫死在程式碼裡 —— 只有一個人、一間健身房能用。
+   現在計畫是使用者的資料（recomp_plan）：
+   · 已經在用的人：沒有 recomp_plan 時沿用上面的原版計畫，
+     而且不會自動寫入任何東西，舊紀錄一筆都不動
+   · 新使用者：第一次打開先選一套課表
+   訓練日的代號是 A / B / C…，'休' 是休息日。
+   ══════════════════════════════════════════════ */
+const PLAN_KEY = 'recomp_plan';
+let WORKOUTS = {};        /* 代號 → 動作陣列 */
+let WORKOUT_NAMES = {};   /* 代號 → 名稱 */
+let CYCLE = [];           /* 一輪的排程，例如 ['A','B','休',…] */
+let PLAN_START = new Date(2026, 5, 22);
+
+function clonePlan(p){ return JSON.parse(JSON.stringify(p)); }
+
+function legacyPlan(){
+  return {
+    v:1, start:'2026-6-22',
+    cycle: LEGACY_CYCLE_DEF.map(x => x.train),
+    workouts:{
+      A:{ name:'上肢推', exercises: clonePlan(LEGACY_WORKOUTS.A) },
+      B:{ name:'下肢背', exercises: clonePlan(LEGACY_WORKOUTS.B) },
+    },
+  };
+}
+
+function validPlan(p){
+  if(!p || typeof p !== 'object' || !p.workouts || !Array.isArray(p.cycle) || !p.cycle.length) return false;
+  const codes = Object.keys(p.workouts);
+  if(!codes.length) return false;
+  return codes.every(c => p.workouts[c] && Array.isArray(p.workouts[c].exercises) &&
+    p.workouts[c].exercises.every(e => e && typeof e.id === 'string' && e.id && typeof e.name === 'string'));
+}
+
+function applyPlan(p){
+  WORKOUTS = {}; WORKOUT_NAMES = {};
+  Object.keys(p.workouts).sort().forEach(code => {
+    WORKOUTS[code] = p.workouts[code].exercises.map(e => ({
+      id:e.id, name:e.name,
+      sets:Math.max(1, Math.min(10, parseInt(e.sets, 10) || 3)),
+      reps:String(e.reps || '8-12'),
+      kg:Number(e.kg) || 0,
+      note:e.note || '',
+    }));
+    WORKOUT_NAMES[code] = p.workouts[code].name || code;
+  });
+  CYCLE = p.cycle.map(t => WORKOUTS[t] ? t : '休');
+  const [y,m,d] = String(p.start || '').split('-').map(Number);
+  PLAN_START = (y && m && d) ? new Date(y, m-1, d) : new Date(2026, 5, 22);
+  try{ _planCache.clear(); invalidateHistory(); }catch(e){}
+}
+
+function currentPlan(){
+  const workouts = {};
+  Object.keys(WORKOUTS).forEach(c => {
+    workouts[c] = { name:WORKOUT_NAMES[c], exercises:WORKOUTS[c].map(e => ({ ...e })) };
+  });
+  return { v:1, start:formatDateStr(PLAN_START), cycle:CYCLE.slice(), workouts };
+}
+
+function hasAnyRecords(){
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && /^recomp_(set_id|set|bw|weight_id|weight)_/.test(k)) return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+/* 回傳 'stored' | 'legacy' | 'new'（'new' = 該顯示引導了） */
+function loadPlan(){
+  const raw = lsGet(PLAN_KEY, null);
+  if(raw){
+    try{
+      const p = JSON.parse(raw);
+      if(validPlan(p)){ applyPlan(p); return 'stored'; }
+    }catch(e){}
+  }
+  applyPlan(legacyPlan());
+  return (hasAnyRecords() || lsGet('rcmeta_onboarded', '') === '1') ? 'legacy' : 'new';
+}
+
+function savePlan(p){
+  lsSet(PLAN_KEY, JSON.stringify(p));
+  applyPlan(p);
+}
+
+function isTrainDay(train){ return !!(WORKOUTS[train] && WORKOUTS[train].length); }
+
+/* 同一個動作可以出現在不同的課表（例如兩天都有深蹲），用 id 去重 */
+function allExercises(){
+  const seen = new Set(), out = [];
+  Object.keys(WORKOUTS).forEach(c => WORKOUTS[c].forEach(e => {
+    if(!seen.has(e.id)){ seen.add(e.id); out.push(e); }
+  }));
+  return out;
+}
+function workoutOfExercise(id){
+  return Object.keys(WORKOUTS).find(c => WORKOUTS[c].some(e => e.id === id)) || null;
+}
+
+
 
 function getPlanForDate(dateObj){
   const cacheKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
@@ -3331,8 +3590,9 @@ function getPlanForDate(dateObj){
   const base = new Date(PLAN_START); base.setHours(12,0,0,0);
   const d    = new Date(dateObj);    d.setHours(12,0,0,0);
   const diff = Math.round((d - base) / 86400000);
-  const planDay = ((diff % PLAN_CYCLE) + PLAN_CYCLE) % PLAN_CYCLE + 1;
-  const plan = TRAINING_CYCLE.find(m => m.day === planDay) || TRAINING_CYCLE[0];
+  const n = CYCLE.length || 1;
+  const planDay = ((diff % n) + n) % n + 1;
+  const plan = { day:planDay, train:CYCLE[planDay - 1] || '休' };
   _planCache.set(cacheKey, plan);
   return plan;
 }
@@ -3359,7 +3619,8 @@ function formatDateStrPad(d){
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function getTrainText(train){
-  return train === 'A' ? 'A日 上肢推' : train === 'B' ? 'B日 下肢背' : '休息日';
+  if(!isTrainDay(train)) return '休息日';
+  return `${train}日 ${WORKOUT_NAMES[train] || ''}`.trim();
 }
 function weekLabelFromOffset(offset){
   if(offset === 0) return '本週';
@@ -3500,7 +3761,7 @@ function copyAnyText(t, msg){
   }
 }
 function isDayFullyTrained(dateStr, type){
-  if(type !== 'A' && type !== 'B') return false;
+  if(!isTrainDay(type)) return false;
   return WORKOUTS[type].every(ex => {
     for(let s = 1; s <= ex.sets; s++){
       if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') === '0') return false;
@@ -3527,44 +3788,59 @@ function logKey(dateStr, exId){ return `recomp_log_${dateStr}_${exId}`; }
 function bumpKey(dateStr, exId){ return `recomp_bump_${dateStr}_${exId}`; }
 
 const _historyCache = new Map();
-function invalidateHistory(){ _historyCache.clear(); }
+let _setIndex = null;
+function invalidateHistory(){ _historyCache.clear(); _setIndex = null; }
 
-/* 某個動作從計畫開始到今天，每一次有打勾的訓練，由舊到新 */
+/* 所有打勾紀錄的索引：動作 id → 日期 → 完成 / 達上限組數。
+   直接從 key 讀，不經過排程 —— 使用者改了課表或排程之後，
+   過去哪天練了哪個動作也不會跟著變。 */
+function setIndex(){
+  if(_setIndex) return _setIndex;
+  _setIndex = new Map();
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(!k || k.indexOf('recomp_set_id_') !== 0) continue;
+      const m = /^recomp_set_id_(\d{4}-\d{1,2}-\d{1,2})_(.+)_(\d+)$/.exec(k);
+      if(!m) continue;
+      const v = localStorage.getItem(k);
+      if(v !== '1' && v !== '2') continue;
+      let byDate = _setIndex.get(m[2]);
+      if(!byDate){ byDate = new Map(); _setIndex.set(m[2], byDate); }
+      const c = byDate.get(m[1]) || { done:0, capped:0 };
+      c.done++; if(v === '2') c.capped++;
+      byDate.set(m[1], c);
+    }
+  }catch(e){}
+  return _setIndex;
+}
+
+/* 某個動作到今天為止，每一次有打勾的訓練，由舊到新 */
 function exerciseHistory(ex){
   if(_historyCache.has(ex.id)) return _historyCache.get(ex.id);
 
   const today = atNoon(new Date());
+  const byDate = setIndex().get(ex.id);
   const sessions = [];
-  for(let d = atNoon(PLAN_START); d <= today; d.setDate(d.getDate() + 1)){
-    d.setHours(12,0,0,0);
-    const plan = getPlanForDate(d);
-    if(plan.train !== 'A' && plan.train !== 'B') continue;
-    const target = WORKOUTS[plan.train].find(x => x.id === ex.id);
-    if(!target) continue;
-
-    const ds = formatDateStr(d);
-    let done = 0, capped = 0;
-    for(let s = 1; s <= target.sets; s++){
-      const v = lsGet(`recomp_set_id_${ds}_${ex.id}_${s}`, '0');
-      if(v !== '0') done++;
-      if(v === '2') capped++;
-    }
-    if(!done) continue;
-
+  if(byDate) byDate.forEach((c, ds) => {
+    const [y,m,d] = ds.split('-').map(Number);
+    const date = new Date(y, m-1, d, 12);
+    if(date > today || !c.done) return;
+    const total = Math.max(ex.sets, c.done);
+    const allCapped = c.capped === total;
     const logged = parseFloat(lsGet(logKey(ds, ex.id), ''));
     const bumpRaw = lsGet(bumpKey(ds, ex.id), null);
-    const allCapped = capped === target.sets;
     /* 新紀錄看標記；舊紀錄沒有標記，全紅就當作那天升過一次 */
     const bump = bumpRaw !== null
       ? (parseFloat(bumpRaw) || 0)
       : (allCapped ? getIncrement(ex.id) : 0);
-
     sessions.push({
-      date:new Date(d), ds, train:plan.train,
-      done, total:target.sets, capped, allCapped, bump,
+      date, ds, train:getPlanForDate(date).train,
+      done:c.done, total, capped:c.capped, allCapped, bump,
       logged: isNaN(logged) ? null : logged,
     });
-  }
+  });
+  sessions.sort((a, b) => a.date - b.date);
 
   /* 從現在的重量往回推：這一次用的 = 下一次用的 − 這一次升的 */
   let after = getExerciseWeight(ex);
@@ -3611,7 +3887,7 @@ function computeMonthSummaryData(year, month){
     const plan = getPlanForDate(dateObj);
     const dateStr = formatDateStr(dateObj);
 
-    if(plan.train !== '休'){
+    if(isTrainDay(plan.train)){
       trainDaysTotal++;
       if(isPast && isDayFullyTrained(dateStr, plan.train)) trainDaysDone++;
     }else{
@@ -3629,7 +3905,7 @@ function computeMonthSummaryData(year, month){
     const dateObj = new Date(year, month, d);
     const dateStr = formatDateStr(dateObj);
     const plan = getPlanForDate(dateObj);
-    if(plan.train === '休') continue;
+    if(!isTrainDay(plan.train)) continue;
     WORKOUTS[plan.train].forEach(ex => {
       setsPlanned += ex.sets;
       for(let n = 1; n <= ex.sets; n++){
@@ -3697,7 +3973,7 @@ const isPast = dateObj <= new Date();
 let heatClass = '';
 let heatBar = '';
 if(isPast && getPref('heatmap')){
-  if(plan.train !== '休'){
+  if(isTrainDay(plan.train)){
     const totalSets = WORKOUTS[plan.train].reduce((s, ex) => s + ex.sets, 0);
     let doneSets = 0;
     WORKOUTS[plan.train].forEach(ex => {
@@ -3724,7 +4000,7 @@ if(isPast && getPref('heatmap')){
       aria-pressed="${isSelected ? 'true' : 'false'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span class="cal-daynum">${d}</span>
-        <span class="cal-tag${plan.train === '休' ? ' is-rest' : ''}">${plan.train}</span>
+        <span class="cal-tag${!isTrainDay(plan.train) ? ' is-rest' : ''}">${plan.train}</span>
       </div>
 
       ${heatBar}
@@ -4118,7 +4394,7 @@ function renderDayHeader(plan, dateStr){
 
   const meta = document.getElementById('dpMeta');
   if(meta){
-    if(plan.train === 'A' || plan.train === 'B'){
+    if(isTrainDay(plan.train)){
       const list = WORKOUTS[plan.train];
       const sets = list.reduce((s, ex) => s + ex.sets, 0);
       meta.textContent = `${list.length} 個動作 · ${sets} 組 · 約 ${estimateMinutes(list)} 分鐘`;
@@ -4151,7 +4427,7 @@ function renderWeekProgress(){
     const d = new Date(monday); d.setDate(monday.getDate() + i); d.setHours(12,0,0,0);
     const c = dayCompletion(d);
     let state = 'rest';
-    if(c.train === 'A' || c.train === 'B'){
+    if(isTrainDay(c.train)){
       dayTotal++; setsTotal += c.total; setsDone += c.done;
       if(c.total && c.done === c.total) dayDone++;
       state = c.total && c.done === c.total ? 'full'
@@ -4191,7 +4467,7 @@ function findLastPerformance(ex, beforeDateStr, trainType){
   const hist = exerciseHistory(ex);
   for(let i = hist.length - 1; i >= 0; i--){
     const s = hist[i];
-    if(s.date >= before || s.train !== trainType) continue;
+    if(s.date >= before) continue;
     if(s.date < oldest) break;
     return { date:new Date(s.date), done:s.done, total:s.total, kg:s.kg };
   }
@@ -4230,7 +4506,7 @@ function renderSessionBar(plan, dateStr){
   const bar = document.getElementById('sessionBar');
   const count = document.getElementById('dpSessionCount');
   if(!bar || !count) return;
-  if(plan.train !== 'A' && plan.train !== 'B'){
+  if(!isTrainDay(plan.train)){
     const states = RECOVERY.map(r => lsGet(recoveryKey(dateStr, r.id), '0') === '1');
     bar.innerHTML = `<div class="sb-group" style="flex:1">${states.map(on =>
       `<i class="sb-seg${on ? ' is-done' : ''}"></i>`).join('')}</div>`;
@@ -4255,7 +4531,7 @@ function nextTrainingAfter(dateObj){
   for(let i = 1; i <= 14; i++){
     cur.setDate(cur.getDate() + 1);
     const p = getPlanForDate(cur);
-    if(p.train === 'A' || p.train === 'B') return { d:new Date(cur), plan:p };
+    if(isTrainDay(p.train)) return { d:new Date(cur), plan:p };
   }
   return null;
 }
@@ -4265,7 +4541,7 @@ function renderWorkoutSection(plan, dateStr){
   const workoutDiv = document.getElementById('dpWorkout');
   renderSessionBar(plan, dateStr);
 
-  if(plan.train !== 'A' && plan.train !== 'B'){
+  if(!isTrainDay(plan.train)){
     workoutLabel.textContent = '休息 · 恢復';
     const [y,m,d] = dateStr.split('-').map(Number);
     const next = nextTrainingAfter(new Date(y, m-1, d));
@@ -4345,7 +4621,7 @@ function renderWorkoutSection(plan, dateStr){
 
 /* 目前這一天的下一個還沒做的組，用在計時器上：「下一組 · 蝴蝶機 第 2 組」 */
 function nextPendingSet(plan, dateStr){
-  if(plan.train !== 'A' && plan.train !== 'B') return null;
+  if(!isTrainDay(plan.train)) return null;
   for(const ex of WORKOUTS[plan.train]){
     for(let s = 1; s <= ex.sets; s++){
       if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') === '0') return { ex, n:s };
@@ -4379,7 +4655,7 @@ function showFinish(dateStr){
   const [y,m,d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m-1, d, 12);
   const plan = getPlanForDate(dateObj);
-  if(plan.train !== 'A' && plan.train !== 'B') return;
+  if(!isTrainDay(plan.train)) return;
   _finishDate = dateStr;
 
   const list = WORKOUTS[plan.train];
@@ -4462,7 +4738,10 @@ function prefillBwInputs(){
 }
 
 function refreshChestWeightStat(){
-  const chestEx = WORKOUTS.A.find(ex => ex.id === 'chest_press');
+  /* 「胸推目標 50kg」是原版計畫的個人目標，換了課表就不顯示 */
+  const chestEx = allExercises().find(ex => ex.id === 'chest_press');
+  const chestCard = document.getElementById('chestProgressCard');
+  if(chestCard) chestCard.hidden = !chestEx;
   if(!chestEx) return;
   const kg = getExerciseWeight(chestEx);
   const numEl = document.getElementById('chestWeightNum');
@@ -4492,14 +4771,14 @@ function computeWeeklyReport(offset){
     const dateStr = formatDateStr(d);
     const fullyTrained = isDayFullyTrained(dateStr, plan.train);
     const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
-    const exerciseText = plan.train === '休'
+    const exerciseText = !isTrainDay(plan.train)
       ? '休息 / 恢復'
       : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
 
-    if(plan.train !== '休') trainPlanned++;
+    if(isTrainDay(plan.train)) trainPlanned++;
     if(fullyTrained) trainDone++;
 
-    if(plan.train !== '休'){
+    if(isTrainDay(plan.train)){
       WORKOUTS[plan.train].forEach(ex => {
         /* 用那一天實際的重量；原本拿「現在的重量」乘，回頭看舊週報數字會一直變 */
         const kg = displayKg(ex, dateStr);
@@ -4539,7 +4818,7 @@ function computeWeeklyReport(offset){
 
   const exercisesThisWeek = new Map();
   days.forEach(day => {
-    if(day.plan.train === 'A' || day.plan.train === 'B'){
+    if(isTrainDay(day.plan.train)){
       WORKOUTS[day.plan.train].forEach(ex => exercisesThisWeek.set(ex.id, ex));
     }
   });
@@ -4617,7 +4896,7 @@ function renderWeeklyReport(offset){
       </div>
       <div style="font-size:12px;line-height:1.6;margin-top:8px">${escapeHtml(day.exerciseText)}</div>
       <div class="search-tags">
-        ${day.plan.train === '休' ? '' : (day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`)}
+        ${!isTrainDay(day.plan.train) ? '' : (day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`)}
         ${bwTag}
       </div>
     </button>`;
@@ -4659,7 +4938,7 @@ function renderWeeklyReport(offset){
    ══════════════════════════════════════════════ */
 function findMakeupReminders(dateObj){
   const plan = getPlanForDate(dateObj);
-  if(plan.train !== 'A' && plan.train !== 'B') return [];
+  if(!isTrainDay(plan.train)) return [];
 
   const reminders = [];
   const lookback = 14;
@@ -4706,7 +4985,7 @@ function drawTrainingCard(){
 
   const plan = getPlanForDate(selectedDateObj);
   const dateStr = formatDateStr(selectedDateObj);
-  if(plan.train === '休') return null;
+  if(!isTrainDay(plan.train)) return null;
 
   const list = WORKOUTS[plan.train];
 
@@ -5035,7 +5314,7 @@ function drawCalendarToCanvas(){
     ctx.textAlign = 'left';
 
     /* 該日完成的組數比例，取代原本的 P/kcal/$ */
-    if(plan.train !== '休'){
+    if(isTrainDay(plan.train)){
       const list = WORKOUTS[plan.train];
       let done = 0, tot = 0;
       list.forEach(ex => {
@@ -5080,7 +5359,7 @@ function buildSearchIndex(){
     const trainText = getTrainText(plan.train);
     const fullyTrained = isDayFullyTrained(dateStr, plan.train);
     const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
-    const exercises = plan.train === '休'
+    const exercises = !isTrainDay(plan.train)
       ? '休息 / 恢復'
       : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
 
@@ -5106,11 +5385,9 @@ function runSearch(){
   let results = SEARCH_INDEX.filter(item => {
     if(q && !item.searchText.includes(q)) return false;
     switch(searchFilter){
-      case 'A': return item.plan.train === 'A';
-      case 'B': return item.plan.train === 'B';
-      case 'rest': return item.plan.train === '休';
+      case 'rest': return !isTrainDay(item.plan.train);
       case 'trained': return item.fullyTrained;
-      default: return true;
+      default: return WORKOUTS[searchFilter] ? item.plan.train === searchFilter : true;
     }
   });
 
@@ -5295,8 +5572,17 @@ function renderSettings(){
   const info = document.getElementById('settingsVersionInfo');
   if(!list) return;
 
+  /* 訓練計畫 */
+  const codes = Object.keys(WORKOUTS);
+  let html = `<div class="kicker" style="margin-bottom:8px">訓練計畫</div>
+    <button type="button" class="plan-summary" id="planEditBtn">
+      <span><b>${codes.map(c => `${c} ${escapeHtml(WORKOUT_NAMES[c])}`).join(' · ')}</b>
+        <span>每週約 ${daysPerWeek(CYCLE)} 天 · ${allExercises().length} 個動作</span></span>
+      <span class="plan-summary-cta">編輯<i class="ph ph-caret-right" aria-hidden="true"></i></span>
+    </button>`;
+
   /* 偏好開關 */
-  let html = '<div class="kicker" style="margin-bottom:8px">偏好設定</div>';
+  html += '<div class="kicker" style="margin-bottom:8px">偏好設定</div>';
 
   html += Object.entries(PREFS).map(([id, pref]) => {
     const isOn = getPref(id);
@@ -5311,12 +5597,12 @@ function renderSettings(){
   }).join('');
 
   /* 訓練器材加重設定 */
-  const allExercises = [...WORKOUTS.A, ...WORKOUTS.B];
+  const exList = allExercises();
   html += '<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--line)">';
   html += '<div class="kicker" style="margin-bottom:8px">每次加重量設定</div>';
   html += '<div class="settings-desc" style="margin-bottom:10px">做滿全部組數時，該動作自動增加的重量（kg）</div>';
 
-  html += allExercises.map(ex => {
+  html += exList.map(ex => {
     const inc = getIncrement(ex.id);
     return `<div class="settings-row">
       <div>
@@ -5382,6 +5668,7 @@ function initSettings(){
   }
 });
 document.getElementById('settingsList').addEventListener('click', e => {
+  if(e.target.closest('#planEditBtn')){ closeSettings(); openPlanEditor(); return; }
   const btn = e.target.closest('[data-pref]');
   if(!btn) return;
     const prefId = btn.dataset.pref;
@@ -5504,6 +5791,8 @@ function showVersionUpdateBanner(remoteVer, stuck){
    INIT & EVENT LISTENERS
    ══════════════════════════════════════════════ */
 function initApp(){
+  /* 課表要在任何畫面算出來之前就載入 */
+  loadPlan.initial = loadPlan();
   /* ── Theme ── */
 (function initTheme(){
   const THEME_KEY = 'recomp_theme';
@@ -6040,6 +6329,7 @@ searchClearBtn.addEventListener('click', () => {
   document.addEventListener('keydown', e => {
     if(e.key !== 'Escape') return;
     if(!document.getElementById('finishLayer').hidden) hideFinish();
+    else if(document.getElementById('planModal').classList.contains('show')) closePlanEditor();
     else if(document.getElementById('exportPreviewModal').classList.contains('show')) closeExportPreview();
     else if(weeklyModal.classList.contains('show')) closeWeeklyModal();
     else if(exportCalModal.classList.contains('show')) closeExportCalModal();
@@ -6102,7 +6392,7 @@ searchClearBtn.addEventListener('click', () => {
   document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
 
   const VALID_IMPORT_KEY = 
-    /^(recomp_(set_id|weight_id|log|bump|rest|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|pref_\w+)$)/;
+    /^(recomp_(set_id|weight_id|log|bump|rest|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|plan|pref_\w+)$)/;
   document.getElementById('importFileInput').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -6138,6 +6428,7 @@ searchClearBtn.addEventListener('click', () => {
         }
         if(snapped) parts.push('可用「還原上一次變更」回到匯入前');
         showDataMsg(parts.join('，'));
+        loadPlan(); renderPlanLabels();
 
         renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
         refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
@@ -6159,6 +6450,7 @@ searchClearBtn.addEventListener('click', () => {
     allRecompKeys().forEach(k => lsRemove(k));
     invalidateHistory();
     showDataMsg(`已清除 ${n} 筆紀錄，可按「還原上一次變更」救回`);
+    loadPlan(); renderPlanLabels();
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
     refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
     renderStorageStatus();
@@ -6174,6 +6466,7 @@ searchClearBtn.addEventListener('click', () => {
     const n = restoreSnapshot();
     invalidateHistory();
     showDataMsg(`已還原 ${n} 筆紀錄`);
+    loadPlan(); renderPlanLabels();
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
     refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
     renderStorageStatus();
@@ -6189,6 +6482,9 @@ searchClearBtn.addEventListener('click', () => {
   checkRemoteVersion();
   initSettings();
   initProgress();
+  initPlanEditor();
+  renderPlanLabels();
+  if(loadPlan.initial === 'new') showOnboarding();
 
   /* 資料安全：申請永久儲存 → 更新狀態面板 → 必要時提醒備份 */
   cleanupNagFlags();
@@ -6363,6 +6659,372 @@ function closeExportPreview(){
    畫面切換
    ══════════════════════════════════════════════ */
 /* ══════════════════════════════════════════════
+   課表範本
+   每週排程的第 0 天是週一；開始日對齊到本週週一，
+   這樣「一三五」就真的落在一三五。
+   ══════════════════════════════════════════════ */
+const E = (id, name, sets, reps, kg, note) => ({ id, name, sets, reps, kg, note:note || '' });
+const TEMPLATES = {
+  full: {
+    title:'全身入門', days:3, blurb:'每週 3 天 · 兩套全身課表輪替 · 第一次重訓從這裡開始',
+    plan: () => ({ cycle:['A','休','B','休','A','休','休','B','休','A','休','B','休','休'], workouts:{
+      A:{ name:'全身・臥推', exercises:[
+        E('squat','槓鈴深蹲',3,'5',20,'膝蓋與腳尖同方向'),
+        E('bench_press','槓鈴臥推',3,'5',20,'肩胛後收下壓'),
+        E('barbell_row','槓鈴划船',3,'5',20,''),
+      ]},
+      B:{ name:'全身・肩推', exercises:[
+        E('squat','槓鈴深蹲',3,'5',20,'膝蓋與腳尖同方向'),
+        E('overhead_press','站姿肩推',3,'5',15,'核心收緊不後仰'),
+        E('deadlift','硬舉',1,'5',40,'背打直，槓貼腿'),
+      ]},
+    }}),
+  },
+  ul: {
+    title:'上下半身', days:4, blurb:'每週 4 天 · 上半身 / 下半身輪替 · 有一點基礎之後最穩的選擇',
+    plan: () => ({ cycle:['A','B','休','A','B','休','休'], workouts:{
+      A:{ name:'上半身', exercises:[
+        E('bench_press','槓鈴臥推',4,'6-8',30,''),
+        E('lat_pulldown','滑輪下拉',4,'8-10',30,''),
+        E('db_shoulder_press','啞鈴肩推',3,'8-12',10,''),
+        E('seated_row','坐姿划船',3,'10-12',30,''),
+        E('db_curl','啞鈴彎舉',2,'12',8,''),
+      ]},
+      B:{ name:'下半身', exercises:[
+        E('squat','槓鈴深蹲',4,'6-8',40,''),
+        E('romanian_deadlift','羅馬尼亞硬舉',3,'8-10',40,''),
+        E('leg_press','腿推機',3,'10-12',60,''),
+        E('leg_curl','腿後勾',3,'12',20,''),
+        E('calf_raise','提踵',3,'15',30,''),
+      ]},
+    }}),
+  },
+  ppl: {
+    title:'推拉腿', days:6, blurb:'每週 6 天 · 推 / 拉 / 腿各練兩次 · 訓練量最大',
+    plan: () => ({ cycle:['A','B','C','A','B','C','休'], workouts:{
+      A:{ name:'推', exercises:[
+        E('bench_press','槓鈴臥推',4,'6-8',30,''),
+        E('incline_db_press','上斜啞鈴臥推',3,'8-12',12,''),
+        E('overhead_press','站姿肩推',3,'8-10',20,''),
+        E('lateral_raise','側平舉',3,'12-15',5,''),
+        E('triceps_pushdown','三頭下壓',3,'10-12',15,''),
+      ]},
+      B:{ name:'拉', exercises:[
+        E('deadlift','硬舉',3,'5',50,''),
+        E('lat_pulldown','滑輪下拉',3,'8-10',35,''),
+        E('barbell_row','槓鈴划船',3,'8-10',30,''),
+        E('face_pull','臉拉',3,'15',10,''),
+        E('db_curl','啞鈴彎舉',3,'10-12',8,''),
+      ]},
+      C:{ name:'腿', exercises:[
+        E('squat','槓鈴深蹲',4,'6-8',40,''),
+        E('leg_press','腿推機',3,'10-12',60,''),
+        E('leg_curl','腿後勾',3,'12',20,''),
+        E('calf_raise','提踵',4,'12-15',30,''),
+        E('cable_crunch','繩索捲腹',3,'15',20,''),
+      ]},
+    }}),
+  },
+  gongguan: {
+    title:'公館重組計畫', days:4, blurb:'器械 A/B · 31 天一輪 · 這個 app 最初的課表',
+    plan: () => { const p = legacyPlan(); return { cycle:p.cycle, workouts:p.workouts }; },
+  },
+};
+
+function templatePlan(key){
+  const t = TEMPLATES[key];
+  const body = t.plan();
+  /* 每週排程對齊週一；31 天的原版循環從今天開始 */
+  const start = body.cycle.length % 7 === 0 ? mondayOf(new Date()) : atNoon(new Date());
+  return { v:1, start:formatDateStr(start), cycle:body.cycle, workouts:body.workouts };
+}
+
+function daysPerWeek(cycle){
+  const n = cycle.filter(t => isTrainDay(t)).length;
+  return Math.round(n * 7 / cycle.length * 10) / 10;
+}
+
+/* 分頁上跟課表有關的標籤：搜尋篩選、月曆圖例 */
+function renderPlanLabels(){
+  const row = document.getElementById('searchFilterRow');
+  const codes = Object.keys(WORKOUTS);
+  if(!['all','rest','trained'].includes(searchFilter) && !WORKOUTS[searchFilter]) searchFilter = 'all';
+  if(row){
+    row.innerHTML = [['all','全部'], ...codes.map(c => [c, `${c}日`]), ['rest','休息'], ['trained','已完成訓練']]
+      .map(([f, l]) => `<button type="button" class="search-chip${searchFilter === f ? ' active' : ''}" data-filter="${f}">${escapeHtml(l)}</button>`).join('');
+  }
+  const legend = document.querySelector('#screenCalendar .cal-legend');
+  if(legend){
+    legend.innerHTML = codes.map(c => `<span><i class="tag-chip">${c}</i> ${escapeHtml(WORKOUT_NAMES[c])}</span>`).join('')
+      + '<span><i class="tag-chip is-rest">休</i> 休息</span>';
+  }
+}
+
+/* 課表換了之後，所有畫面重畫一次 */
+function rerenderAll(){
+  renderPlanLabels();
+  const d = selectedDateObj || new Date();
+  renderCalendar(d.getFullYear(), d.getMonth());
+  selectDate(d);
+  refreshChestWeightStat();
+  renderBwStats(); renderBwChart(); renderBwWeekly();
+  refreshProgressIfOpen(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+}
+
+/* ══════════════════════════════════════════════
+   第一次打開
+   ══════════════════════════════════════════════ */
+function showOnboarding(){
+  const ob = document.getElementById('onboard');
+  if(!ob) return;
+  ob.querySelector('#obPlans').innerHTML = Object.entries(TEMPLATES).map(([key, t]) => `
+    <button type="button" class="ob-plan" data-template="${key}">
+      <span class="ob-plan-days"><b>${t.days}</b><small>天／週</small></span>
+      <span class="ob-plan-text"><b>${escapeHtml(t.title)}</b><span>${escapeHtml(t.blurb)}</span></span>
+      <i class="ph ph-caret-right" aria-hidden="true"></i>
+    </button>`).join('') + `
+    <button type="button" class="ob-plan" data-template="custom">
+      <span class="ob-plan-days"><b>＋</b><small>自訂</small></span>
+      <span class="ob-plan-text"><b>自己排課表</b><span>動作、組數、每週哪幾天練，全部自己決定</span></span>
+      <i class="ph ph-caret-right" aria-hidden="true"></i>
+    </button>`;
+  obStep(1);
+  ob.hidden = false;
+  document.body.style.overflow = 'hidden';
+  const cta = ob.querySelector('#obStartBtn');
+  if(cta) cta.focus();
+}
+function obStep(n){
+  document.querySelectorAll('#onboard .ob-step').forEach(el => { el.hidden = +el.dataset.step !== n; });
+  const ob = document.getElementById('onboard');
+  if(ob) ob.scrollTop = 0;
+}
+function hideOnboarding(){
+  const ob = document.getElementById('onboard');
+  if(!ob) return;
+  ob.hidden = true;
+  document.body.style.overflow = '';
+}
+function chooseTemplate(key){
+  if(key === 'custom'){
+    lsSet('rcmeta_onboarded', '1');
+    hideOnboarding();
+    openPlanEditor({ v:1, start:formatDateStr(mondayOf(new Date())), cycle:['A','休','A','休','A','休','休'],
+      workouts:{ A:{ name:'', exercises:[ newExercise() ] } } }, true);
+    return;
+  }
+  const p = templatePlan(key);
+  savePlan(p);
+  lsSet('rcmeta_onboarded', '1');
+  hideOnboarding();
+  rerenderAll();
+  showScreen('today');
+  flashToast(`已套用「${TEMPLATES[key].title}」· 點重量數字改成你目前用的重量`);
+}
+
+/* ══════════════════════════════════════════════
+   課表編輯器
+   ══════════════════════════════════════════════ */
+let _planDraft = null;
+let _planDraftIsNew = false;
+
+function newExercise(){
+  return { id:'ex_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+           name:'', sets:3, reps:'8-12', kg:20, note:'', kgNow:20, isNew:true };
+}
+
+function planTrainOn(d, date){
+  const [y,m,dd] = String(d.start).split('-').map(Number);
+  const start = new Date(y, m-1, dd, 12);
+  const diff = Math.round((atNoon(date) - start) / 86400000);
+  const n = d.cycle.length;
+  return d.cycle[((diff % n) + n) % n];
+}
+function weeklyValues(d){
+  const mon = mondayOf(new Date());
+  return Array.from({ length:7 }, (_, i) => { const x = new Date(mon); x.setDate(mon.getDate() + i); return planTrainOn(d, x); });
+}
+
+function openPlanEditor(draft, isNew){
+  const src = draft || currentPlan();
+  _planDraft = clonePlan(src);
+  _planDraftIsNew = !!isNew;
+  Object.values(_planDraft.workouts).forEach(w => w.exercises.forEach(e => {
+    if(e.kgNow === undefined) e.kgNow = getExerciseWeight(e);
+  }));
+  renderPlanEditor();
+  const modal = document.getElementById('planModal');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+  document.getElementById('planMsg').textContent = '';
+  document.getElementById('planCloseBtn').focus();
+}
+function closePlanEditor(){
+  const modal = document.getElementById('planModal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden', 'true');
+  _planDraft = null;
+}
+
+function renderPlanEditor(){
+  const d = _planDraft;
+  if(!d) return;
+  const codes = Object.keys(d.workouts).sort();
+  const wd = ['一','二','三','四','五','六','日'];
+  let sched;
+  if(d.cycle.length === 7){
+    const vals = weeklyValues(d);
+    sched = `<div class="pe-week">${vals.map((v, i) => `
+      <button type="button" class="pe-day${d.workouts[v] ? '' : ' is-rest'}" data-day="${i}"
+        aria-label="週${wd[i]}：${d.workouts[v] ? v + ' 日' : '休息'}，點一下切換">
+        <span>${wd[i]}</span><b>${d.workouts[v] ? v : '休'}</b></button>`).join('')}</div>
+      <p class="pe-hint">點一下切換：休 → ${codes.join(' → ')} → 休</p>`;
+  }else{
+    sched = `<p class="pe-hint">目前是 ${d.cycle.length} 天一輪的循環（${d.cycle.slice(0, 7).join('-')}…），每 ${d.cycle.length} 天重來一次。</p>
+      <button type="button" class="btn" data-act="to-weekly"><i class="ph ph-calendar-check icon" aria-hidden="true"></i>改成每週固定排程</button>`;
+  }
+
+  const workouts = codes.map(code => {
+    const w = d.workouts[code];
+    return `<div class="pe-workout" data-code="${code}">
+      <div class="pe-w-head">
+        <span class="pe-code">${code}</span>
+        <input class="pe-input pe-wname" data-field="wname" value="${escapeHtml(w.name)}" placeholder="名稱，例如 上半身" aria-label="${code} 日名稱">
+        ${codes.length > 1 ? `<button type="button" class="icon-btn" data-act="del-workout" aria-label="刪除 ${code} 日"><i class="ph ph-trash" aria-hidden="true"></i></button>` : ''}
+      </div>
+      ${w.exercises.map((e, i) => `
+        <div class="pe-ex" data-i="${i}">
+          <div class="pe-ex-top">
+            <input class="pe-input pe-name" data-field="name" value="${escapeHtml(e.name)}" placeholder="動作名稱" aria-label="動作名稱">
+            <button type="button" class="icon-btn" data-act="del-ex" aria-label="刪除 ${escapeHtml(e.name || '這個動作')}"><i class="ph ph-x" aria-hidden="true"></i></button>
+          </div>
+          <div class="pe-ex-row">
+            <label><span>組數</span><input class="pe-input pe-num" data-field="sets" type="number" min="1" max="10" inputmode="numeric" value="${e.sets}"></label>
+            <label><span>次數</span><input class="pe-input pe-num" data-field="reps" value="${escapeHtml(e.reps)}"></label>
+            <label><span>${e.isNew ? '起始重量' : '目前重量'} kg</span><input class="pe-input pe-num" data-field="kgNow" type="number" min="0" max="500" step="0.5" inputmode="decimal" value="${e.kgNow}"></label>
+          </div>
+        </div>`).join('')}
+      <button type="button" class="btn btn-quiet pe-add" data-act="add-ex"><i class="ph ph-plus icon" aria-hidden="true"></i>新增動作</button>
+    </div>`;
+  }).join('');
+
+  const nextCode = 'ABCDEF'.split('').find(c => !d.workouts[c]);
+  document.getElementById('planBody').innerHTML = `
+    <div class="pe-section">
+      <div class="kicker">每週排程</div>
+      ${sched}
+    </div>
+    <div class="pe-section">
+      <div class="kicker">課表</div>
+      ${workouts}
+      ${nextCode ? `<button type="button" class="btn pe-add-workout" data-act="add-workout"><i class="ph ph-plus icon" aria-hidden="true"></i>新增 ${nextCode} 日</button>` : ''}
+    </div>`;
+}
+
+function setWeekly(d, vals){
+  d.start = formatDateStr(mondayOf(new Date()));
+  d.cycle = vals;
+}
+
+function savePlanDraft(){
+  const d = _planDraft;
+  const msg = document.getElementById('planMsg');
+  const codes = Object.keys(d.workouts).sort();
+  const out = { v:1, start:d.start, cycle:d.cycle.slice(), workouts:{} };
+  const weightChanges = [];
+  for(const code of codes){
+    const w = d.workouts[code];
+    const exs = w.exercises.filter(e => String(e.name).trim());
+    if(!exs.length){ msg.textContent = `${code} 日至少要有一個動作`; return; }
+    out.workouts[code] = {
+      name: String(w.name).trim() || `${code} 日`,
+      exercises: exs.map(e => {
+        const kgNow = Math.max(0, Math.min(500, parseFloat(e.kgNow) || 0));
+        weightChanges.push([e, kgNow]);
+        return { id:e.id, name:String(e.name).trim(), sets:Math.max(1, Math.min(10, parseInt(e.sets, 10) || 3)),
+                 reps:String(e.reps || '').trim() || '8-12', kg:e.isNew ? kgNow : (Number(e.kg) || kgNow), note:e.note || '' };
+      }),
+    };
+  }
+  out.cycle = out.cycle.map(t => out.workouts[t] ? t : '休');
+  if(!out.cycle.some(t => out.workouts[t])){ msg.textContent = '排程裡至少要有一天訓練'; return; }
+
+  savePlan(out);
+  weightChanges.forEach(([e, kg]) => { if(kg !== getExerciseWeight(e)) setExerciseWeight(e, roundKg(kg)); });
+  invalidateHistory();
+  lsSet('rcmeta_onboarded', '1');
+  closePlanEditor();
+  rerenderAll();
+  flashToast('課表已儲存');
+}
+
+function initPlanEditor(){
+  const body = document.getElementById('planBody');
+  if(!body) return;
+  body.addEventListener('input', e => {
+    const f = e.target.dataset.field;
+    if(!f || !_planDraft) return;
+    const w = e.target.closest('.pe-workout');
+    const code = w && w.dataset.code;
+    if(!code) return;
+    if(f === 'wname'){ _planDraft.workouts[code].name = e.target.value; return; }
+    const ex = e.target.closest('.pe-ex');
+    const item = ex && _planDraft.workouts[code].exercises[+ex.dataset.i];
+    if(item) item[f] = e.target.value;
+  });
+  body.addEventListener('click', e => {
+    const d = _planDraft;
+    if(!d) return;
+    const day = e.target.closest('.pe-day');
+    if(day){
+      const codes = Object.keys(d.workouts).sort();
+      const vals = weeklyValues(d).map(v => d.workouts[v] ? v : '休');
+      const order = ['休', ...codes];
+      const i = +day.dataset.day;
+      vals[i] = order[(order.indexOf(vals[i]) + 1) % order.length];
+      setWeekly(d, vals);
+      renderPlanEditor();
+      document.querySelector(`#planBody .pe-day[data-day="${i}"]`).focus();
+      return;
+    }
+    const act = e.target.closest('[data-act]');
+    if(!act) return;
+    const code = act.closest('.pe-workout') && act.closest('.pe-workout').dataset.code;
+    switch(act.dataset.act){
+      case 'to-weekly': setWeekly(d, weeklyValues(d).map(v => d.workouts[v] ? v : '休')); break;
+      case 'add-ex': d.workouts[code].exercises.push(newExercise()); break;
+      case 'del-ex': d.workouts[code].exercises.splice(+act.closest('.pe-ex').dataset.i, 1); break;
+      case 'add-workout': {
+        const c = 'ABCDEF'.split('').find(x => !d.workouts[x]);
+        if(c) d.workouts[c] = { name:'', exercises:[ newExercise() ] };
+        break;
+      }
+      case 'del-workout':
+        delete d.workouts[code];
+        d.cycle = d.cycle.map(t => t === code ? '休' : t);
+        break;
+      default: return;
+    }
+    renderPlanEditor();
+    if(act.dataset.act === 'add-ex' || act.dataset.act === 'add-workout'){
+      const inputs = document.querySelectorAll('#planBody .pe-name');
+      if(inputs.length) inputs[inputs.length - 1].focus();
+    }
+  });
+  document.getElementById('planCloseBtn').addEventListener('click', closePlanEditor);
+  document.getElementById('planCancelBtn').addEventListener('click', closePlanEditor);
+  document.getElementById('planSaveBtn').addEventListener('click', savePlanDraft);
+
+  const ob = document.getElementById('onboard');
+  ob.addEventListener('click', e => {
+    if(e.target.closest('#obStartBtn')){ obStep(2); return; }
+    if(e.target.closest('#obBackBtn')){ obStep(1); return; }
+    const t = e.target.closest('[data-template]');
+    if(t) chooseTemplate(t.dataset.template);
+  });
+}
+
+/* ══════════════════════════════════════════════
    進步
    訓練頁回答「今天要做什麼」，這一頁回答「有沒有變強」。
    漸進超負荷是整份計畫的核心，但原本 app 裡看不到任何
@@ -6379,7 +7041,7 @@ function refreshProgressIfOpen(){
 
 function dayCompletion(d){
   const plan = getPlanForDate(d);
-  if(plan.train !== 'A' && plan.train !== 'B') return { train:plan.train, done:0, total:0 };
+  if(!isTrainDay(plan.train)) return { train:plan.train, done:0, total:0 };
   const ds = formatDateStr(d);
   let done = 0, total = 0;
   WORKOUTS[plan.train].forEach(ex => { total += ex.sets; done += setsDoneFor(ex, ds); });
@@ -6418,13 +7080,13 @@ function computeProgress(){
   const today = atNoon(new Date());
   const start = atNoon(PLAN_START);
 
-  const lifts = [...WORKOUTS.A, ...WORKOUTS.B].map(ex => {
+  const lifts = allExercises().map(ex => {
     const hist = exerciseHistory(ex);
     const now = getExerciseWeight(ex);
     const first = hist.length ? hist[0].kg : now;
     return {
       ex, hist, now, first,
-      train: WORKOUTS.A.includes(ex) ? 'A' : 'B',
+      train: workoutOfExercise(ex.id),
       delta: roundKg(now - first),
       pct: first > 0 ? (now - first) / first : 0,
       bumps: hist.filter(s => s.bump > 0).length,
@@ -6441,7 +7103,7 @@ function computeProgress(){
     days.push({ date:new Date(d), ...dayCompletion(d) });
   }
   const isTodayPending = x => +x.date === +today && x.done === 0;
-  const trainDays = days.filter(x => x.train !== '休' && !isTodayPending(x));
+  const trainDays = days.filter(x => isTrainDay(x.train) && !isTodayPending(x));
   const sessions = days.filter(x => x.done > 0).length;
   const attendance = trainDays.length ? sessions / trainDays.length : 0;
 
@@ -6628,7 +7290,7 @@ function heatHtml(p){
       else if(d <= today){
         const c = dayCompletion(d);
         const isToday = +d === +today;
-        if(c.train === '休'){ cls = 'h-rest'; tip = '休息'; }
+        if(!isTrainDay(c.train)){ cls = 'h-rest'; tip = '休息'; }
         else{
           if(!(isToday && !c.done)){ scheduled++; if(c.done) attended++; }
           cls = c.done >= c.total ? 'h-full' : c.done ? 'h-partial' : (isToday ? 'h-future' : 'h-miss');
@@ -6690,7 +7352,7 @@ function renderProgress(){
       </div>`;
   }else{
     let html = '';
-    ['A', 'B'].forEach(t => {
+    Object.keys(WORKOUTS).forEach(t => {
       html += `<div class="pg-group"><span class="kicker">${escapeHtml(getTrainText(t))}</span></div>`;
       p.lifts.filter(l => l.train === t).forEach(l => {
         const open = _pgOpen.has(l.ex.id);
@@ -6805,7 +7467,7 @@ function drawProgressCard(){
   const rows = p.lifts.length;
   const rowH = Math.min(84, (footerY - 24 - listTop - groupH * 2) / rows);
   let y = listTop;
-  ['A', 'B'].forEach(t => {
+  Object.keys(WORKOUTS).forEach(t => {
     ctx.fillStyle = muted; ctx.font = font(700, 20); setLS('3px');
     ctx.fillText(getTrainText(t).replace('日', ''), PAD, y + 8); setLS('0px');
     y += groupH;

@@ -28,9 +28,10 @@ test.afterEach(async ({ page }, info) => {
   expect(banner, 'error banner').toBeNull();
 });
 
+/* 既有使用者：沿用原版課表、不顯示第一次打開的引導 */
 async function open(page, seed){
   await page.goto('./');
-  await page.evaluate(() => localStorage.clear());
+  await page.evaluate(() => { localStorage.clear(); localStorage.setItem('rcmeta_onboarded', '1'); });
   if(seed) await page.evaluate(seed);
   await page.goto('./');
   await expect(page.locator('#dpTitle')).not.toHaveText('—');
@@ -269,6 +270,8 @@ test.describe('主題與設定', () => {
     const page = await context.newPage();
     await page.route(/^https?:\/\/(?!127\.0\.0\.1)/, route => route.abort());
     await page.goto('./');
+    await page.evaluate(() => localStorage.setItem('rcmeta_onboarded', '1'));
+    await page.reload();
     await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
     await expect(page.locator('html')).toHaveAttribute('data-theme-pref', 'auto');
     await page.click('.tabbar-btn[data-screen="calendar"]');
@@ -396,6 +399,84 @@ test.describe('今日畫面', () => {
 });
 
 
+test.describe('給每個人用', () => {
+  test('新使用者：引導 → 選「上下半身」→ 課表生效', async ({ page }) => {
+    await page.goto('./');
+    await page.evaluate(() => localStorage.clear());
+    await page.goto('./');
+    await expect(page.locator('#onboard')).toBeVisible();
+    await page.click('#obStartBtn');
+    await page.click('[data-template="ul"]');
+    await expect(page.locator('#onboard')).toBeHidden();
+    const plan = JSON.parse(await stored(page, 'recomp_plan'));
+    expect(plan.workouts.A.name).toBe('上半身');
+    /* 9/23 是週三：上下半身的週三休息；週一是上半身 */
+    await expect(page.locator('#dpTitle')).toHaveText('休息日');
+    await page.click('#weekStrip .ws-day[data-ymd="2026-9-21"]');
+    await expect(page.locator('#dpTitle')).toHaveText('A日 上半身');
+    await expect(page.locator('#dpWorkout [data-ex-row="bench_press"]')).toBeVisible();
+    await expect(page.locator('#dpWorkout [data-ex-row="chest_press"]')).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator('#onboard')).toBeHidden();
+    await page.click('.tabbar-btn[data-screen="calendar"]');
+    await expect(page.locator('.cal-legend')).toContainText('下半身');
+  });
+
+  test('編輯課表：改名、加動作、改成每週排程', async ({ page }) => {
+    await open(page);
+    await page.click('#settingsBtn');
+    await page.click('#planEditBtn');
+    await expect(page.locator('#planModal')).toHaveClass(/show/);
+    await page.fill('.pe-workout[data-code="A"] .pe-wname', '胸肩三頭');
+    await page.click('.pe-workout[data-code="A"] [data-act="add-ex"]');
+    const last = page.locator('.pe-workout[data-code="A"] .pe-ex').last();
+    await last.locator('[data-field="name"]').fill('啞鈴飛鳥');
+    await last.locator('[data-field="sets"]').fill('4');
+    await last.locator('[data-field="kgNow"]').fill('12');
+    /* 原版是 31 天循環 → 改成每週，並把週三（今天）設成休息 */
+    await page.click('#planBody [data-act="to-weekly"]');
+    const wed = page.locator('.pe-day[data-day="2"]');
+    while(!(await wed.textContent()).includes('休')) await wed.click();
+    await page.click('#planSaveBtn');
+    await expect(page.locator('#planModal')).not.toHaveClass(/show/);
+    await expect(page.locator('#dpTitle')).toHaveText('休息日');
+    const plan = JSON.parse(await stored(page, 'recomp_plan'));
+    expect(plan.cycle).toHaveLength(7);
+    expect(plan.workouts.A.name).toBe('胸肩三頭');
+    const added = plan.workouts.A.exercises.at(-1);
+    expect(added).toMatchObject({ name:'啞鈴飛鳥', sets:4 });
+    expect(await stored(page, 'recomp_weight_id_' + added.id)).toBe('12');
+    /* 轉成每週時保留本週原本的樣子：週一 B、週六 A */
+    await page.click('#weekStrip .ws-day[data-ymd="2026-9-21"]');
+    await expect(page.locator('#dpTitle')).toHaveText('B日 下肢背');
+    await page.click('#weekStrip .ws-day[data-ymd="2026-9-26"]');
+    await expect(page.locator('#dpTitle')).toHaveText('A日 胸肩三頭');
+    await expect(page.locator('#dpWorkout [data-ex-row="' + added.id + '"] .set-check')).toHaveCount(4);
+  });
+
+  test('改排程不會改到過去的紀錄', async ({ page }) => {
+    await open(page, `(() => { for(let s = 1; s <= 4; s++) localStorage.setItem('recomp_set_id_2026-9-20_chest_press_' + s, '1'); })()`);
+    const before = await page.evaluate(() => exerciseHistory(exerciseById('chest_press')).map(s => s.ds));
+    await page.evaluate(() => { const p = currentPlan(); p.cycle = ['B','休','休','休','休','休','休']; savePlan(p); });
+    const after = await page.evaluate(() => exerciseHistory(exerciseById('chest_press')).map(s => s.ds));
+    expect(after).toEqual(before);
+    expect(after).toContain('2026-9-20');
+  });
+
+  test('空白的課表不能存', async ({ page }) => {
+    await open(page);
+    await page.click('#settingsBtn');
+    await page.click('#planEditBtn');
+    const names = page.locator('.pe-workout[data-code="B"] .pe-name');
+    const n = await names.count();
+    for(let i = 0; i < n; i++) await names.nth(i).fill('');
+    await page.click('#planSaveBtn');
+    await expect(page.locator('#planMsg')).toHaveText('B 日至少要有一個動作');
+    await expect(page.locator('#planModal')).toHaveClass(/show/);
+  });
+});
+
+
 test.describe('升級安全', () => {
   /* fixtures/v3.2.0-storage.json：用真正的 v3.2.0（commit 40c98ad）在瀏覽器裡
      操作出來的 localStorage —— 三個月的打勾、體重、手動改過的重量、偏好設定。
@@ -413,8 +494,13 @@ test.describe('升級安全', () => {
     expect(records(await dump(page))).toEqual(records(FIXTURE.data));
   });
 
-  test('新版讀得懂舊資料', async ({ page }) => {
-    await open(page, load);
+  test('新版讀得懂舊資料，而且不會跳出新使用者引導', async ({ page }) => {
+    await page.goto('./');
+    await page.evaluate(() => localStorage.clear());
+    await page.evaluate(load);
+    await page.goto('./');
+    await expect(page.locator('#onboard')).toBeHidden();
+    await expect(page.locator('#dpTitle')).toHaveText('A日 上肢推');
     await page.click('.tabbar-btn[data-screen="weight"]');
     await expect(page.locator('#bwStatsRow .stat-cell-val').first()).toHaveText('75.8kg');
     await page.click('.tabbar-btn[data-screen="progress"]');
