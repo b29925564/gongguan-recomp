@@ -275,7 +275,9 @@ test.describe('主題與設定', () => {
     await chestSets(page).first().click();
     await expect(page.locator('#restTimer')).toHaveClass(/show/);
     await page.click('#settingsBtn');
-    await page.click('[data-pref="restTimer"][data-val="0"]');
+    await expect(page.locator('.switch[data-pref="restTimer"]')).toHaveAttribute('aria-checked', 'true');
+    await page.click('.switch[data-pref="restTimer"]');
+    await expect(page.locator('.switch[data-pref="restTimer"]')).toHaveAttribute('aria-checked', 'false');
     await expect(page.locator('#restTimer')).not.toHaveClass(/show/);
   });
 

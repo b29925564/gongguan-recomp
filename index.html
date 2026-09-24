@@ -2358,6 +2358,84 @@ body{
 .finish-bump b{font-family:'Fragment Mono',ui-monospace,monospace;color:var(--signal-text)}
 .finish-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s2);margin-top:var(--s3)}
 
+/* ══════════════════════════════════════════════════════════════
+   其他畫面跟上 v5：同一套標題尺度、同一種規線，拿掉最後的粗框
+   ══════════════════════════════════════════════════════════════ */
+#screenCalendar .cal-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s3)}
+#screenCalendar .day-title{font-size:clamp(40px, 12vw, 56px);line-height:1;letter-spacing:-.035em}
+#screenCalendar .day-kicker.is-today{color:var(--signal-text);font-weight:var(--fw-strong)}
+.cal-arrows{display:flex;gap:2px;margin-bottom:4px}
+.cal-arrows .icon-btn{width:44px;height:44px;border:var(--hairline) solid var(--line)}
+#screenCalendar .cal-actions{margin-top:calc(var(--s3) * -1)}
+#screenCalendar .cal-actions .btn{min-height:40px;font-size:var(--fs-small);color:var(--ink)}
+#screenCalendar .cal-actions .btn .icon{font-size:15px;color:var(--concrete)}
+
+/* 月曆標籤：從粗框方塊改成單純的字 */
+#screenCalendar .cal-tag{
+  border:none;background:none;padding:0;border-radius:0;
+  font-size:11px;font-weight:var(--fw-strong);color:var(--ink);line-height:1.2;
+}
+#screenCalendar .cal-tag.is-rest{color:var(--concrete);font-weight:var(--fw-medium)}
+#screenCalendar .cal-cell.is-selected .cal-tag{color:inherit;background:none}
+#screenCalendar .cal-cell.is-other{background:none;border-color:transparent}
+#screenCalendar .cal-legend .tag-chip{border:none;padding:0;font-size:11px;font-weight:var(--fw-strong)}
+#screenCalendar .cal-legend .tag-chip.is-rest{font-weight:var(--fw-medium)}
+
+/* 本月摘要：與其他統計列一致，欄位之間一條髮絲線 */
+#screenCalendar .msum-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+#screenCalendar .msum-cell{
+  background:none;border:none;border-radius:0;
+  border-left:var(--hairline) solid var(--line);padding:0 var(--s3);
+}
+#screenCalendar .msum-cell:first-child{border-left:none;padding-left:0}
+#screenCalendar .msum-num{font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-title);font-weight:700;letter-spacing:-.02em}
+#screenCalendar .msum-num span{font-size:var(--fs-micro)!important}
+#screenCalendar .progress-track{height:3px;border-radius:0;margin-top:var(--s2)}
+
+/* 週報 */
+#weeklyModal .modal-head{align-items:center}
+.weekly-nav{
+  display:grid;grid-template-columns:44px 1fr 44px;align-items:center;
+  text-align:center;font-size:var(--fs-small);color:var(--concrete);
+  border:var(--hairline) solid var(--line);margin-bottom:var(--s4);
+}
+.weekly-nav .btn{min-height:44px;padding:0;border:none;font-size:16px}
+#weeklyModal .weekly-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+#weeklyModal .week-cell{
+  background:none;border:none;border-radius:0;
+  border-bottom:var(--hairline) solid var(--line);padding:var(--s3) 0;
+}
+#weeklyModal .week-cell:nth-child(odd){padding-right:var(--s3);border-right:var(--hairline) solid var(--line)}
+#weeklyModal .week-cell:nth-child(even){padding-left:var(--s3)}
+#weeklyModal .msum-num{font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-title)!important;font-weight:700}
+#weeklyModal .week-row{border-bottom:var(--hairline) solid var(--line)}
+.weekly-copy{width:100%;margin-top:var(--s4)}
+#weeklyModal .week-change-list{gap:0}
+#weeklyModal .week-day-link{
+  background:none;border:none;border-radius:0;box-shadow:none;
+  border-bottom:var(--hairline) solid var(--line);padding:var(--s3) 0;width:100%;text-align:left;
+}
+#weeklyModal .week-day-link:active{opacity:.6}
+#weeklyModal .search-tag,#searchDrawer .search-tag{border-radius:0}
+
+/* 設定：真正的開關 */
+.switch{
+  position:relative;flex:0 0 auto;
+  width:50px;height:30px;padding:0;
+  background:var(--line);border:none;border-radius:999px;cursor:pointer;
+  transition:background var(--dur-base) var(--ease-out);
+  -webkit-tap-highlight-color:transparent;
+}
+.switch-knob{
+  position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);
+  transition:transform var(--dur-base) var(--ease-out);
+}
+.switch[aria-checked="true"]{background:var(--positive-fill)}
+.switch[aria-checked="true"] .switch-knob{transform:translateX(20px)}
+.switch:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.settings-row{align-items:center}
+
 @media(prefers-reduced-motion:reduce){
   #screenToday .ex-row,.recovery-item,
   #screenToday.is-active .day-head > *,#screenToday.is-active .day-nav,
@@ -2465,19 +2543,24 @@ body{
     <div class="screen-inner">
 
       <div class="cal-head">
-        <button type="button" class="icon-btn" id="calPrev" aria-label="上個月">
-          <i class="ph ph-caret-left" aria-hidden="true"></i>
-        </button>
-        <div class="cal-head-label" id="calMonthLabel">—</div>
-        <button type="button" class="icon-btn" id="calNext" aria-label="下個月">
-          <i class="ph ph-caret-right" aria-hidden="true"></i>
-        </button>
+        <div class="day-head">
+          <div class="day-kicker" id="calYearLabel">—</div>
+          <h1 class="day-title" id="calMonthLabel">—</h1>
+        </div>
+        <div class="cal-arrows">
+          <button type="button" class="icon-btn" id="calPrev" aria-label="上個月">
+            <i class="ph ph-caret-left" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="icon-btn" id="calNext" aria-label="下個月">
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
-      <div class="action-row">
-        <button type="button" id="calToday" class="btn btn-quiet">回到今天</button>
-        <button type="button" id="weekReportBtn" class="btn btn-quiet">週報</button>
-        <button type="button" id="exportCalBtn" class="btn btn-quiet">匯出 PNG</button>
+      <div class="action-row cal-actions">
+        <button type="button" id="calToday" class="btn btn-quiet"><i class="ph ph-arrow-u-up-left icon" aria-hidden="true"></i>本月</button>
+        <button type="button" id="weekReportBtn" class="btn btn-quiet"><i class="ph ph-list-checks icon" aria-hidden="true"></i>週報</button>
+        <button type="button" id="exportCalBtn" class="btn btn-quiet"><i class="ph ph-image icon" aria-hidden="true"></i>匯出圖片</button>
       </div>
 
       <div class="card card-tight">
@@ -2700,16 +2783,16 @@ body{
         <div class="kicker">週報</div>
         <div class="modal-title" id="weeklyModalTitle">—</div>
       </div>
-            <div class="modal-actions">
-        <button type="button" id="weeklyNewerBtn" class="btn">較新一週</button>
-        <button type="button" id="weeklyOlderBtn" class="btn">較早一週</button>
-        <button type="button" id="weeklyCopyBtn" class="btn"><i class="ph ph-copy icon" aria-hidden="true"></i>複製純文字</button>
-        <button type="button" id="weeklyCloseBtn" class="btn"><i class="ph ph-x icon" aria-hidden="true"></i>關閉</button>
-      </div>
+      <button type="button" id="weeklyCloseBtn" class="icon-btn" aria-label="關閉"><i class="ph ph-x" aria-hidden="true"></i></button>
     </div>
     <div class="modal-body">
-      <div class="small muted mono-num" id="weeklyRangeLabel">—</div>
-      <div id="weeklyReportBody" style="margin-top:14px"></div>
+      <div class="weekly-nav">
+        <button type="button" id="weeklyOlderBtn" class="btn btn-quiet" aria-label="較早一週"><i class="ph ph-caret-left" aria-hidden="true"></i></button>
+        <div class="mono-num" id="weeklyRangeLabel">—</div>
+        <button type="button" id="weeklyNewerBtn" class="btn btn-quiet" aria-label="較新一週"><i class="ph ph-caret-right" aria-hidden="true"></i></button>
+      </div>
+      <div id="weeklyReportBody"></div>
+      <button type="button" id="weeklyCopyBtn" class="btn weekly-copy"><i class="ph ph-copy icon" aria-hidden="true"></i>複製純文字（貼到 LINE / 備忘錄）</button>
     </div>
   </div>
 </div>
@@ -3576,7 +3659,14 @@ function renderCalendar(year, month){
   const grid  = document.getElementById('calGrid');
   const label = document.getElementById('calMonthLabel');
   if(!grid) return;
-  label.textContent = `${year} 年 ${month+1} 月`;
+  label.textContent = `${month+1} 月`;
+  const yearLabel = document.getElementById('calYearLabel');
+  if(yearLabel){
+    const now = new Date();
+    const isNow = year === now.getFullYear() && month === now.getMonth();
+    yearLabel.textContent = `${isNow ? '本月 · ' : ''}${year} 年`;
+    yearLabel.classList.toggle('is-today', isNow);
+  }
 
   const first       = new Date(year, month, 1);
   const startDow    = first.getDay();
@@ -3629,7 +3719,7 @@ if(isPast && getPref('heatmap')){
       aria-pressed="${isSelected ? 'true' : 'false'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span class="cal-daynum">${d}</span>
-        <span class="cal-tag">${plan.train}</span>
+        <span class="cal-tag${plan.train === '休' ? ' is-rest' : ''}">${plan.train}</span>
       </div>
 
       ${heatBar}
@@ -4501,7 +4591,7 @@ function renderWeeklyReport(offset){
   const newerBtn = document.getElementById('weeklyNewerBtn');
 
   title.textContent = `${weekLabelFromOffset(offset)} · 訓練週報`;
-  range.textContent = `${formatDateStrPad(r.start)} → ${formatDateStrPad(r.end)} · Mon–Sun`;
+  range.textContent = `${fmtMD(r.start)} – ${fmtMD(r.end)}`;
   newerBtn.disabled = offset >= 0;
 
   const weightChangeHtml = r.weightChanges.length
@@ -5209,10 +5299,8 @@ function renderSettings(){
         <div class="settings-label">${escapeHtml(pref.label)}</div>
         <div class="settings-desc">${escapeHtml(pref.desc)}</div>
       </div>
-      <div class="settings-toggle">
-        <button type="button" class="btn ${isOn ? '' : 'on'}" data-pref="${id}" data-val="0">關</button>
-        <button type="button" class="btn ${isOn ? 'on' : ''}" data-pref="${id}" data-val="1">開</button>
-      </div>
+      <button type="button" class="switch" role="switch" aria-checked="${isOn}"
+        data-pref="${id}" aria-label="${escapeHtml(pref.label)}"><span class="switch-knob"></span></button>
     </div>`;
   }).join('');
 
@@ -5291,7 +5379,7 @@ document.getElementById('settingsList').addEventListener('click', e => {
   const btn = e.target.closest('[data-pref]');
   if(!btn) return;
     const prefId = btn.dataset.pref;
-    const val = btn.dataset.val === '1';
+    const val = btn.dataset.val !== undefined ? btn.dataset.val === '1' : btn.getAttribute('aria-checked') !== 'true';
     setPref(prefId, val);
     renderSettings();
 
