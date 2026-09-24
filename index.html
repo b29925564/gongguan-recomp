@@ -4409,7 +4409,7 @@ function showFinish(dateStr){
 
   layer.hidden = false;
   document.body.style.overflow = 'hidden';
-  if(getPref('vibration') && navigator.vibrate) navigator.vibrate([40, 60, 40, 60, 140]);
+  haptic([40, 60, 40, 60, 140]);
 
   /* 組數從 0 數上來 */
   const numEl = document.getElementById('finishSets');
@@ -5256,6 +5256,7 @@ const PREFS = {
   vibration:  { key:'recomp_pref_vibration',  label:'震動回饋',      desc:'訓練打勾、升重、體重儲存時震動', default:'1' },
   heatmap:    { key:'recomp_pref_heatmap',    label:'月曆熱力圖',    desc:'依完成度顯示月曆格子底色',       default:'1' },
   exportPreview:{ key:'recomp_pref_export_preview', label:'匯出前預覽', desc:'儲存或分享圖片前先看一次成品', default:'1' },
+  wakeLock:   { key:'recomp_pref_wake_lock',  label:'訓練中螢幕常亮', desc:'開始打勾後螢幕不會自動變暗，練完自動解除', default:'1' },
 };
 const REST_SECONDS = 90;
 
@@ -5391,6 +5392,7 @@ document.getElementById('settingsList').addEventListener('click', e => {
     /* val 是布林值，原本寫成 val === '0' 永遠不成立，
        關掉計時器時正在倒數的那個不會消失 */
     if(prefId === 'restTimer' && !val) stopRestTimer();
+    if(prefId === 'wakeLock') keepAwake(val && sessionInProgress());
   });
 
   /* Escape 關閉 */
@@ -5718,7 +5720,7 @@ function beginWeightEdit(weightSpan){
     refreshChestWeightStat();
     refreshWeeklyIfOpen();
     refreshProgressIfOpen();
-    if(getPref('vibration') && navigator.vibrate) navigator.vibrate(25);
+    haptic(25);
   }
 
   input.addEventListener('blur', save, { once:true });
@@ -5777,7 +5779,7 @@ document.getElementById('dpWorkout').addEventListener('keydown', e => {
     btn.classList.toggle('cap', next === '2');
     btn.setAttribute('aria-label', setAriaLabel(ex, +btn.dataset.set || 1, next));
     if(next !== '0'){ btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
-    if(getPref('vibration') && navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
+    haptic(next === '2' ? [30, 30, 30] : 25);
     const plan = getPlanForDate(selectedDateObj);
 
     const after = states();
@@ -5817,6 +5819,7 @@ document.getElementById('dpWorkout').addEventListener('keydown', e => {
     /* 剛打完一組（不是取消）就開始倒數，並告訴你下一組是什麼；
        最後一組打完 → 不用倒數了，直接進完成畫面 */
     const dayAfter = dayCompletion(selectedDateObj);
+    keepAwake(sessionInProgress());
     if(next === '0') stopRestTimer();
     else if(dayAfter.total && dayAfter.done === dayAfter.total){
       stopRestTimer();
@@ -5835,7 +5838,7 @@ document.getElementById('dpWorkout').addEventListener('keydown', e => {
       flashToast(`已收回升重 · ${ex.name} 回到 ${getExerciseWeight(ex)}kg`);
     }
     if(bumped > 0 && label){
-      if(getPref('vibration') && navigator.vibrate) navigator.vibrate([50, 50, 100]);
+      haptic([50, 50, 100]);
       const badge = label.querySelector('.bump-badge');
       if(badge) badge.classList.add('is-new');
 
@@ -5887,7 +5890,7 @@ if(bwFlashInput){
   setTimeout(() => bwFlashInput.classList.remove('saved-flash'), 700);
 }
 /* haptic feedback */
-if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
+haptic(50);
     renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
   });
 
@@ -5931,7 +5934,7 @@ if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
       item.classList.toggle('is-done', on);
       item.setAttribute('aria-pressed', String(on));
       renderSessionBar(getPlanForDate(selectedDateObj), dateStr);
-      if(getPref('vibration') && navigator.vibrate) navigator.vibrate(on ? 25 : 10);
+      haptic(on ? 25 : 10);
       if(on && RECOVERY.every(r => lsGet(recoveryKey(dateStr, r.id), '0') === '1')) flashToast('恢復日完成 ✓');
       return;
     }
@@ -6211,6 +6214,64 @@ if(verLabel) verLabel.textContent = APP_VERSION;
 console.log('RECOMP', APP_VERSION, 'schema', SCHEMA_VERSION);
 }
 /* ══════════════════════════════════════════════
+   觸覺回饋
+   iPhone 的 Safari 從來沒有實作 navigator.vibrate —— 「震動回饋」
+   這個設定在 iPhone 上一直是無聲無息的。iOS 18 起，切換原生的
+   <input type="checkbox" switch> 會有一下系統觸覺回饋，
+   所以在 iOS 上改由一個看不見的開關代勞（只能給一下，沒有節奏）。
+   必須在使用者手勢裡呼叫 —— 所有呼叫點都在點擊事件裡。
+   ══════════════════════════════════════════════ */
+let _hapticLabel = null;
+function haptic(pattern){
+  if(!getPref('vibration')) return;
+  if(navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} return; }
+  if(!isIosDevice()) return;
+  try{
+    if(!_hapticLabel){
+      _hapticLabel = document.createElement('label');
+      _hapticLabel.setAttribute('aria-hidden', 'true');
+      _hapticLabel.style.cssText = 'position:fixed;left:-100px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch', '');
+      input.tabIndex = -1;
+      _hapticLabel.appendChild(input);
+      document.body.appendChild(_hapticLabel);
+    }
+    _hapticLabel.click();
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════════════
+   訓練中螢幕常亮
+   兩組之間手機放在椅子上，90 秒後螢幕就暗了、鎖了，
+   每一組都要重新解鎖。打勾之後向瀏覽器要求螢幕常亮，
+   練完（或全部取消）就放掉；切到背景時瀏覽器會自動收回，
+   回到前景且今天還沒練完就再要一次。
+   ══════════════════════════════════════════════ */
+let _wakeLock = null;
+async function keepAwake(on){
+  try{
+    if(on){
+      if(_wakeLock || !getPref('wakeLock') || !('wakeLock' in navigator)) return;
+      _wakeLock = await navigator.wakeLock.request('screen');
+      _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+    }else if(_wakeLock){
+      const l = _wakeLock; _wakeLock = null;
+      await l.release();
+    }
+  }catch(e){ _wakeLock = null; }
+}
+function sessionInProgress(){
+  const today = atNoon(new Date());
+  const c = dayCompletion(today);
+  return c.total > 0 && c.done > 0 && c.done < c.total;
+}
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && sessionInProgress()) keepAwake(true);
+});
+
+/* ══════════════════════════════════════════════
    組間休息計時器
    訓練規則寫著組間 90 秒，但原本要另外開一個 app 才能計時。
    打完一組自動開始倒數。
@@ -6235,7 +6296,7 @@ function paintRest(){
     const lab = document.getElementById('restTimerLabel');
     if(lab) lab.textContent = '休息結束，可以下一組了';
     if(num) num.textContent = '0:00';
-    if(getPref('vibration') && navigator.vibrate) navigator.vibrate([90,60,90]);
+    haptic([90,60,90]);
     setTimeout(stopRestTimer, 6000);
   }
 }

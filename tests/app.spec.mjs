@@ -332,6 +332,27 @@ test.describe('今日畫面', () => {
     await expect(layer).toBeHidden();
   });
 
+  test('打勾後螢幕常亮，練完自動解除', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__wl = { req:0, rel:0 };
+      Object.defineProperty(navigator, 'wakeLock', { configurable:true, value:{
+        request: async () => { window.__wl.req++; return { release: async () => { window.__wl.rel++; }, addEventListener(){} }; }
+      }});
+    });
+    await open(page);
+    const rows = page.locator('#dpWorkout [data-ex-row]');
+    await rows.first().locator('.set-check').first().click();
+    await expect.poll(() => page.evaluate(() => window.__wl.req)).toBe(1);
+    await rows.first().locator('.set-check').nth(1).click();
+    expect(await page.evaluate(() => window.__wl.req)).toBe(1);      /* 不重複要求 */
+    const n = await rows.count();
+    for(let r = 0; r < n; r++){
+      const sets = rows.nth(r).locator('.set-check:not(.done)');
+      while(await sets.count()) await sets.first().click();
+    }
+    await expect.poll(() => page.evaluate(() => window.__wl.rel)).toBe(1);
+  });
+
   test('計時器告訴你下一組是什麼', async ({ page }) => {
     await open(page);
     await page.locator('[data-ex-row="chest_press"] .set-check').first().click();
