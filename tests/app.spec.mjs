@@ -56,6 +56,14 @@ test.describe('發版', () => {
     expect(version).toBe(appVersion);
   });
 
+  test('manifest 與 apple-touch-icon 指到的圖示都存在', () => {
+    const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'manifest.json'), 'utf8'));
+    const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
+    const files = manifest.icons.map(i => i.src).concat(html.match(/rel="apple-touch-icon" href="([^"]+)"/)[1]);
+    for(const f of files) expect(fs.existsSync(path.join(ROOT, f.replace(/^\.?\//, ''))), f).toBe(true);
+    expect(manifest.icons.some(i => i.purpose === 'maskable')).toBe(true);
+  });
+
   test('只有伺服器版本比較新才提示更新', async ({ page }) => {
     await page.route('**/version.json*', r => r.fulfill({ json: { version: 'v3.1.0' } }));
     await open(page);

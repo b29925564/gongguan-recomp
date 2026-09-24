@@ -4,8 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>RECOMP — Body Recomposition</title>
-<meta name="theme-color" content="#E30613">
+<meta name="theme-color" content="#F5F3F0" id="themeColorMeta">
 <link rel="manifest" href="./manifest.json">
+<!-- iOS 不吃 manifest 裡的 SVG 圖示，也沒有 apple-touch-icon 時會拿網頁截圖當桌面圖示 -->
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="RECOMP">
 <script>
 /* 在第一次繪製前就決定主題。主程式在 body 最後才跑，
    深色模式的手機每次打開都會先閃一下淺色底再變暗。 */
@@ -16,6 +20,7 @@
       m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     }
     document.documentElement.setAttribute('data-theme', m);
+    document.getElementById('themeColorMeta').setAttribute('content', m === 'dark' ? '#1a1a1e' : '#F5F3F0');
   }catch(e){}
 })();
 </script>
@@ -5528,6 +5533,9 @@ function initApp(){
   function applyTheme(mode){
     html.setAttribute('data-theme', resolveTheme(mode));
     html.dataset.themePref = mode;
+    /* 瀏覽器頂端的顏色跟著主題走（原本固定是紅色，跟米白色的畫面接不起來） */
+    const meta = document.getElementById('themeColorMeta');
+    if(meta) meta.setAttribute('content', resolveTheme(mode) === 'dark' ? '#1a1a1e' : '#F5F3F0');
     if(btn){
       btn.innerHTML = `<i class="ph ${icons[mode] || 'ph-monitor'} icon" aria-hidden="true"></i>`;
       btn.title = labels[mode] || '';
