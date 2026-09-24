@@ -1,0 +1,35 @@
+# 每一次 push（包含在 GitHub 網頁上「Add files via upload」）都在真的瀏覽器裡跑一遍測試。
+# 失敗時會附上截圖與操作錄影（playwright-report），到 Actions 分頁下載即可。
+name: 瀏覽器測試
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: tests
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: tests/package-lock.json
+
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test
+
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: tests/playwright-report
+          retention-days: 14
