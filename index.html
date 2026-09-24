@@ -4,8 +4,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>RECOMP — Body Recomposition</title>
-<meta name="theme-color" content="#E30613">
+<meta name="theme-color" content="#F5F3F0" id="themeColorMeta">
 <link rel="manifest" href="./manifest.json">
+<!-- iOS 不吃 manifest 裡的 SVG 圖示，也沒有 apple-touch-icon 時會拿網頁截圖當桌面圖示 -->
+<link rel="apple-touch-icon" href="./icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="./icons/icon-192.png">
+<meta name="apple-mobile-web-app-title" content="RECOMP">
+<script>
+/* 在第一次繪製前就決定主題。主程式在 body 最後才跑，
+   深色模式的手機每次打開都會先閃一下淺色底再變暗。 */
+(function(){
+  try{
+    var m = localStorage.getItem('recomp_theme') || 'auto';
+    if(m !== 'light' && m !== 'dark'){
+      m = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    }
+    document.documentElement.setAttribute('data-theme', m);
+    document.getElementById('themeColorMeta').setAttribute('content', m === 'dark' ? '#1a1a1e' : '#F5F3F0');
+  }catch(e){}
+})();
+</script>
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -82,6 +100,9 @@
 [data-theme="dark"] .cal-tag{
   border-color:#444;
   color:var(--concrete);
+  /* 基礎樣式的 #fff 底沒被覆蓋：灰字落在白底上只有 2.8:1，
+     整排標籤在深色月曆上變成一顆顆發亮的白方塊 */
+  background:transparent;
 }
 [data-theme="dark"] .cal-cell:active:not(.is-other){
   background:#2a2a2e!important;
@@ -476,8 +497,9 @@ h2{font-size:26px;font-weight:800;letter-spacing:-.015em}
 .bump-badge{
   display:inline-block;background:var(--signal);color:#fff;
   font-size:10px;padding:1px 6px;border-radius:3px;
-  margin-left:4px;font-weight:700;animation:popIn .25s ease;
+  margin-left:4px;font-weight:700;
 }
+.bump-badge.is-new{animation:popIn .25s ease}
 .bump-undo{
   display:inline-block;font-size:10px;padding:1px 6px;
   border-radius:3px;margin-left:4px;cursor:pointer;
@@ -1936,6 +1958,605 @@ body{
 /* 匯出按鈕不必整塊反白，細框就夠 */
 #exportTrainCardBtn{margin-top:var(--s4)!important}
 
+
+/* ══════════════════════════════════════════════════════════════
+   進步 v3.3
+   ──────────────────────────────────────────────────────────────
+   延續 v4 的編排：沒有卡片框，靠規線與留白分組。
+   數字一律等寬、正向用 --positive、紅色只留給「升重」這個事件。
+   ══════════════════════════════════════════════════════════════ */
+.tabbar{grid-template-columns:repeat(4,1fr)}
+
+.pg-hero-sub{font-size:var(--fs-small);color:var(--concrete);margin-top:var(--s1)}
+.pg-hero-sub b{color:var(--ink);font-weight:var(--fw-strong)}
+.day-title .pg-unit{font-size:var(--fs-title);color:var(--concrete);font-weight:var(--fw-strong);margin-left:2px}
+.day-title.is-up{color:var(--positive)}
+.day-title.is-down{color:var(--signal-text)}
+
+.pg-group{
+  margin:var(--s4) 0 var(--s1);
+  display:flex;align-items:center;gap:var(--s2);
+}
+.pg-group:first-child{margin-top:0}
+
+.pg-lift{
+  width:100%;
+  display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:var(--s3);
+  padding:var(--s3) 0;
+  background:none;border:none;border-bottom:var(--hairline) solid var(--line);
+  color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.pg-lift:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.pg-lift:active{opacity:.6}
+.pg-lift-name{font-size:var(--fs-body);font-weight:var(--fw-strong);line-height:var(--lh-snug)}
+.pg-lift-meta{
+  font-size:var(--fs-micro);color:var(--concrete);margin-top:2px;
+  font-family:'Fragment Mono',ui-monospace,monospace;
+}
+.pg-lift-right{display:flex;align-items:center;gap:var(--s3)}
+.pg-spark{width:76px;height:26px;display:block;overflow:visible}
+.pg-delta{
+  font-family:'Fragment Mono',ui-monospace,monospace;font-weight:var(--fw-strong);
+  font-size:var(--fs-small);min-width:5.2ch;text-align:right;color:var(--concrete);
+}
+.pg-delta.is-up{color:var(--positive)}
+.pg-delta.is-down{color:var(--signal-text)}
+.pg-chev{color:var(--concrete);font-size:14px;transition:transform var(--dur-fast) var(--ease-out)}
+.pg-lift[aria-expanded="true"] .pg-chev{transform:rotate(180deg)}
+
+.pg-detail{
+  padding:var(--s3) 0 var(--s4);
+  border-bottom:var(--hairline) solid var(--line);
+  animation:screenIn var(--dur-base) var(--ease-out) both;
+}
+.pg-detail[hidden]{display:none}
+.pg-sessions{margin-top:var(--s3);display:grid;gap:0}
+.pg-session{
+  display:grid;grid-template-columns:4.6em 1fr auto;gap:var(--s3);align-items:baseline;
+  padding:6px 0;border-top:var(--hairline) solid var(--line);
+  font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-small);
+}
+.pg-session .muted{font-size:var(--fs-micro)}
+.pg-session .is-bump{color:var(--signal-text);font-weight:var(--fw-strong)}
+.pg-legend{
+  display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);margin-top:var(--s2);
+  font-size:var(--fs-micro);color:var(--concrete);
+}
+.pg-legend span{display:flex;align-items:center;gap:var(--s1)}
+.pg-key-bump{width:8px;height:8px;border-radius:50%;background:var(--signal-fill)}
+.pg-key-dot{width:8px;height:8px;border-radius:50%;background:var(--ink)}
+.pg-key-open{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--ink)}
+.pg-key-dash{width:14px;border-top:2px dashed var(--concrete)}
+.pg-est{color:var(--concrete)}
+
+/* 出席格：16 週 × 7 天，像 GitHub 的貢獻圖 —— 一眼看出哪幾週斷掉 */
+.pg-heat{
+  display:grid;grid-template-columns:auto repeat(16,minmax(0,1fr));
+  gap:3px;align-items:center;
+}
+.pg-heat-month,.pg-heat-dow{
+  font-size:9px;color:var(--concrete);font-family:'Fragment Mono',ui-monospace,monospace;
+  line-height:1;white-space:nowrap;
+}
+.pg-heat-month{height:12px;overflow:visible}
+.pg-heat-dow{padding-right:4px;text-align:right}
+.pg-cell{aspect-ratio:1;background:transparent;border:var(--hairline) solid var(--line)}
+.pg-cell.h-rest{border:none;background:color-mix(in srgb,var(--line) 55%,transparent)}
+.pg-cell.h-full{border:none;background:var(--positive-fill)}
+.pg-cell.h-partial{border:none;background:color-mix(in srgb,var(--positive-fill) 42%,transparent)}
+.pg-cell.h-miss{border:none;background:color-mix(in srgb,var(--signal-fill) 26%,transparent)}
+.pg-cell.h-before{border:none;background:none}
+.pg-cell.h-today{outline:1.5px solid var(--ink);outline-offset:0}
+.pg-heat-legend{
+  display:flex;flex-wrap:wrap;gap:var(--s2) var(--s4);margin-top:var(--s3);
+  font-size:var(--fs-micro);color:var(--concrete);
+}
+.pg-heat-legend span{display:flex;align-items:center;gap:var(--s1)}
+.pg-heat-legend .pg-cell{width:10px;height:10px}
+.pg-heat-sum{
+  display:flex;gap:var(--s4);margin-top:var(--s3);
+  font-size:var(--fs-small);color:var(--concrete);
+}
+.pg-heat-sum b{color:var(--ink);font-size:var(--fs-lead);font-weight:var(--fw-strong)}
+
+#pgExportBtn{width:100%}
+.chart-bar-now{fill:var(--signal-fill)}
+.chart-bar{fill:var(--ink);opacity:.82}
+
+
+/* ══════════════════════════════════════════════════════════════
+   今日 v5
+   ──────────────────────────────────────────────────────────────
+   這個畫面是在健身房裡、兩組之間、手上還有汗的時候用的。
+   所以：
+   · 打勾按鈕從 21px 放大到 52px（Apple 建議的觸控下限是 44px）
+   · 一眼看到「今天練到哪」：每一組一格的進度條
+   · 導覽換成一週七天的日期列，同時就是本週完成度
+   · 動態只用在「回饋」上：打勾、完成、升重，其餘保持安靜
+   全部限定在 #screenToday 底下，蓋過前面幾層歷史樣式。
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── 標題 ── */
+#screenToday .day-head{gap:6px;margin-bottom:0}
+.day-kicker-row{display:flex;align-items:center;justify-content:space-between;gap:var(--s3);min-height:28px}
+#screenToday .day-title{
+  font-size:clamp(40px, 12vw, 56px);
+  line-height:1;letter-spacing:-.035em;
+}
+.day-meta{font-size:var(--fs-small);color:var(--concrete);letter-spacing:.01em}
+.today-pill{
+  display:inline-flex;align-items:center;gap:6px;
+  height:28px;padding:0 12px;
+  background:var(--ink);color:var(--paper);border:none;border-radius:999px;
+  font-family:inherit;font-size:var(--fs-micro);font-weight:var(--fw-strong);
+  cursor:pointer;animation:popIn var(--dur-base) var(--ease-out);
+}
+.today-pill[hidden]{display:none}
+.today-pill:active{opacity:.7}
+
+/* 進場：標題由下往上浮出，一次一行 */
+#screenToday.is-active .day-head > *,
+#screenToday.is-active .day-nav{animation:rowIn 520ms var(--ease-out) both}
+#screenToday.is-active .day-head > :nth-child(2){animation-delay:40ms}
+#screenToday.is-active .day-head > :nth-child(3){animation-delay:80ms}
+#screenToday.is-active .day-nav{animation-delay:120ms}
+@keyframes rowIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* ── 一週日期列 ── */
+#screenToday .day-nav{
+  display:grid;grid-template-columns:28px 1fr 28px;align-items:stretch;gap:2px;
+  margin-top:calc(var(--s2) * -1);
+}
+#screenToday .day-nav .icon-btn{width:28px;height:auto;font-size:16px;color:var(--concrete)}
+.week-strip{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.ws-day{
+  position:relative;
+  display:grid;justify-items:center;gap:3px;
+  padding:8px 0 10px;
+  background:none;border:none;border-radius:0;
+  color:var(--ink);font-family:inherit;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);
+}
+.ws-dow{font-size:10px;font-weight:var(--fw-medium);color:var(--concrete);letter-spacing:.04em}
+.ws-num{font-family:'Fragment Mono',ui-monospace,monospace;font-size:17px;font-weight:700;line-height:1.15}
+.ws-tag{font-size:10px;font-weight:var(--fw-strong);color:var(--concrete);line-height:1}
+.ws-bar{position:absolute;left:22%;right:22%;bottom:3px;height:3px;background:var(--line);overflow:hidden}
+.ws-bar i{display:block;height:100%;background:var(--positive-fill);transition:width var(--dur-slow) var(--ease-out)}
+.ws-day.is-rest .ws-bar{background:none}
+.ws-day.is-rest .ws-num{color:var(--concrete);font-weight:500}
+.ws-day.is-miss .ws-bar{background:color-mix(in srgb,var(--signal-fill) 45%,transparent)}
+.ws-day.is-today .ws-dow{color:var(--signal-text);font-weight:var(--fw-strong)}
+.ws-day.is-selected{background:var(--ink);color:var(--paper)}
+.ws-day.is-selected .ws-dow,.ws-day.is-selected .ws-tag,.ws-day.is-selected .ws-num{color:var(--paper)}
+.ws-day.is-selected .ws-bar{background:color-mix(in srgb,var(--paper) 25%,transparent)}
+.ws-day.is-selected.is-today .ws-dow{color:var(--signal-fill)}
+.ws-day:focus-visible{outline:2px solid var(--signal);outline-offset:-2px}
+.ws-day:active{opacity:.6}
+
+/* ── 本次訓練進度條：一組一格，動作之間留大一點的縫 ── */
+.session-bar{display:flex;gap:8px;margin:0 0 var(--s2)}
+.session-bar:empty{display:none}
+.sb-group{display:flex;gap:3px;min-width:0}
+.sb-seg{flex:1;height:6px;background:var(--line);transition:background var(--dur-base) var(--ease-out)}
+.sb-seg.is-done{background:var(--ink)}
+.sb-seg.is-cap{background:var(--signal-fill)}
+#dpSessionCount b{color:var(--ink);font-weight:var(--fw-strong)}
+
+/* ── 動作列 ── */
+#screenToday .ex-row{
+  display:block;
+  padding:var(--s4) 0;
+  border-top:none;border-bottom:var(--hairline) solid var(--line);
+  animation:rowIn 460ms var(--ease-out) both;
+  animation-delay:calc(var(--i, 0) * 45ms + 60ms);
+}
+#screenToday .ex-row:last-of-type{border-bottom:var(--hairline) solid var(--line)}
+#screenToday .ex-name{
+  display:flex;align-items:center;gap:var(--s2);
+  font-size:var(--fs-lead);font-weight:var(--fw-strong);
+  letter-spacing:var(--tr-title);line-height:var(--lh-snug);
+}
+.ex-done{
+  color:var(--positive);font-size:18px;line-height:1;
+  opacity:0;transform:scale(.5);
+  transition:opacity var(--dur-base) var(--ease-out),transform var(--dur-base) var(--ease-out);
+}
+.ex-row.is-complete .ex-done{opacity:1;transform:none}
+.ex-sub{
+  margin-top:2px;
+  font-size:var(--fs-small);color:var(--concrete);
+  display:flex;flex-wrap:wrap;align-items:baseline;gap:0 var(--s2);
+}
+#screenToday .ex-weight-label{color:var(--concrete);font-size:var(--fs-small)}
+#screenToday .ex-weight-display{
+  color:var(--ink);font-weight:var(--fw-strong);
+  border-bottom:1px dashed color-mix(in srgb,var(--ink) 35%,transparent);
+  padding-bottom:1px;
+}
+#screenToday .ex-note{font-size:var(--fs-small);color:var(--concrete)}
+#screenToday .ex-note::before{content:'·';margin-right:var(--s2)}
+.ex-body{
+  display:flex;align-items:center;justify-content:space-between;gap:var(--s3);
+  margin-top:var(--s3);
+}
+#screenToday .ex-checks{display:flex;gap:8px;padding:0}
+#screenToday .ex-last{
+  margin:0;text-align:right;line-height:1.5;
+  font-size:var(--fs-micro);color:var(--concrete);
+}
+#screenToday .ex-last b{color:var(--ink);font-weight:var(--fw-strong)}
+#screenToday .ex-last.is-better b{color:var(--positive)}
+#screenToday .ex-hint{
+  padding-top:var(--s3);font-size:var(--fs-micro);color:var(--concrete);line-height:1.6;
+}
+
+/* ── 打勾按鈕 ── */
+#screenToday .set-check{
+  width:52px;height:52px;flex:0 0 52px;
+  display:grid;place-items:center;position:relative;
+  background:var(--card);
+  border:1.5px solid var(--line);border-radius:0;box-shadow:none;
+  color:var(--concrete);
+  font-family:'Fragment Mono',ui-monospace,monospace;font-size:13px;
+  -webkit-tap-highlight-color:transparent;touch-action:manipulation;
+  transition:background var(--dur-fast) var(--ease-out),
+             border-color var(--dur-fast) var(--ease-out),
+             color var(--dur-fast) var(--ease-out),
+             transform 160ms var(--ease-out);
+}
+#screenToday .set-check::after{display:none}
+#screenToday .set-check:hover{border-color:var(--concrete)}
+#screenToday .set-check:active{transform:scale(.9);box-shadow:none;opacity:1}
+#screenToday .set-check svg{
+  position:absolute;width:26px;height:26px;
+  fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:square;stroke-linejoin:miter;
+  stroke-dasharray:24;stroke-dashoffset:24;
+  transition:stroke-dashoffset 280ms var(--ease-out) 30ms;
+}
+.set-n{transition:opacity 120ms linear}
+#screenToday .set-check.done{background:var(--ink);border-color:var(--ink);color:var(--paper)}
+#screenToday .set-check.done svg{stroke-dashoffset:0}
+#screenToday .set-check.done .set-n{opacity:0}
+#screenToday .set-check.cap{background:var(--signal-fill);border-color:var(--signal-fill);color:#fff}
+#screenToday .set-check.cap::before{
+  content:'上限';position:absolute;bottom:3px;left:0;right:0;text-align:center;
+  font-family:'Inter','Noto Sans TC',sans-serif;font-size:8px;font-weight:700;letter-spacing:.08em;
+}
+#screenToday .set-check.cap svg{transform:translateY(-3px)}
+[data-theme="dark"] #screenToday .set-check.cap{color:#18181b}
+#screenToday .set-check.pop{animation:setPop 340ms var(--ease-out)}
+@keyframes setPop{0%{transform:scale(.86)}55%{transform:scale(1.07)}100%{transform:scale(1)}}
+
+#screenToday .bump-badge{
+  display:inline-flex;align-items:center;
+  background:var(--signal-fill);color:#fff;border-radius:0;
+  font-family:'Fragment Mono',ui-monospace,monospace;font-size:10px;font-weight:700;
+  padding:2px 6px;margin-left:6px;vertical-align:1px;
+}
+[data-theme="dark"] #screenToday .bump-badge{color:#18181b}
+#screenToday .bump-undo{font-size:var(--fs-micro)}
+
+/* ── 休息日 ── */
+.rest-lead{font-size:var(--fs-body);line-height:var(--lh-loose);color:var(--concrete);margin-bottom:var(--s4)}
+.recovery-list{display:grid;gap:0;border-top:var(--hairline) solid var(--line)}
+.recovery-item{
+  display:grid;grid-template-columns:44px 1fr;align-items:center;gap:var(--s3);
+  padding:var(--s3) 0;
+  background:none;border:none;border-bottom:var(--hairline) solid var(--line);
+  color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  animation:rowIn 460ms var(--ease-out) both;animation-delay:calc(var(--i, 0) * 60ms + 60ms);
+}
+.recovery-check{
+  width:44px;height:44px;display:grid;place-items:center;
+  border:1.5px solid var(--line);border-radius:50%;
+  color:var(--paper);
+  transition:background var(--dur-fast) var(--ease-out),border-color var(--dur-fast) var(--ease-out),transform 160ms var(--ease-out);
+}
+.recovery-check svg{
+  width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.8;stroke-linecap:square;
+  stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset 280ms var(--ease-out) 30ms;
+}
+.recovery-item.is-done .recovery-check{background:var(--positive-fill);border-color:var(--positive-fill)}
+.recovery-item.is-done .recovery-check svg{stroke-dashoffset:0}
+.recovery-item:active .recovery-check{transform:scale(.9)}
+.recovery-text b{display:block;font-size:var(--fs-lead);font-weight:var(--fw-strong);letter-spacing:var(--tr-title)}
+.recovery-text span{display:block;font-size:var(--fs-small);color:var(--concrete);margin-top:1px}
+.recovery-item.is-done .recovery-text b{text-decoration:line-through;text-decoration-color:color-mix(in srgb,var(--ink) 35%,transparent)}
+.rest-next{
+  margin-top:var(--s5);padding:var(--s4);
+  background:var(--ink);color:var(--paper);
+  display:grid;gap:4px;cursor:pointer;border:none;width:100%;text-align:left;font-family:inherit;
+}
+.rest-next .kicker{color:color-mix(in srgb,var(--paper) 60%,transparent)}
+.rest-next-title{font-size:var(--fs-title);font-weight:var(--fw-display);letter-spacing:var(--tr-title)}
+.rest-next-meta{font-size:var(--fs-small);opacity:.7}
+.rest-next:active{opacity:.85}
+
+/* ── 本週摘要（日期已經在上面的日期列） ── */
+#screenToday .week-sum{margin-bottom:var(--s3)}
+
+/* ── 下方分頁：滑動的紅色指示線 ── */
+.tabbar{position:fixed}
+.tabbar-ink{
+  position:absolute;top:0;left:0;width:25%;height:2px;
+  background:var(--signal-fill);
+  transform:translateX(calc(var(--tab-i, 0) * 100%));
+  transition:transform var(--dur-slow) var(--ease-out);
+}
+.tabbar-btn i{transition:transform var(--dur-base) var(--ease-out),color var(--dur-fast)}
+.tabbar-btn.is-active i{transform:translateY(-1px) scale(1.08)}
+
+/* ── 換日時的滑動 ── */
+#screenToday .screen-inner.slide-next{animation:slideNext 300ms var(--ease-out)}
+#screenToday .screen-inner.slide-prev{animation:slidePrev 300ms var(--ease-out)}
+@keyframes slideNext{from{opacity:.2;transform:translateX(24px)}to{opacity:1;transform:none}}
+@keyframes slidePrev{from{opacity:.2;transform:translateX(-24px)}to{opacity:1;transform:none}}
+
+/* ── 組間計時器：多一行「下一組」 ── */
+.rest-timer-label{min-width:0}
+.rest-timer-label b{
+  display:block;font-size:var(--fs-small);color:var(--paper);font-weight:var(--fw-strong);margin-top:1px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+#restTimer .rest-timer-label{opacity:1;color:color-mix(in srgb,var(--paper) 70%,transparent)}
+
+/* ══ 訓練完成 ══ */
+#finishLayer{
+  position:fixed;inset:0;z-index:var(--z-overlay);
+  background:var(--paper);color:var(--ink);
+  display:flex;align-items:flex-end;
+  padding:calc(env(safe-area-inset-top,0px) + 24px) 24px calc(env(safe-area-inset-bottom,0px) + 28px);
+  overflow:hidden;
+}
+#finishLayer[hidden]{display:none}
+.finish-wipe{
+  position:absolute;left:0;right:0;top:0;height:42%;
+  background:var(--signal-fill);
+  transform-origin:left center;
+  animation:finishWipe 700ms var(--ease-in-out) both;
+}
+@keyframes finishWipe{from{transform:scaleX(0)}to{transform:scaleX(1)}}
+/* 紅色色塊裡放一個巨大的訓練代號 —— 瑞士海報的做法，字就是圖 */
+.finish-poster{
+  position:absolute;left:0;right:0;top:0;height:42%;
+  padding:calc(env(safe-area-inset-top,0px) + 20px) 24px 0;
+  color:var(--paper);pointer-events:none;overflow:hidden;
+}
+.finish-mark{
+  display:block;font-weight:900;font-size:var(--fs-lead);letter-spacing:-.02em;
+  animation:rowIn 480ms var(--ease-out) 520ms both;
+}
+.finish-letter{
+  position:absolute;right:16px;bottom:-.2em;
+  font-family:'Inter',sans-serif;font-weight:900;
+  font-size:min(52vh, 110vw);line-height:1;letter-spacing:-.06em;
+  animation:letterIn 760ms var(--ease-out) 300ms both;
+}
+@keyframes letterIn{from{opacity:0;transform:translateY(18%)}to{opacity:1;transform:none}}
+.finish-inner{position:relative;width:100%;max-width:560px;margin:0 auto;display:grid;gap:var(--s3)}
+.finish-inner > *{animation:rowIn 560ms var(--ease-out) both}
+.finish-inner > :nth-child(1){animation-delay:380ms}
+.finish-inner > :nth-child(2){animation-delay:440ms}
+.finish-inner > :nth-child(3){animation-delay:500ms}
+.finish-inner > :nth-child(4){animation-delay:580ms}
+.finish-inner > :nth-child(5){animation-delay:640ms}
+.finish-inner > :nth-child(6){animation-delay:700ms}
+.finish-title{
+  font-size:clamp(56px, 17vw, 96px);font-weight:900;
+  line-height:.95;letter-spacing:-.045em;margin:0;
+}
+.finish-big{font-size:clamp(64px, 22vw, 128px);font-weight:700;line-height:1;letter-spacing:-.06em;color:var(--signal-text)}
+.finish-big-unit{font-size:var(--fs-title);letter-spacing:0;color:var(--concrete);margin-left:6px}
+.finish-stats{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  border-top:var(--hairline) solid var(--line);padding-top:var(--s4);margin-top:var(--s2);
+}
+.finish-stats > div{display:grid;gap:2px;padding:0 var(--s3);border-left:var(--hairline) solid var(--line)}
+.finish-stats > div:first-child{padding-left:0;border-left:none}
+.finish-stats b{font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-title);font-weight:700;letter-spacing:-.02em}
+.finish-bumps{display:grid;gap:4px;font-size:var(--fs-small)}
+.finish-bumps:empty{display:none}
+.finish-bump{display:flex;justify-content:space-between;gap:var(--s3);padding:6px 0;border-top:var(--hairline) solid var(--line)}
+.finish-bump b{font-family:'Fragment Mono',ui-monospace,monospace;color:var(--signal-text)}
+.finish-actions{display:grid;grid-template-columns:1fr 1.4fr;gap:var(--s2);margin-top:var(--s3)}
+
+/* ══════════════════════════════════════════════════════════════
+   其他畫面跟上 v5：同一套標題尺度、同一種規線，拿掉最後的粗框
+   ══════════════════════════════════════════════════════════════ */
+#screenCalendar .cal-head{display:flex;align-items:flex-end;justify-content:space-between;gap:var(--s3)}
+#screenCalendar .day-title{font-size:clamp(40px, 12vw, 56px);line-height:1;letter-spacing:-.035em}
+#screenCalendar .day-kicker.is-today{color:var(--signal-text);font-weight:var(--fw-strong)}
+.cal-arrows{display:flex;gap:2px;margin-bottom:4px}
+.cal-arrows .icon-btn{width:44px;height:44px;border:var(--hairline) solid var(--line)}
+#screenCalendar .cal-actions{margin-top:calc(var(--s3) * -1)}
+#screenCalendar .cal-actions .btn{min-height:40px;font-size:var(--fs-small);color:var(--ink)}
+#screenCalendar .cal-actions .btn .icon{font-size:15px;color:var(--concrete)}
+
+/* 月曆標籤：從粗框方塊改成單純的字 */
+#screenCalendar .cal-tag{
+  border:none;background:none;padding:0;border-radius:0;
+  font-size:11px;font-weight:var(--fw-strong);color:var(--ink);line-height:1.2;
+}
+#screenCalendar .cal-tag.is-rest{color:var(--concrete);font-weight:var(--fw-medium)}
+#screenCalendar .cal-cell.is-selected .cal-tag{color:inherit;background:none}
+#screenCalendar .cal-cell.is-other{background:none;border-color:transparent}
+#screenCalendar .cal-legend .tag-chip{border:none;padding:0;font-size:11px;font-weight:var(--fw-strong)}
+#screenCalendar .cal-legend .tag-chip.is-rest{font-weight:var(--fw-medium)}
+
+/* 本月摘要：與其他統計列一致，欄位之間一條髮絲線 */
+#screenCalendar .msum-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:0}
+#screenCalendar .msum-cell{
+  background:none;border:none;border-radius:0;
+  border-left:var(--hairline) solid var(--line);padding:0 var(--s3);
+}
+#screenCalendar .msum-cell:first-child{border-left:none;padding-left:0}
+#screenCalendar .msum-num{font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-title);font-weight:700;letter-spacing:-.02em}
+#screenCalendar .msum-num span{font-size:var(--fs-micro)!important}
+#screenCalendar .progress-track{height:3px;border-radius:0;margin-top:var(--s2)}
+
+/* 週報 */
+#weeklyModal .modal-head{align-items:center}
+.weekly-nav{
+  display:grid;grid-template-columns:44px 1fr 44px;align-items:center;
+  text-align:center;font-size:var(--fs-small);color:var(--concrete);
+  border:var(--hairline) solid var(--line);margin-bottom:var(--s4);
+}
+.weekly-nav .btn{min-height:44px;padding:0;border:none;font-size:16px}
+#weeklyModal .weekly-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:0}
+#weeklyModal .week-cell{
+  background:none;border:none;border-radius:0;
+  border-bottom:var(--hairline) solid var(--line);padding:var(--s3) 0;
+}
+#weeklyModal .week-cell:nth-child(odd){padding-right:var(--s3);border-right:var(--hairline) solid var(--line)}
+#weeklyModal .week-cell:nth-child(even){padding-left:var(--s3)}
+#weeklyModal .msum-num{font-family:'Fragment Mono',ui-monospace,monospace;font-size:var(--fs-title)!important;font-weight:700}
+#weeklyModal .week-row{border-bottom:var(--hairline) solid var(--line)}
+.weekly-copy{width:100%;margin-top:var(--s4)}
+#weeklyModal .week-change-list{gap:0}
+#weeklyModal .week-day-link{
+  background:none;border:none;border-radius:0;box-shadow:none;
+  border-bottom:var(--hairline) solid var(--line);padding:var(--s3) 0;width:100%;text-align:left;
+}
+#weeklyModal .week-day-link:active{opacity:.6}
+#weeklyModal .search-tag,#searchDrawer .search-tag{border-radius:0}
+
+/* 設定：真正的開關 */
+.switch{
+  position:relative;flex:0 0 auto;
+  width:50px;height:30px;padding:0;
+  background:var(--line);border:none;border-radius:999px;cursor:pointer;
+  transition:background var(--dur-base) var(--ease-out);
+  -webkit-tap-highlight-color:transparent;
+}
+.switch-knob{
+  position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);
+  transition:transform var(--dur-base) var(--ease-out);
+}
+.switch[aria-checked="true"]{background:var(--positive-fill)}
+.switch[aria-checked="true"] .switch-knob{transform:translateX(20px)}
+.switch:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.settings-row{align-items:center}
+
+/* ══ 第一次打開 ══ */
+#onboard{
+  position:fixed;inset:0;z-index:90;overflow-y:auto;
+  background:var(--paper);color:var(--ink);
+}
+#onboard[hidden],.ob-step[hidden]{display:none}
+.ob-step{min-height:100%;display:flex;flex-direction:column}
+.ob-poster{
+  background:var(--signal-fill);color:#fff;
+  padding:calc(env(safe-area-inset-top,0px) + 22px) 24px 32px;
+  display:grid;gap:clamp(40px,12vh,120px);
+  animation:finishWipe 640ms var(--ease-in-out) both;transform-origin:left center;
+}
+[data-theme="dark"] .ob-poster{color:#18181b}
+.ob-mark{font-weight:900;font-size:var(--fs-lead);letter-spacing:-.02em}
+.ob-big{
+  margin:0;font-weight:900;font-size:clamp(60px,19vw,120px);
+  line-height:.92;letter-spacing:-.055em;
+  animation:rowIn 620ms var(--ease-out) 260ms both;
+}
+.ob-body{
+  width:100%;max-width:560px;margin:0 auto;flex:1;
+  padding:28px 24px calc(env(safe-area-inset-bottom,0px) + 28px);
+  display:grid;gap:18px;align-content:start;
+}
+.ob-points{list-style:none;margin:0;padding:0;border-top:var(--hairline) solid var(--line)}
+.ob-points li{
+  display:grid;gap:2px;padding:14px 0 14px 18px;position:relative;
+  border-bottom:var(--hairline) solid var(--line);
+  animation:rowIn 520ms var(--ease-out) both;
+}
+.ob-points li:nth-child(1){animation-delay:420ms}
+.ob-points li:nth-child(2){animation-delay:480ms}
+.ob-points li:nth-child(3){animation-delay:540ms}
+.ob-points li::before{content:'';position:absolute;left:0;top:22px;width:8px;height:8px;background:var(--signal-fill)}
+.ob-points b{font-size:var(--fs-lead);font-weight:var(--fw-strong)}
+.ob-points span{font-size:var(--fs-small);color:var(--concrete)}
+.ob-cta{min-height:56px;font-size:var(--fs-lead);width:100%}
+.ob-back{margin-left:-10px}
+.ob-h{font-size:clamp(40px,12vw,56px);font-weight:900;line-height:1;letter-spacing:-.04em;margin:0}
+.ob-sub{font-size:var(--fs-small);color:var(--concrete);line-height:1.6}
+.ob-plans{display:grid;border-top:var(--hairline) solid var(--line)}
+.ob-plan{
+  display:grid;grid-template-columns:62px minmax(0,1fr) auto;align-items:center;gap:14px;
+  padding:16px 0;background:none;border:none;border-bottom:var(--hairline) solid var(--line);
+  color:var(--ink);font-family:inherit;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.ob-plan:active{opacity:.6}
+.ob-plan:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.ob-plan-days{display:grid;justify-items:start}
+.ob-plan-days b{font-family:'Fragment Mono',ui-monospace,monospace;font-size:36px;line-height:1;font-weight:700;letter-spacing:-.04em}
+.ob-plan-days small{font-size:10px;color:var(--concrete);letter-spacing:.06em;margin-top:2px}
+.ob-plan-text b{display:block;font-size:var(--fs-lead);font-weight:var(--fw-strong)}
+.ob-plan-text span{display:block;font-size:var(--fs-small);color:var(--concrete);line-height:1.5;margin-top:2px}
+.ob-plan i{color:var(--concrete)}
+
+/* ══ 課表編輯 ══ */
+#planModal .modal-card{width:min(640px,100%);max-height:92vh;display:flex;flex-direction:column}
+#planModal .modal-body{overflow-y:auto;flex:1;min-height:0}
+.plan-foot{
+  display:grid;grid-template-columns:1fr auto auto;align-items:center;gap:8px;
+  padding:12px 18px calc(env(safe-area-inset-bottom,0px) + 12px);
+  border-top:var(--hairline) solid var(--line);
+}
+.pe-msg{font-size:var(--fs-small);color:var(--signal-text)}
+.pe-section{display:grid;gap:12px;margin-bottom:28px}
+.pe-hint{font-size:var(--fs-small);color:var(--concrete);line-height:1.6}
+.pe-week{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.pe-day{
+  display:grid;gap:2px;justify-items:center;padding:9px 0;
+  background:var(--ink);color:var(--paper);border:var(--hairline) solid var(--ink);
+  font-family:inherit;cursor:pointer;border-radius:0;-webkit-tap-highlight-color:transparent;
+  transition:background var(--dur-fast) var(--ease-out),color var(--dur-fast) var(--ease-out);
+}
+.pe-day span{font-size:10px;opacity:.7}
+.pe-day b{font-family:'Fragment Mono',ui-monospace,monospace;font-size:18px;line-height:1.1}
+.pe-day.is-rest{background:var(--card);color:var(--concrete);border-color:var(--line)}
+.pe-day:active{transform:scale(.94)}
+.pe-day:focus-visible{outline:2px solid var(--signal);outline-offset:2px}
+.pe-workout{display:grid;gap:4px;border-top:2px solid var(--ink);padding-top:12px;margin-top:8px}
+.pe-w-head{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.pe-code{font-family:'Fragment Mono',ui-monospace,monospace;font-weight:700;font-size:22px;min-width:22px}
+.pe-input{
+  font:inherit;font-size:16px;color:var(--ink);background:var(--card);
+  border:var(--hairline) solid var(--line);border-radius:0;
+  height:44px;padding:0 10px;min-width:0;width:100%;
+}
+.pe-input:focus{outline:none;border-color:var(--ink)}
+.pe-wname{font-weight:var(--fw-strong)}
+.pe-ex{display:grid;gap:6px;padding:10px 0;border-bottom:var(--hairline) solid var(--line)}
+.pe-ex-top{display:grid;grid-template-columns:minmax(0,1fr) 44px;gap:6px}
+.pe-ex-row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.pe-ex-row label{display:grid;gap:3px;font-size:10px;font-weight:var(--fw-strong);letter-spacing:.06em;color:var(--concrete)}
+.pe-num{font-family:'Fragment Mono',ui-monospace,monospace;text-align:center}
+.pe-add{justify-self:start;min-height:40px}
+.pe-add-workout{width:100%}
+.plan-summary{
+  width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;
+  padding:14px;margin-bottom:22px;
+  background:var(--card);border:var(--hairline) solid var(--line);color:var(--ink);
+  font-family:inherit;text-align:left;cursor:pointer;
+}
+.plan-summary b{display:block;font-size:var(--fs-body);font-weight:var(--fw-strong)}
+.plan-summary span span{display:block;font-size:var(--fs-small);color:var(--concrete);margin-top:2px}
+.plan-summary-cta{font-size:var(--fs-small);font-weight:var(--fw-strong);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.plan-summary:active{opacity:.7}
+
+@media(prefers-reduced-motion:reduce){
+  .ob-poster,.ob-big,.ob-points li{animation:none!important}
+  #screenToday .ex-row,.recovery-item,
+  #screenToday.is-active .day-head > *,#screenToday.is-active .day-nav,
+  .finish-wipe,.finish-inner > *,.finish-mark,.finish-letter,
+  #screenToday .screen-inner.slide-next,#screenToday .screen-inner.slide-prev{animation:none!important}
+}
+
 </style>
 </head>
 <body>
@@ -1969,16 +2590,22 @@ body{
     <div class="screen-inner">
 
       <div class="day-head">
-        <div class="day-kicker" id="dpKicker">—</div>
+        <div class="day-kicker-row">
+          <div class="day-kicker" id="dpKicker">—</div>
+          <button type="button" id="dpToday" class="today-pill" hidden>
+            <i class="ph ph-arrow-u-up-left" aria-hidden="true"></i>回到今天
+          </button>
+        </div>
         <h1 class="day-title" id="dpTitle">—</h1>
+        <div class="day-meta mono-num" id="dpMeta"></div>
       </div>
 
       <div class="day-nav">
-        <button type="button" id="dpPrev" class="btn btn-quiet" aria-label="前一天">
+        <button type="button" id="dpPrev" class="icon-btn" aria-label="前一天">
           <i class="ph ph-caret-left" aria-hidden="true"></i>
         </button>
-        <button type="button" id="dpToday" class="btn btn-quiet">今天</button>
-        <button type="button" id="dpNext" class="btn btn-quiet" aria-label="後一天">
+        <div class="week-strip" id="weekStrip" role="group" aria-label="本週日期"></div>
+        <button type="button" id="dpNext" class="icon-btn" aria-label="後一天">
           <i class="ph ph-caret-right" aria-hidden="true"></i>
         </button>
       </div>
@@ -1986,7 +2613,9 @@ body{
       <div class="card">
         <div class="card-head">
           <span class="kicker" id="dpWorkoutLabel">訓練</span>
+          <span class="card-head-note mono-num" id="dpSessionCount"></span>
         </div>
+        <div class="session-bar" id="sessionBar" aria-hidden="true"></div>
         <div id="dpWorkout"></div>
       </div>
 
@@ -1998,7 +2627,7 @@ body{
         <div id="weekProgressBody"></div>
       </div>
 
-      <div class="card card-tight">
+      <div class="card card-tight" id="chestProgressCard">
         <div class="progress-strip">
           <div class="progress-strip-label">
             <span class="kicker">胸推進度</span>
@@ -2028,19 +2657,24 @@ body{
     <div class="screen-inner">
 
       <div class="cal-head">
-        <button type="button" class="icon-btn" id="calPrev" aria-label="上個月">
-          <i class="ph ph-caret-left" aria-hidden="true"></i>
-        </button>
-        <div class="cal-head-label" id="calMonthLabel">—</div>
-        <button type="button" class="icon-btn" id="calNext" aria-label="下個月">
-          <i class="ph ph-caret-right" aria-hidden="true"></i>
-        </button>
+        <div class="day-head">
+          <div class="day-kicker" id="calYearLabel">—</div>
+          <h1 class="day-title" id="calMonthLabel">—</h1>
+        </div>
+        <div class="cal-arrows">
+          <button type="button" class="icon-btn" id="calPrev" aria-label="上個月">
+            <i class="ph ph-caret-left" aria-hidden="true"></i>
+          </button>
+          <button type="button" class="icon-btn" id="calNext" aria-label="下個月">
+            <i class="ph ph-caret-right" aria-hidden="true"></i>
+          </button>
+        </div>
       </div>
 
-      <div class="action-row">
-        <button type="button" id="calToday" class="btn btn-quiet">回到今天</button>
-        <button type="button" id="weekReportBtn" class="btn btn-quiet">週報</button>
-        <button type="button" id="exportCalBtn" class="btn btn-quiet">匯出 PNG</button>
+      <div class="action-row cal-actions">
+        <button type="button" id="calToday" class="btn btn-quiet"><i class="ph ph-arrow-u-up-left icon" aria-hidden="true"></i>本月</button>
+        <button type="button" id="weekReportBtn" class="btn btn-quiet"><i class="ph ph-list-checks icon" aria-hidden="true"></i>週報</button>
+        <button type="button" id="exportCalBtn" class="btn btn-quiet"><i class="ph ph-image icon" aria-hidden="true"></i>匯出圖片</button>
       </div>
 
       <div class="card card-tight">
@@ -2063,6 +2697,48 @@ body{
         <div class="msum-grid" id="msumGrid"></div>
       </div>
 
+
+    </div>
+  </section>
+
+  <!-- ─────────── 進步 ─────────── -->
+  <section id="screenProgress" class="screen" role="tabpanel" aria-label="進步" hidden>
+    <div class="screen-inner">
+
+      <div class="day-head">
+        <div class="day-kicker" id="pgKicker">—</div>
+        <h1 class="day-title" id="pgTitle">—</h1>
+      </div>
+
+      <div class="stat-row" id="pgStats"></div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker">力量曲線</span>
+          <span class="card-head-note">點動作看每一次</span>
+        </div>
+        <div id="pgLifts"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker">每週訓練量</span>
+          <span class="card-head-note">重量 × 完成組數</span>
+        </div>
+        <div class="bw-chart-wrap" id="pgVolume"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head">
+          <span class="kicker">出席</span>
+          <span class="card-head-note mono-num" id="pgHeatNote">近 16 週</span>
+        </div>
+        <div id="pgHeat"></div>
+      </div>
+
+      <button type="button" id="pgExportBtn" class="btn">
+        <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出進步卡（社群分享）
+      </button>
 
     </div>
   </section>
@@ -2147,11 +2823,15 @@ body{
 </div>
 
 <nav class="tabbar" role="tablist" aria-label="主要導覽">
+  <span class="tabbar-ink" aria-hidden="true"></span>
   <button type="button" class="tabbar-btn is-active" data-screen="today" role="tab" aria-selected="true">
     <i class="ph ph-barbell" aria-hidden="true"></i><span>今日</span>
   </button>
   <button type="button" class="tabbar-btn" data-screen="calendar" role="tab" aria-selected="false">
     <i class="ph ph-calendar-blank" aria-hidden="true"></i><span>月曆</span>
+  </button>
+  <button type="button" class="tabbar-btn" data-screen="progress" role="tab" aria-selected="false">
+    <i class="ph ph-trend-up" aria-hidden="true"></i><span>進步</span>
   </button>
   <button type="button" class="tabbar-btn" data-screen="weight" role="tab" aria-selected="false">
     <i class="ph ph-chart-line" aria-hidden="true"></i><span>體重</span>
@@ -2217,16 +2897,16 @@ body{
         <div class="kicker">週報</div>
         <div class="modal-title" id="weeklyModalTitle">—</div>
       </div>
-            <div class="modal-actions">
-        <button type="button" id="weeklyNewerBtn" class="btn">較新一週</button>
-        <button type="button" id="weeklyOlderBtn" class="btn">較早一週</button>
-        <button type="button" id="weeklyCopyBtn" class="btn"><i class="ph ph-copy icon" aria-hidden="true"></i>複製純文字</button>
-        <button type="button" id="weeklyCloseBtn" class="btn"><i class="ph ph-x icon" aria-hidden="true"></i>關閉</button>
-      </div>
+      <button type="button" id="weeklyCloseBtn" class="icon-btn" aria-label="關閉"><i class="ph ph-x" aria-hidden="true"></i></button>
     </div>
     <div class="modal-body">
-      <div class="small muted mono-num" id="weeklyRangeLabel">—</div>
-      <div id="weeklyReportBody" style="margin-top:14px"></div>
+      <div class="weekly-nav">
+        <button type="button" id="weeklyOlderBtn" class="btn btn-quiet" aria-label="較早一週"><i class="ph ph-caret-left" aria-hidden="true"></i></button>
+        <div class="mono-num" id="weeklyRangeLabel">—</div>
+        <button type="button" id="weeklyNewerBtn" class="btn btn-quiet" aria-label="較新一週"><i class="ph ph-caret-right" aria-hidden="true"></i></button>
+      </div>
+      <div id="weeklyReportBody"></div>
+      <button type="button" id="weeklyCopyBtn" class="btn weekly-copy"><i class="ph ph-copy icon" aria-hidden="true"></i>複製純文字（貼到 LINE / 備忘錄）</button>
     </div>
   </div>
 </div>
@@ -2303,10 +2983,77 @@ body{
 
 </div>
 <div id="drawerBackdrop"></div>
+<!-- 第一次打開 -->
+<div id="onboard" role="dialog" aria-modal="true" aria-labelledby="obTitle" hidden>
+  <div class="ob-step" data-step="1">
+    <div class="ob-poster">
+      <span class="ob-mark">RECOMP</span>
+      <h2 class="ob-big" id="obTitle">每一組<br>都算數。</h2>
+    </div>
+    <div class="ob-body">
+      <ul class="ob-points">
+        <li><b>自動漸進超負荷</b><span>同一個動作每組都做到次數上限，下次自動加重。</span></li>
+        <li><b>看得見的進步</b><span>每個動作的重量曲線、出席紀錄、每週訓練量。</span></li>
+        <li><b>資料只在你的手機</b><span>不用註冊、不用網路，隨時匯出備份。</span></li>
+      </ul>
+      <button type="button" class="btn btn-primary ob-cta" id="obStartBtn">選一套課表 <i class="ph ph-arrow-right icon" aria-hidden="true"></i></button>
+    </div>
+  </div>
+  <div class="ob-step" data-step="2" hidden>
+    <div class="ob-body">
+      <button type="button" class="icon-btn ob-back" id="obBackBtn" aria-label="上一步"><i class="ph ph-arrow-left" aria-hidden="true"></i></button>
+      <div class="kicker">第一步</div>
+      <h2 class="ob-h">選一套課表</h2>
+      <p class="ob-sub">之後隨時可以在 設定 → 訓練計畫 修改動作、組數和每週排程。</p>
+      <div class="ob-plans" id="obPlans"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 課表編輯 -->
+<div id="planModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="planTitle" aria-hidden="true">
+  <div class="modal-card">
+    <div class="modal-head">
+      <div>
+        <div class="kicker">訓練計畫</div>
+        <div class="modal-title" id="planTitle">編輯課表</div>
+      </div>
+      <button type="button" id="planCloseBtn" class="icon-btn" aria-label="關閉"><i class="ph ph-x" aria-hidden="true"></i></button>
+    </div>
+    <div class="modal-body" id="planBody"></div>
+    <div class="plan-foot">
+      <span class="pe-msg" id="planMsg" role="alert"></span>
+      <button type="button" id="planCancelBtn" class="btn">取消</button>
+      <button type="button" id="planSaveBtn" class="btn btn-primary">儲存課表</button>
+    </div>
+  </div>
+</div>
+
+<!-- 訓練完成 -->
+<div id="finishLayer" role="dialog" aria-modal="true" aria-labelledby="finishTitle" hidden>
+  <div class="finish-wipe" aria-hidden="true"></div>
+  <div class="finish-poster" aria-hidden="true">
+    <span class="finish-mark">RECOMP</span>
+    <span class="finish-letter" id="finishLetter">A</span>
+  </div>
+  <div class="finish-inner">
+    <div class="kicker" id="finishKicker">—</div>
+    <h2 class="finish-title" id="finishTitle">訓練完成</h2>
+    <div class="finish-big mono-num"><span id="finishSets">0</span><span class="finish-big-unit" id="finishSetsTotal">/0 組</span></div>
+    <div class="finish-stats" id="finishStats"></div>
+    <div class="finish-bumps" id="finishBumps"></div>
+    <div class="finish-actions">
+      <button type="button" class="btn" id="finishCloseBtn">完成</button>
+      <button type="button" class="btn btn-primary" id="finishShareBtn">
+        <i class="ph ph-share-network icon" aria-hidden="true"></i>分享訓練卡
+      </button>
+    </div>
+  </div>
+</div>
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v3.2.0';
+const APP_VERSION = 'v3.3.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -2325,7 +3072,7 @@ const SCHEMA_VERSION = 3;
 /* ══════════════════════════════════════════════
    DATA
    ══════════════════════════════════════════════ */
-const WORKOUTS = {
+const LEGACY_WORKOUTS = {
   A: [
     { id:'chest_press',         name:'合式胸部推舉機',   sets:4, reps:'6-10',  kg:36, note:'肩胛夾緊' },
     { id:'pec_fly',             name:'蝴蝶機',           sets:3, reps:'10-15', kg:36, note:'' },
@@ -2344,7 +3091,7 @@ const WORKOUTS = {
 /* 訓練週期：A-B-休-A-B-休-休，31 天一輪（沿用原本的排程，一天都沒變動）。
    這份資料原本藏在 MEALS 裡，每個元素同時帶著餐點和 train 欄位；
    餐點功能移除後把訓練別獨立出來。 */
-const TRAINING_CYCLE = [
+const LEGACY_CYCLE_DEF = [
   {day:1,train:'A'}, {day:2,train:'B'}, {day:3,train:'休'}, {day:4,train:'A'}, {day:5,train:'B'}, {day:6,train:'休'}, {day:7,train:'休'},
   {day:8,train:'A'}, {day:9,train:'B'}, {day:10,train:'休'}, {day:11,train:'A'}, {day:12,train:'B'}, {day:13,train:'休'}, {day:14,train:'休'},
   {day:15,train:'A'}, {day:16,train:'B'}, {day:17,train:'休'}, {day:18,train:'A'}, {day:19,train:'B'}, {day:20,train:'休'}, {day:21,train:'休'},
@@ -2654,10 +3401,20 @@ function getExerciseWeight(ex){
 function setExerciseWeight(ex, kg){
   lsSet('recomp_weight_id_' + ex.id, String(kg));
 }
+function exerciseById(id){
+  return allExercises().find(x => x.id === id) || null;
+}
+function setsDoneFor(ex, dateStr){
+  let n = 0;
+  for(let s = 1; s <= ex.sets; s++){
+    if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') !== '0') n++;
+  }
+  return n;
+}
 
 function migrateLegacyExerciseKeys(){
   if(lsGet('recomp_migrated_v2','0') === '1') return;
-  const allExercises = [...WORKOUTS.A, ...WORKOUTS.B];
+  const allExercises = [...LEGACY_WORKOUTS.A, ...LEGACY_WORKOUTS.B];
   allExercises.forEach(ex => {
     const legacyKey = 'recomp_weight_' + ex.name;
     const legacyVal = lsGet(legacyKey, null);
@@ -2718,32 +3475,113 @@ function migrateSchema(){
   lsSet('recomp_schema_version', String(SCHEMA_VERSION));
 }
   
-function copyText(t){
-  const done = () => {
-    const el = document.getElementById('toast');
-    el.textContent  = '已複製點餐口令';
-    el.style.opacity = '1';
-    clearTimeout(copyText._t);
-    copyText._t = setTimeout(() => el.style.opacity = '0', 1200);
+const _planCache = new Map();
+
+/* ══════════════════════════════════════════════
+   訓練計畫
+   原本課表、排程、起始日都寫死在程式碼裡 —— 只有一個人、一間健身房能用。
+   現在計畫是使用者的資料（recomp_plan）：
+   · 已經在用的人：沒有 recomp_plan 時沿用上面的原版計畫，
+     而且不會自動寫入任何東西，舊紀錄一筆都不動
+   · 新使用者：第一次打開先選一套課表
+   訓練日的代號是 A / B / C…，'休' 是休息日。
+   ══════════════════════════════════════════════ */
+const PLAN_KEY = 'recomp_plan';
+let WORKOUTS = {};        /* 代號 → 動作陣列 */
+let WORKOUT_NAMES = {};   /* 代號 → 名稱 */
+let CYCLE = [];           /* 一輪的排程，例如 ['A','B','休',…] */
+let PLAN_START = new Date(2026, 5, 22);
+
+function clonePlan(p){ return JSON.parse(JSON.stringify(p)); }
+
+function legacyPlan(){
+  return {
+    v:1, start:'2026-6-22',
+    cycle: LEGACY_CYCLE_DEF.map(x => x.train),
+    workouts:{
+      A:{ name:'上肢推', exercises: clonePlan(LEGACY_WORKOUTS.A) },
+      B:{ name:'下肢背', exercises: clonePlan(LEGACY_WORKOUTS.B) },
+    },
   };
-  if(navigator.clipboard && window.isSecureContext){
-    navigator.clipboard.writeText(t).then(done).catch(fallback);
-  } else { fallback(); }
-  function fallback(){
-    try{
-      const ta = document.createElement('textarea');
-      ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    }catch(e){}
-    done();
-  }
 }
 
-const PLAN_START = new Date(2026, 5, 22);
-const PLAN_CYCLE = 31;
-const _planCache = new Map();
+function validPlan(p){
+  if(!p || typeof p !== 'object' || !p.workouts || !Array.isArray(p.cycle) || !p.cycle.length) return false;
+  const codes = Object.keys(p.workouts);
+  if(!codes.length) return false;
+  return codes.every(c => p.workouts[c] && Array.isArray(p.workouts[c].exercises) &&
+    p.workouts[c].exercises.every(e => e && typeof e.id === 'string' && e.id && typeof e.name === 'string'));
+}
+
+function applyPlan(p){
+  WORKOUTS = {}; WORKOUT_NAMES = {};
+  Object.keys(p.workouts).sort().forEach(code => {
+    WORKOUTS[code] = p.workouts[code].exercises.map(e => ({
+      id:e.id, name:e.name,
+      sets:Math.max(1, Math.min(10, parseInt(e.sets, 10) || 3)),
+      reps:String(e.reps || '8-12'),
+      kg:Number(e.kg) || 0,
+      note:e.note || '',
+    }));
+    WORKOUT_NAMES[code] = p.workouts[code].name || code;
+  });
+  CYCLE = p.cycle.map(t => WORKOUTS[t] ? t : '休');
+  const [y,m,d] = String(p.start || '').split('-').map(Number);
+  PLAN_START = (y && m && d) ? new Date(y, m-1, d) : new Date(2026, 5, 22);
+  try{ _planCache.clear(); invalidateHistory(); }catch(e){}
+}
+
+function currentPlan(){
+  const workouts = {};
+  Object.keys(WORKOUTS).forEach(c => {
+    workouts[c] = { name:WORKOUT_NAMES[c], exercises:WORKOUTS[c].map(e => ({ ...e })) };
+  });
+  return { v:1, start:formatDateStr(PLAN_START), cycle:CYCLE.slice(), workouts };
+}
+
+function hasAnyRecords(){
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(k && /^recomp_(set_id|set|bw|weight_id|weight)_/.test(k)) return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+/* 回傳 'stored' | 'legacy' | 'new'（'new' = 該顯示引導了） */
+function loadPlan(){
+  const raw = lsGet(PLAN_KEY, null);
+  if(raw){
+    try{
+      const p = JSON.parse(raw);
+      if(validPlan(p)){ applyPlan(p); return 'stored'; }
+    }catch(e){}
+  }
+  applyPlan(legacyPlan());
+  return (hasAnyRecords() || lsGet('rcmeta_onboarded', '') === '1') ? 'legacy' : 'new';
+}
+
+function savePlan(p){
+  lsSet(PLAN_KEY, JSON.stringify(p));
+  applyPlan(p);
+}
+
+function isTrainDay(train){ return !!(WORKOUTS[train] && WORKOUTS[train].length); }
+
+/* 同一個動作可以出現在不同的課表（例如兩天都有深蹲），用 id 去重 */
+function allExercises(){
+  const seen = new Set(), out = [];
+  Object.keys(WORKOUTS).forEach(c => WORKOUTS[c].forEach(e => {
+    if(!seen.has(e.id)){ seen.add(e.id); out.push(e); }
+  }));
+  return out;
+}
+function workoutOfExercise(id){
+  return Object.keys(WORKOUTS).find(c => WORKOUTS[c].some(e => e.id === id)) || null;
+}
+
+
 
 function getPlanForDate(dateObj){
   const cacheKey = `${dateObj.getFullYear()}-${dateObj.getMonth()}-${dateObj.getDate()}`;
@@ -2752,8 +3590,9 @@ function getPlanForDate(dateObj){
   const base = new Date(PLAN_START); base.setHours(12,0,0,0);
   const d    = new Date(dateObj);    d.setHours(12,0,0,0);
   const diff = Math.round((d - base) / 86400000);
-  const planDay = ((diff % PLAN_CYCLE) + PLAN_CYCLE) % PLAN_CYCLE + 1;
-  const plan = TRAINING_CYCLE.find(m => m.day === planDay) || TRAINING_CYCLE[0];
+  const n = CYCLE.length || 1;
+  const planDay = ((diff % n) + n) % n + 1;
+  const plan = { day:planDay, train:CYCLE[planDay - 1] || '休' };
   _planCache.set(cacheKey, plan);
   return plan;
 }
@@ -2780,7 +3619,8 @@ function formatDateStrPad(d){
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 function getTrainText(train){
-  return train === 'A' ? 'A日 上肢推' : train === 'B' ? 'B日 下肢背' : '休息日';
+  if(!isTrainDay(train)) return '休息日';
+  return `${train}日 ${WORKOUT_NAMES[train] || ''}`.trim();
 }
 function weekLabelFromOffset(offset){
   if(offset === 0) return '本週';
@@ -2921,7 +3761,7 @@ function copyAnyText(t, msg){
   }
 }
 function isDayFullyTrained(dateStr, type){
-  if(type !== 'A' && type !== 'B') return false;
+  if(!isTrainDay(type)) return false;
   return WORKOUTS[type].every(ex => {
     for(let s = 1; s <= ex.sets; s++){
       if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') === '0') return false;
@@ -2929,34 +3769,111 @@ function isDayFullyTrained(dateStr, type){
     return true;
   });
 }
-function isExerciseAllCapped(dateStr, ex){
-  for(let s = 1; s <= ex.sets; s++){
-    if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') !== '2') return false;
-  }
-  return true;
+
+/* ══════════════════════════════════════════════
+   重量歷史
+   以前重量只存「現在是多少」一個值，過去每一次用了多重，
+   是拿「起始重量 + 升重次數 × 增量」往前推出來的。
+   這在兩種情況下會錯：手動改過重量（起點就不對了），
+   以及改過增量（2.5 → 5，整段歷史跟著變）。
+   週報的升重清單甚至把增量寫死成 2.5。
+
+   現在改成：
+   · recomp_log_{日期}_{動作}   那天實際用的重量，打第一組時寫入
+   · recomp_bump_{日期}_{動作}  那天升重的增量；'0' = 升了又撤銷
+   沒有紀錄的舊日子，從「現在的重量」往回推 —— 起點錯了
+   誤差會出現在最早的那幾次，而不是最近、最常被拿來參考的那幾次。
+   ══════════════════════════════════════════════ */
+function logKey(dateStr, exId){ return `recomp_log_${dateStr}_${exId}`; }
+function bumpKey(dateStr, exId){ return `recomp_bump_${dateStr}_${exId}`; }
+
+const _historyCache = new Map();
+let _setIndex = null;
+function invalidateHistory(){ _historyCache.clear(); _setIndex = null; }
+
+/* 所有打勾紀錄的索引：動作 id → 日期 → 完成 / 達上限組數。
+   直接從 key 讀，不經過排程 —— 使用者改了課表或排程之後，
+   過去哪天練了哪個動作也不會跟著變。 */
+function setIndex(){
+  if(_setIndex) return _setIndex;
+  _setIndex = new Map();
+  try{
+    for(let i = 0; i < localStorage.length; i++){
+      const k = localStorage.key(i);
+      if(!k || k.indexOf('recomp_set_id_') !== 0) continue;
+      const m = /^recomp_set_id_(\d{4}-\d{1,2}-\d{1,2})_(.+)_(\d+)$/.exec(k);
+      if(!m) continue;
+      const v = localStorage.getItem(k);
+      if(v !== '1' && v !== '2') continue;
+      let byDate = _setIndex.get(m[2]);
+      if(!byDate){ byDate = new Map(); _setIndex.set(m[2], byDate); }
+      const c = byDate.get(m[1]) || { done:0, capped:0 };
+      c.done++; if(v === '2') c.capped++;
+      byDate.set(m[1], c);
+    }
+  }catch(e){}
+  return _setIndex;
 }
 
-const _bumpCountCache = new Map();
-function countExerciseBumpsUntil(ex, endDate){
-  const end = atNoon(endDate);
-  const start = atNoon(PLAN_START);
-  if(end < start) return 0;
+/* 某個動作到今天為止，每一次有打勾的訓練，由舊到新 */
+function exerciseHistory(ex){
+  if(_historyCache.has(ex.id)) return _historyCache.get(ex.id);
 
-  const cacheKey = `${ex.id}|${formatDateStr(end)}`;
-  if(_bumpCountCache.has(cacheKey)) return _bumpCountCache.get(cacheKey);
+  const today = atNoon(new Date());
+  const byDate = setIndex().get(ex.id);
+  const sessions = [];
+  if(byDate) byDate.forEach((c, ds) => {
+    const [y,m,d] = ds.split('-').map(Number);
+    const date = new Date(y, m-1, d, 12);
+    if(date > today || !c.done) return;
+    const total = Math.max(ex.sets, c.done);
+    const allCapped = c.capped === total;
+    const logged = parseFloat(lsGet(logKey(ds, ex.id), ''));
+    const bumpRaw = lsGet(bumpKey(ds, ex.id), null);
+    /* 新紀錄看標記；舊紀錄沒有標記，全紅就當作那天升過一次 */
+    const bump = bumpRaw !== null
+      ? (parseFloat(bumpRaw) || 0)
+      : (allCapped ? getIncrement(ex.id) : 0);
+    sessions.push({
+      date, ds, train:getPlanForDate(date).train,
+      done:c.done, total, capped:c.capped, allCapped, bump,
+      logged: isNaN(logged) ? null : logged,
+    });
+  });
+  sessions.sort((a, b) => a.date - b.date);
 
-  let count = 0;
-  for(let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)){
-    d.setHours(12,0,0,0);
-    const plan = getPlanForDate(d);
-    if(plan.train !== 'A' && plan.train !== 'B') continue;
-    const target = WORKOUTS[plan.train].find(x => x.id === ex.id);
-    if(!target) continue;
-    if(isExerciseAllCapped(formatDateStr(d), target)) count++;
+  /* 從現在的重量往回推：這一次用的 = 下一次用的 − 這一次升的 */
+  let after = getExerciseWeight(ex);
+  for(let i = sessions.length - 1; i >= 0; i--){
+    const s = sessions[i];
+    s.estimated = s.logged === null;
+    s.kg = s.estimated ? Math.max(0, +(after - s.bump).toFixed(2)) : s.logged;
+    after = s.kg;
   }
-  _bumpCountCache.set(cacheKey, count);
-  return count;
+
+  _historyCache.set(ex.id, sessions);
+  return sessions;
 }
+
+/* 某一天「生效中」的重量：當天有訓練就是當天用的，
+   沒有就是下一次訓練會用的（中間沒動過），再沒有就是現在的 */
+function weightOn(ex, dateObj){
+  const t = atNoon(dateObj);
+  const hit = exerciseHistory(ex).find(s => s.date >= t);
+  return hit ? hit.kg : getExerciseWeight(ex);
+}
+
+/* 訓練畫面上某一天要顯示的重量 */
+function displayKg(ex, dateStr){
+  const logged = parseFloat(lsGet(logKey(dateStr, ex.id), ''));
+  if(!isNaN(logged)) return logged;
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dateObj = atNoon(new Date(y, m-1, d));
+  if(dateObj < atNoon(new Date())) return weightOn(ex, dateObj);
+  return getExerciseWeight(ex);
+}
+
+function roundKg(n){ return +(+n).toFixed(2); }
 
 function computeMonthSummaryData(year, month){
   const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -2970,7 +3887,7 @@ function computeMonthSummaryData(year, month){
     const plan = getPlanForDate(dateObj);
     const dateStr = formatDateStr(dateObj);
 
-    if(plan.train !== '休'){
+    if(isTrainDay(plan.train)){
       trainDaysTotal++;
       if(isPast && isDayFullyTrained(dateStr, plan.train)) trainDaysDone++;
     }else{
@@ -2988,7 +3905,7 @@ function computeMonthSummaryData(year, month){
     const dateObj = new Date(year, month, d);
     const dateStr = formatDateStr(dateObj);
     const plan = getPlanForDate(dateObj);
-    if(plan.train === '休') continue;
+    if(!isTrainDay(plan.train)) continue;
     WORKOUTS[plan.train].forEach(ex => {
       setsPlanned += ex.sets;
       for(let n = 1; n <= ex.sets; n++){
@@ -3023,7 +3940,14 @@ function renderCalendar(year, month){
   const grid  = document.getElementById('calGrid');
   const label = document.getElementById('calMonthLabel');
   if(!grid) return;
-  label.textContent = `${year} 年 ${month+1} 月`;
+  label.textContent = `${month+1} 月`;
+  const yearLabel = document.getElementById('calYearLabel');
+  if(yearLabel){
+    const now = new Date();
+    const isNow = year === now.getFullYear() && month === now.getMonth();
+    yearLabel.textContent = `${isNow ? '本月 · ' : ''}${year} 年`;
+    yearLabel.classList.toggle('is-today', isNow);
+  }
 
   const first       = new Date(year, month, 1);
   const startDow    = first.getDay();
@@ -3049,7 +3973,7 @@ const isPast = dateObj <= new Date();
 let heatClass = '';
 let heatBar = '';
 if(isPast && getPref('heatmap')){
-  if(plan.train !== '休'){
+  if(isTrainDay(plan.train)){
     const totalSets = WORKOUTS[plan.train].reduce((s, ex) => s + ex.sets, 0);
     let doneSets = 0;
     WORKOUTS[plan.train].forEach(ex => {
@@ -3076,7 +4000,7 @@ if(isPast && getPref('heatmap')){
       aria-pressed="${isSelected ? 'true' : 'false'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span class="cal-daynum">${d}</span>
-        <span class="cal-tag">${plan.train}</span>
+        <span class="cal-tag${!isTrainDay(plan.train) ? ' is-rest' : ''}">${plan.train}</span>
       </div>
 
       ${heatBar}
@@ -3441,98 +4365,96 @@ function selectDate(dateObj){
   refreshChestWeightStat();
 }
 
+const WDAYS = ['週日','週一','週二','週三','週四','週五','週六'];
+const CHECK_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+function planWeekNo(dateObj){
+  return Math.floor((atNoon(dateObj) - atNoon(PLAN_START)) / (7 * 86400000)) + 1;
+}
+
+/* 預估時間：每組約 40 秒 + 組間休息，取整到 5 分鐘 */
+function estimateMinutes(list){
+  const sets = list.reduce((s, ex) => s + ex.sets, 0);
+  return Math.max(5, Math.round(sets * (40 + REST_SECONDS) / 60 / 5) * 5);
+}
+
 function renderDayHeader(plan, dateStr){
-  const wdays = ['週日','週一','週二','週三','週四','週五','週六'];
   const [y,m,d] = dateStr.split('-').map(Number);
   const dateObj = new Date(y, m-1, d);
-
   const isToday = formatDateStr(new Date()) === dateStr;
+  const md = `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')}`;
+  const wk = planWeekNo(dateObj);
+
   const kicker = document.getElementById('dpKicker');
-  kicker.textContent =
-    `${isToday ? '今天 · ' : ''}${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} ${wdays[dateObj.getDay()]}`;
+  kicker.textContent = `${isToday ? '今天 · ' : ''}${WDAYS[dateObj.getDay()]} ${md}${wk >= 1 ? ` · 第 ${wk} 週` : ''}`;
   kicker.classList.toggle('is-today', isToday);
+  const todayBtn = document.getElementById('dpToday');
+  if(todayBtn) todayBtn.hidden = isToday;
   document.getElementById('dpTitle').textContent = getTrainText(plan.train);
-  document.getElementById('todayTopLabel').textContent =
-    `${String(m).padStart(2,'0')}/${String(d).padStart(2,'0')} · ${getTrainText(plan.train)}`;
+
+  const meta = document.getElementById('dpMeta');
+  if(meta){
+    if(isTrainDay(plan.train)){
+      const list = WORKOUTS[plan.train];
+      const sets = list.reduce((s, ex) => s + ex.sets, 0);
+      meta.textContent = `${list.length} 個動作 · ${sets} 組 · 約 ${estimateMinutes(list)} 分鐘`;
+    }else{
+      meta.textContent = '恢復日 · 不做重訓';
+    }
+  }
+
+  document.getElementById('todayTopLabel').textContent = `${md} · ${getTrainText(plan.train)}`;
   const entryDate = document.getElementById('bwEntryDate');
   if(entryDate) entryDate.textContent = `紀錄到 ${formatDateStrPad(dateObj)}${isToday ? '（今天）' : ''}`;
 }
 
-/* 本週進度：休息日時這頁幾乎沒東西，這張卡補上「這週做了多少」 */
+/* 本週：上方的七天日期列（同時是導覽）＋ 下方的摘要 */
 function renderWeekProgress(){
+  const strip = document.getElementById('weekStrip');
   const body = document.getElementById('weekProgressBody');
   const note = document.getElementById('weekRangeNote');
   if(!body || !selectedDateObj) return;
 
   const base = atNoon(selectedDateObj);
-  const dow = (base.getDay() + 6) % 7;          /* 週一 = 0 */
-  const monday = new Date(base); monday.setDate(base.getDate() - dow);
+  const monday = mondayOf(base);
   const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
   const today = atNoon(new Date());
-
-  let dayDone = 0, dayTotal = 0, setsDone = 0, setsTotal = 0;
-  let nextTrain = null;
-  const dots = [];
-
-  for(let i = 0; i < 7; i++){
-    const d = new Date(monday); d.setDate(monday.getDate() + i);
-    const ds = formatDateStr(d);
-    const plan = getPlanForDate(d);
-    const isFuture = d > today;
-
-    if(plan.train === '休'){
-      dots.push({ state:'rest', label:plan.train, d });
-      continue;
-    }
-    dayTotal++;
-    const list = WORKOUTS[plan.train];
-    let done = 0, tot = 0;
-    list.forEach(ex => {
-      tot += ex.sets;
-      for(let n = 1; n <= ex.sets; n++){
-        if(lsGet(`recomp_set_id_${ds}_${ex.id}_${n}`, '0') !== '0') done++;
-      }
-    });
-    setsTotal += tot; setsDone += done;
-    if(done === tot && tot > 0) dayDone++;
-
-    dots.push({
-      state: isFuture ? 'future' : (tot && done === tot ? 'full' : done ? 'partial' : 'miss'),
-      label: plan.train, d, done, tot
-    });
-  }
-
-  note.textContent = `${monday.getMonth()+1}/${monday.getDate()} – ${sunday.getMonth()+1}/${sunday.getDate()}`;
-
-  /* 只有休息日才需要「下次訓練」—— 訓練日看著眼前的清單就好。
-     而且要找選取日之後的，不是本週第一個未來訓練日。 */
-  if(getPlanForDate(base).train === '休'){
-    const cur = new Date(base);
-    for(let i = 1; i <= 14; i++){
-      cur.setDate(cur.getDate() + 1);
-      const p = getPlanForDate(cur);
-      if(p.train !== '休'){ nextTrain = { d:new Date(cur), plan:p }; break; }
-    }
-  }
-
-  const pct = setsTotal ? Math.round(setsDone / setsTotal * 100) : 0;
   const wd = ['一','二','三','四','五','六','日'];
 
+  let dayDone = 0, dayTotal = 0, setsDone = 0, setsTotal = 0;
+  let html = '';
+  for(let i = 0; i < 7; i++){
+    const d = new Date(monday); d.setDate(monday.getDate() + i); d.setHours(12,0,0,0);
+    const c = dayCompletion(d);
+    let state = 'rest';
+    if(isTrainDay(c.train)){
+      dayTotal++; setsTotal += c.total; setsDone += c.done;
+      if(c.total && c.done === c.total) dayDone++;
+      state = c.total && c.done === c.total ? 'full'
+            : c.done ? 'partial'
+            : d >= today ? 'future' : 'miss';
+    }
+    const pct = c.total ? Math.round(c.done / c.total * 100) : 0;
+    const sel = +d === +base, now = +d === +today;
+    html += `<button type="button" class="ws-day is-${state}${sel ? ' is-selected' : ''}${now ? ' is-today' : ''}"
+        data-ymd="${formatDateStr(d)}" aria-pressed="${sel}"
+        aria-label="${d.getMonth()+1}月${d.getDate()}日 週${wd[i]} ${getTrainText(c.train)}${c.total ? `，完成 ${c.done}/${c.total} 組` : ''}">
+        <span class="ws-dow">${now ? '今天' : wd[i]}</span>
+        <span class="ws-num">${d.getDate()}</span>
+        <span class="ws-tag">${c.train}</span>
+        <span class="ws-bar"><i style="width:${pct}%"></i></span>
+      </button>`;
+  }
+  if(strip) strip.innerHTML = html;
+  if(note) note.textContent = `${monday.getMonth()+1}/${monday.getDate()} – ${sunday.getMonth()+1}/${sunday.getDate()}`;
+
+  const pct = setsTotal ? Math.round(setsDone / setsTotal * 100) : 0;
   body.innerHTML = `
-    <div class="week-dots">
-      ${dots.map((x,i) => `
-        <button type="button" class="week-dot is-${x.state}" data-ymd="${formatDateStr(x.d)}"
-          aria-label="${x.d.getMonth()+1}月${x.d.getDate()}日 ${x.label}">
-          <span class="week-dot-day">${wd[i]}</span>
-          <span class="week-dot-mark">${x.label}</span>
-        </button>`).join('')}
-    </div>
     <div class="week-sum">
       <span><b class="mono-num">${dayDone}</b>/${dayTotal} 天完成</span>
       <span><b class="mono-num">${setsDone}</b>/${setsTotal} 組</span>
     </div>
-    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
-    ${nextTrain ? `<div class="week-next">下次訓練　<b>${nextTrain.d.getMonth()+1}/${nextTrain.d.getDate()}</b>　${getTrainText(nextTrain.plan.train)}</div>` : ''}`;
+    <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>`;
 }
 
 /* 往回找同一個動作最近一次有紀錄的日子。
@@ -3540,21 +4462,76 @@ function renderWeekProgress(){
    就只能憑感覺決定今天要不要加重。 */
 function findLastPerformance(ex, beforeDateStr, trainType){
   const [y,m,d] = beforeDateStr.split('-').map(Number);
-  const cursor = new Date(y, m-1, d);
-  for(let i = 1; i <= 60; i++){
-    cursor.setDate(cursor.getDate() - 1);
-    const plan = getPlanForDate(cursor);
-    if(plan.train !== trainType) continue;
-    const ds = formatDateStr(cursor);
-    let done = 0;
-    for(let n = 1; n <= ex.sets; n++){
-      if(lsGet(`recomp_set_id_${ds}_${ex.id}_${n}`, '0') !== '0') done++;
+  const before = atNoon(new Date(y, m-1, d));
+  const oldest = atNoon(before); oldest.setDate(oldest.getDate() - 60);
+  const hist = exerciseHistory(ex);
+  for(let i = hist.length - 1; i >= 0; i--){
+    const s = hist[i];
+    if(s.date >= before) continue;
+    if(s.date < oldest) break;
+    return { date:new Date(s.date), done:s.done, total:s.total, kg:s.kg };
+  }
+  return null;
+}
+
+/* 重量標籤的內容只由這裡產生。原本升重時是去改 span 裡的文字節點，
+   但第一個節點其實是排版用的換行空白 —— 結果變成
+   「38.5kg · 6-10 36kg · 6-10 +2.5kg ▲」兩份重量疊在一起，
+   撤銷後還把可點擊修改的那個 span 整個蓋掉。 */
+function weightLabelHtml(ex, dateStr){
+  const kg = displayKg(ex, dateStr);
+  const inc = parseFloat(lsGet(bumpKey(dateStr, ex.id), '')) || 0;
+  return `<span class="ex-weight-display" data-edit-weight="${escapeHtml(ex.id)}" role="button" tabindex="0"
+      title="點擊修改重量" aria-label="${escapeHtml(ex.name)} 重量 ${kg} 公斤，點擊修改">${kg}kg</span> · ${escapeHtml(ex.reps)}`
+    + (inc > 0 ? ` <span class="bump-badge" title="全部組數達上限，下次 ${roundKg(kg + inc)}kg">+${inc}kg ▲</span>` : '');
+}
+
+function setAriaLabel(ex, n, state){
+  const s = state === '2' ? '達上限' : state === '1' ? '完成' : '未完成';
+  return `${escapeHtml(ex.name)} 第 ${n} 組：${s}`;
+}
+
+/* 休息日不是空白頁：恢復本身就是計畫的一部分。
+   原本只有一行「目標：走路 8000 步 · 睡滿 6.5hr+ · 水 2500ml」，
+   現在變成可以打勾的清單，每天分開存。 */
+const RECOVERY = [
+  { id:'walk',  label:'走路 8000 步',  hint:'低強度活動，幫助血液循環與恢復' },
+  { id:'sleep', label:'睡滿 6.5 小時', hint:'未滿 6 小時，隔天重量 −10%' },
+  { id:'water', label:'喝水 2500ml',   hint:'脫水 2% 力量就會明顯下降' },
+];
+function recoveryKey(dateStr, id){ return `recomp_rest_${dateStr}_${id}`; }
+
+/* 一組一格的進度條；休息日則是三項恢復目標 */
+function renderSessionBar(plan, dateStr){
+  const bar = document.getElementById('sessionBar');
+  const count = document.getElementById('dpSessionCount');
+  if(!bar || !count) return;
+  if(!isTrainDay(plan.train)){
+    const states = RECOVERY.map(r => lsGet(recoveryKey(dateStr, r.id), '0') === '1');
+    bar.innerHTML = `<div class="sb-group" style="flex:1">${states.map(on =>
+      `<i class="sb-seg${on ? ' is-done' : ''}"></i>`).join('')}</div>`;
+    count.innerHTML = `<b>${states.filter(Boolean).length}</b>/${RECOVERY.length} 項`;
+    return;
+  }
+  let done = 0, total = 0;
+  bar.innerHTML = WORKOUTS[plan.train].map(ex => {
+    let segs = '';
+    for(let s = 1; s <= ex.sets; s++){
+      const v = lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0');
+      total++; if(v !== '0') done++;
+      segs += `<i class="sb-seg${v === '2' ? ' is-cap' : v === '1' ? ' is-done' : ''}"></i>`;
     }
-    if(done === 0) continue;
-    /* 重量沒有逐日存檔，但可以還原：起始重量 + 那天為止的升重次數 × 增量
-       （週報的升重清單用的也是同一套算法） */
-    const kg = +(ex.kg + countExerciseBumpsUntil(ex, cursor) * getIncrement(ex.id)).toFixed(1);
-    return { date:new Date(cursor), done, total:ex.sets, kg };
+    return `<div class="sb-group" style="flex:${ex.sets}">${segs}</div>`;
+  }).join('');
+  count.innerHTML = `<b>${done}</b>/${total} 組`;
+}
+
+function nextTrainingAfter(dateObj){
+  const cur = atNoon(dateObj);
+  for(let i = 1; i <= 14; i++){
+    cur.setDate(cur.getDate() + 1);
+    const p = getPlanForDate(cur);
+    if(isTrainDay(p.train)) return { d:new Date(cur), plan:p };
   }
   return null;
 }
@@ -3562,18 +4539,35 @@ function findLastPerformance(ex, beforeDateStr, trainType){
 function renderWorkoutSection(plan, dateStr){
   const workoutLabel = document.getElementById('dpWorkoutLabel');
   const workoutDiv = document.getElementById('dpWorkout');
+  renderSessionBar(plan, dateStr);
 
-  if(plan.train === '休'){
+  if(!isTrainDay(plan.train)){
     workoutLabel.textContent = '休息 · 恢復';
-    workoutDiv.innerHTML = `<div style="font-size:13px;color:var(--concrete)">
-      休息日。不做重訓。<br>目標：走路 8000 步 · 睡滿 6.5hr+ · 水 2500ml
-    </div>`;
+    const [y,m,d] = dateStr.split('-').map(Number);
+    const next = nextTrainingAfter(new Date(y, m-1, d));
+    const nextList = next ? WORKOUTS[next.plan.train] : null;
+    workoutDiv.innerHTML = `
+      <p class="rest-lead">今天不做重訓。肌肉是在休息的時候長出來的 —— 把恢復做好，下一次才推得動。</p>
+      <div class="recovery-list">${RECOVERY.map((r, i) => {
+        const on = lsGet(recoveryKey(dateStr, r.id), '0') === '1';
+        return `<button type="button" class="recovery-item${on ? ' is-done' : ''}" data-recovery="${r.id}"
+            aria-pressed="${on}" style="--i:${i}">
+          <span class="recovery-check">${CHECK_SVG}</span>
+          <span class="recovery-text"><b>${escapeHtml(r.label)}</b><span>${escapeHtml(r.hint)}</span></span>
+        </button>`;
+      }).join('')}</div>
+      ${next ? `<button type="button" class="rest-next" data-goto="${formatDateStr(next.d)}">
+        <span class="kicker">下次訓練 · ${WDAYS[next.d.getDay()]} ${fmtMD(next.d)}</span>
+        <span class="rest-next-title">${escapeHtml(getTrainText(next.plan.train))}</span>
+        <span class="rest-next-meta mono-num">${nextList.length} 個動作 · ${nextList.reduce((s, ex) => s + ex.sets, 0)} 組 · 約 ${estimateMinutes(nextList)} 分鐘 →</span>
+      </button>` : ''}`;
     return;
   }
 
   workoutLabel.textContent = `訓練 · ${getTrainText(plan.train)}`;
-    /* makeup reminder */
-  const reminders = findMakeupReminders(new Date(dateStr.split('-')[0], dateStr.split('-')[1]-1, dateStr.split('-')[2]));
+  /* makeup reminder */
+  const [yy, mm, dd] = dateStr.split('-').map(Number);
+  const reminders = findMakeupReminders(new Date(yy, mm-1, dd));
   let makeupHtml = '';
   if(reminders.length > 0){
     const r = reminders[0];
@@ -3584,40 +4578,144 @@ function renderWorkoutSection(plan, dateStr){
       <span class="muted">建議今天優先補回這些動作</span>
     </div>`;
   }
-    const list = WORKOUTS[plan.train];
+  const list = WORKOUTS[plan.train];
 
-    workoutDiv.innerHTML = makeupHtml + list.map(ex => {
-    const liveKg = getExerciseWeight(ex);
+  workoutDiv.innerHTML = makeupHtml + list.map((ex, i) => {
+    const id = escapeHtml(ex.id);
+    const liveKg = displayKg(ex, dateStr);
+    let done = 0;
     const setsHtml = Array.from({length: ex.sets}, (_, s) => {
       const k = `recomp_set_id_${dateStr}_${ex.id}_${s+1}`;
       const state = lsGet(k, '0');
+      if(state !== '0') done++;
       const cls = state === '2' ? 'done cap' : state === '1' ? 'done' : '';
-      return `<button type="button" class="set-check ${cls}" data-k="${k}" data-exid="${escapeHtml(ex.id)}" aria-label="第 ${s+1} 組"></button>`;
+      return `<button type="button" class="set-check ${cls}" data-k="${k}" data-exid="${id}" data-set="${s+1}"
+        aria-label="${setAriaLabel(ex, s+1, state)}">${CHECK_SVG}<span class="set-n">${s+1}</span></button>`;
     }).join('');
 
-    return `<div class="ex-row" data-ex-row="${escapeHtml(ex.id)}">
-      <div class="ex-checks">${setsHtml}</div>
-      <div class="ex-info">
-<div class="ex-name">${escapeHtml(ex.name)}
-          <span class="mono-num ex-weight-label weight-display" data-ex-weight="${escapeHtml(ex.id)}">
-            <span class="ex-weight-display" data-edit-weight="${escapeHtml(ex.id)}" title="點擊修改重量">${liveKg}kg</span> · ${ex.reps}
-          </span>
-        </div>
-        ${(() => {
-          const prev = findLastPerformance(ex, dateStr, plan.train);
-          if(!prev) return '';
-          const md = `${prev.date.getMonth()+1}/${prev.date.getDate()}`;
-          const kgText = `${prev.kg}kg`;
-          const better = liveKg > prev.kg;
-          return `<div class="ex-last${better ? ' is-better' : ''}">上次 ${md} · ${kgText} · ${prev.done}/${prev.total} 組${better ? ' ↑' : ''}</div>`;
-        })()}
-        ${ex.note ? `<div class="ex-note">${escapeHtml(ex.note)}</div>` : ''}
+    const prev = findLastPerformance(ex, dateStr, plan.train);
+    let lastHtml = '';
+    if(prev){
+      const better = liveKg > prev.kg;
+      lastHtml = `<div class="ex-last${better ? ' is-better' : ''}">上次 ${prev.date.getMonth()+1}/${prev.date.getDate()}<br>
+        <b>${prev.kg}kg</b> · ${prev.done}/${prev.total}${better ? ' ↑' : ''}</div>`;
+    }
+
+    return `<div class="ex-row${done === ex.sets ? ' is-complete' : ''}" data-ex-row="${id}" style="--i:${i}">
+      <div class="ex-name">${escapeHtml(ex.name)}<i class="ph ph-check-circle ex-done" aria-hidden="true"></i></div>
+      <div class="ex-sub">
+        <span class="mono-num ex-weight-label weight-display" data-ex-weight="${id}">${weightLabelHtml(ex, dateStr)}</span>
+        ${ex.note ? `<span class="ex-note">${escapeHtml(ex.note)}</span>` : ''}
+      </div>
+      <div class="ex-body">
+        <div class="ex-checks">${setsHtml}</div>
+        ${lastHtml}
       </div>
     </div>`;
   }).join('') +
-  `<div class="ex-hint">點兩下變紅 = 達上限，全紅自動加重 · 點重量數字可手動調整</div>` +   `<button type="button" id="exportTrainCardBtn" class="btn" style="width:100%;margin-top:12px">     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）   </button>`;
+  `<div class="ex-hint">點一下 = 完成，再點一下 = 達到次數上限（紅）<br>同一個動作全部紅色 → 下次自動加重 · 點重量數字可以修改</div>
+   <button type="button" id="exportTrainCardBtn" class="btn" style="width:100%">
+     <i class="ph ph-share-network icon" aria-hidden="true"></i>匯出今日訓練卡（社群打卡）
+   </button>`;
 }
 
+/* 目前這一天的下一個還沒做的組，用在計時器上：「下一組 · 蝴蝶機 第 2 組」 */
+function nextPendingSet(plan, dateStr){
+  if(!isTrainDay(plan.train)) return null;
+  for(const ex of WORKOUTS[plan.train]){
+    for(let s = 1; s <= ex.sets; s++){
+      if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${s}`, '0') === '0') return { ex, n:s };
+    }
+  }
+  return null;
+}
+
+/* 換日：帶一點方向感的滑動 */
+function goToDate(d, dir){
+  selectDate(d);
+  const inner = document.querySelector('#screenToday .screen-inner');
+  if(inner && dir){
+    inner.classList.remove('slide-next', 'slide-prev');
+    void inner.offsetWidth;
+    inner.classList.add(dir > 0 ? 'slide-next' : 'slide-prev');
+  }
+}
+
+/* ══════════════════════════════════════════════
+   訓練完成
+   最後一組打下去的那一刻，值得一個畫面。
+   刻意做成純排版：一條紅色色塊掃過去、大字、數字 ——
+   跟整個 app 一樣，不用彩帶也不用表情符號。
+   ══════════════════════════════════════════════ */
+let _finishDate = null;
+const _finishShown = new Set();
+function showFinish(dateStr){
+  const layer = document.getElementById('finishLayer');
+  if(!layer) return;
+  const [y,m,d] = dateStr.split('-').map(Number);
+  const dateObj = new Date(y, m-1, d, 12);
+  const plan = getPlanForDate(dateObj);
+  if(!isTrainDay(plan.train)) return;
+  _finishDate = dateStr;
+
+  const list = WORKOUTS[plan.train];
+  let sets = 0, total = 0, vol = 0;
+  const bumps = [];
+  list.forEach(ex => {
+    const n = setsDoneFor(ex, dateStr);
+    const kg = displayKg(ex, dateStr);
+    sets += n; total += ex.sets; vol += kg * n;
+    const inc = parseFloat(lsGet(bumpKey(dateStr, ex.id), '')) || 0;
+    if(inc > 0) bumps.push({ name:ex.name, from:kg, to:roundKg(kg + inc) });
+  });
+
+  const mon = mondayOf(dateObj);
+  let wDone = 0, wTotal = 0;
+  for(let i = 0; i < 7; i++){
+    const x = new Date(mon); x.setDate(mon.getDate() + i);
+    const c = dayCompletion(x);
+    if(c.total){ wTotal++; if(c.done === c.total) wDone++; }
+  }
+
+  document.getElementById('finishLetter').textContent = plan.train;
+  document.getElementById('finishKicker').textContent =
+    `${WDAYS[dateObj.getDay()]} ${fmtMD(dateObj)} · ${getTrainText(plan.train)}`;
+  document.getElementById('finishSetsTotal').textContent = `/${total} 組`;
+  document.getElementById('finishStats').innerHTML = `
+    <div><span class="stat-cell-label">訓練量</span><b>${fmtVol(vol)}</b></div>
+    <div><span class="stat-cell-label">升重</span><b>${bumps.length} 項</b></div>
+    <div><span class="stat-cell-label">本週</span><b>${wDone}/${wTotal} 天</b></div>`;
+  document.getElementById('finishBumps').innerHTML = bumps.map(b => `
+    <div class="finish-bump"><span>▲ ${escapeHtml(b.name)}</span><b>${b.from} → ${b.to}kg</b></div>`).join('');
+
+  layer.hidden = false;
+  document.body.style.overflow = 'hidden';
+  haptic([40, 60, 40, 60, 140]);
+
+  /* 組數從 0 數上來 */
+  const numEl = document.getElementById('finishSets');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduce){ numEl.textContent = sets; }
+  else{
+    numEl.textContent = '0';
+    const t0 = performance.now() + 450, dur = 700;
+    const tick = now => {
+      const k = Math.min(1, Math.max(0, (now - t0) / dur));
+      numEl.textContent = Math.round(sets * (1 - Math.pow(1 - k, 3)));
+      if(k < 1 && !layer.hidden) requestAnimationFrame(tick);
+      else numEl.textContent = sets;
+    };
+    requestAnimationFrame(tick);
+  }
+  document.getElementById('finishCloseBtn').focus();
+}
+
+function hideFinish(){
+  const layer = document.getElementById('finishLayer');
+  if(!layer || layer.hidden) return;
+  layer.hidden = true;
+  document.body.style.overflow = '';
+}
 
 
 function prefillBwInputs(){
@@ -3640,7 +4738,10 @@ function prefillBwInputs(){
 }
 
 function refreshChestWeightStat(){
-  const chestEx = WORKOUTS.A.find(ex => ex.id === 'chest_press');
+  /* 「胸推目標 50kg」是原版計畫的個人目標，換了課表就不顯示 */
+  const chestEx = allExercises().find(ex => ex.id === 'chest_press');
+  const chestCard = document.getElementById('chestProgressCard');
+  if(chestCard) chestCard.hidden = !chestEx;
   if(!chestEx) return;
   const kg = getExerciseWeight(chestEx);
   const numEl = document.getElementById('chestWeightNum');
@@ -3670,16 +4771,17 @@ function computeWeeklyReport(offset){
     const dateStr = formatDateStr(d);
     const fullyTrained = isDayFullyTrained(dateStr, plan.train);
     const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
-    const exerciseText = plan.train === '休'
+    const exerciseText = !isTrainDay(plan.train)
       ? '休息 / 恢復'
       : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
 
-    if(plan.train !== '休') trainPlanned++;
+    if(isTrainDay(plan.train)) trainPlanned++;
     if(fullyTrained) trainDone++;
 
-    if(plan.train !== '休'){
+    if(isTrainDay(plan.train)){
       WORKOUTS[plan.train].forEach(ex => {
-        const kg = getExerciseWeight(ex);
+        /* 用那一天實際的重量；原本拿「現在的重量」乘，回頭看舊週報數字會一直變 */
+        const kg = displayKg(ex, dateStr);
         for(let n = 1; n <= ex.sets; n++){
           setsPlanned++;
           if(lsGet(`recomp_set_id_${dateStr}_${ex.id}_${n}`, '0') !== '0'){
@@ -3711,20 +4813,21 @@ function computeWeeklyReport(offset){
     bwSummary = `${first.w} → ${last.w}kg（${sign}${bwDelta}kg）`;
   }
 
-  const dayBeforeStart = atNoon(new Date(start));
-  dayBeforeStart.setDate(dayBeforeStart.getDate() - 1);
+  const dayAfterEnd = atNoon(new Date(end));
+  dayAfterEnd.setDate(dayAfterEnd.getDate() + 1);
 
   const exercisesThisWeek = new Map();
   days.forEach(day => {
-    if(day.plan.train === 'A' || day.plan.train === 'B'){
+    if(isTrainDay(day.plan.train)){
       WORKOUTS[day.plan.train].forEach(ex => exercisesThisWeek.set(ex.id, ex));
     }
   });
 
   const weightChanges = [];
   exercisesThisWeek.forEach(ex => {
-    const before = +(ex.kg + countExerciseBumpsUntil(ex, dayBeforeStart) * 2.5).toFixed(1);
-    const after = +(ex.kg + countExerciseBumpsUntil(ex, end) * 2.5).toFixed(1);
+    /* 週一生效的重量 vs 週日練完之後的重量（原本增量寫死 2.5） */
+    const before = weightOn(ex, start);
+    const after = weightOn(ex, dayAfterEnd);
     if(after > before){
       weightChanges.push({ id: ex.id, name: ex.name, before, after });
     }
@@ -3772,7 +4875,7 @@ function renderWeeklyReport(offset){
   const newerBtn = document.getElementById('weeklyNewerBtn');
 
   title.textContent = `${weekLabelFromOffset(offset)} · 訓練週報`;
-  range.textContent = `${formatDateStrPad(r.start)} → ${formatDateStrPad(r.end)} · Mon–Sun`;
+  range.textContent = `${fmtMD(r.start)} – ${fmtMD(r.end)}`;
   newerBtn.disabled = offset >= 0;
 
   const weightChangeHtml = r.weightChanges.length
@@ -3793,7 +4896,7 @@ function renderWeeklyReport(offset){
       </div>
       <div style="font-size:12px;line-height:1.6;margin-top:8px">${escapeHtml(day.exerciseText)}</div>
       <div class="search-tags">
-        ${day.plan.train === '休' ? '' : (day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`)}
+        ${!isTrainDay(day.plan.train) ? '' : (day.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : `<span class="search-tag">訓練未滿</span>`)}
         ${bwTag}
       </div>
     </button>`;
@@ -3835,7 +4938,7 @@ function renderWeeklyReport(offset){
    ══════════════════════════════════════════════ */
 function findMakeupReminders(dateObj){
   const plan = getPlanForDate(dateObj);
-  if(plan.train !== 'A' && plan.train !== 'B') return [];
+  if(!isTrainDay(plan.train)) return [];
 
   const reminders = [];
   const lookback = 14;
@@ -3882,7 +4985,7 @@ function drawTrainingCard(){
 
   const plan = getPlanForDate(selectedDateObj);
   const dateStr = formatDateStr(selectedDateObj);
-  if(plan.train === '休') return null;
+  if(!isTrainDay(plan.train)) return null;
 
   const list = WORKOUTS[plan.train];
 
@@ -3898,9 +5001,8 @@ function drawTrainingCard(){
   if(!ctx) return null;
   ctx.textBaseline = 'top';
 
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark' ||
-    (document.documentElement.getAttribute('data-theme') === 'auto' &&
-     window.matchMedia('(prefers-color-scheme:dark)').matches);
+  /* 「跟隨系統」已在 initTheme 解析成實際的 light / dark */
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
   const bg     = isDark ? '#1a1a1e' : '#F5F3F0';
   const fg     = isDark ? '#e8e4df' : '#141414';
@@ -4023,7 +5125,7 @@ function drawTrainingCard(){
 
   list.forEach((ex, i) => {
     const y = listTop + i * rowH;
-    const liveKg = getExerciseWeight(ex);
+    const liveKg = displayKg(ex, dateStr);
 
     /* 分隔線 */
     if(i > 0){
@@ -4131,7 +5233,7 @@ function drawCalendarToCanvas(){
 
   ctx.font = '13px sans-serif';
   ctx.fillStyle = colors.concrete;
-  ctx.fillText('RECOMP · Training / Meal Calendar Export', padX, 96);
+  ctx.fillText('RECOMP · Training Calendar Export', padX, 96);
 
   const s = computeMonthSummaryData(calYear, calMonth);
   ctx.font = '12px monospace';
@@ -4212,7 +5314,7 @@ function drawCalendarToCanvas(){
     ctx.textAlign = 'left';
 
     /* 該日完成的組數比例，取代原本的 P/kcal/$ */
-    if(plan.train !== '休'){
+    if(isTrainDay(plan.train)){
       const list = WORKOUTS[plan.train];
       let done = 0, tot = 0;
       list.forEach(ex => {
@@ -4257,7 +5359,7 @@ function buildSearchIndex(){
     const trainText = getTrainText(plan.train);
     const fullyTrained = isDayFullyTrained(dateStr, plan.train);
     const bw = getBwEntry(d.getFullYear(), d.getMonth(), d.getDate());
-    const exercises = plan.train === '休'
+    const exercises = !isTrainDay(plan.train)
       ? '休息 / 恢復'
       : WORKOUTS[plan.train].map(ex => ex.name).join(' / ');
 
@@ -4283,11 +5385,9 @@ function runSearch(){
   let results = SEARCH_INDEX.filter(item => {
     if(q && !item.searchText.includes(q)) return false;
     switch(searchFilter){
-      case 'A': return item.plan.train === 'A';
-      case 'B': return item.plan.train === 'B';
-      case 'rest': return item.plan.train === '休';
+      case 'rest': return !isTrainDay(item.plan.train);
       case 'trained': return item.fullyTrained;
-      default: return true;
+      default: return WORKOUTS[searchFilter] ? item.plan.train === searchFilter : true;
     }
   });
 
@@ -4313,7 +5413,6 @@ function runSearch(){
       <div class="search-tags">
         <span class="search-tag">${item.plan.train}</span>
         ${item.fullyTrained ? `<span class="search-tag ok">訓練完成</span>` : ''}
-        ${item.plan.junk ? `<span class="search-tag warn">垃圾食物日</span>` : ''}
         ${bwTag}
       </div>
     </button>`;
@@ -4439,6 +5538,7 @@ const PREFS = {
   vibration:  { key:'recomp_pref_vibration',  label:'震動回饋',      desc:'訓練打勾、升重、體重儲存時震動', default:'1' },
   heatmap:    { key:'recomp_pref_heatmap',    label:'月曆熱力圖',    desc:'依完成度顯示月曆格子底色',       default:'1' },
   exportPreview:{ key:'recomp_pref_export_preview', label:'匯出前預覽', desc:'儲存或分享圖片前先看一次成品', default:'1' },
+  wakeLock:   { key:'recomp_pref_wake_lock',  label:'訓練中螢幕常亮', desc:'開始打勾後螢幕不會自動變暗，練完自動解除', default:'1' },
 };
 const REST_SECONDS = 90;
 
@@ -4472,8 +5572,17 @@ function renderSettings(){
   const info = document.getElementById('settingsVersionInfo');
   if(!list) return;
 
+  /* 訓練計畫 */
+  const codes = Object.keys(WORKOUTS);
+  let html = `<div class="kicker" style="margin-bottom:8px">訓練計畫</div>
+    <button type="button" class="plan-summary" id="planEditBtn">
+      <span><b>${codes.map(c => `${c} ${escapeHtml(WORKOUT_NAMES[c])}`).join(' · ')}</b>
+        <span>每週約 ${daysPerWeek(CYCLE)} 天 · ${allExercises().length} 個動作</span></span>
+      <span class="plan-summary-cta">編輯<i class="ph ph-caret-right" aria-hidden="true"></i></span>
+    </button>`;
+
   /* 偏好開關 */
-  let html = '<div class="kicker" style="margin-bottom:8px">偏好設定</div>';
+  html += '<div class="kicker" style="margin-bottom:8px">偏好設定</div>';
 
   html += Object.entries(PREFS).map(([id, pref]) => {
     const isOn = getPref(id);
@@ -4482,20 +5591,18 @@ function renderSettings(){
         <div class="settings-label">${escapeHtml(pref.label)}</div>
         <div class="settings-desc">${escapeHtml(pref.desc)}</div>
       </div>
-      <div class="settings-toggle">
-        <button type="button" class="btn ${isOn ? '' : 'on'}" data-pref="${id}" data-val="0">關</button>
-        <button type="button" class="btn ${isOn ? 'on' : ''}" data-pref="${id}" data-val="1">開</button>
-      </div>
+      <button type="button" class="switch" role="switch" aria-checked="${isOn}"
+        data-pref="${id}" aria-label="${escapeHtml(pref.label)}"><span class="switch-knob"></span></button>
     </div>`;
   }).join('');
 
   /* 訓練器材加重設定 */
-  const allExercises = [...WORKOUTS.A, ...WORKOUTS.B];
+  const exList = allExercises();
   html += '<div style="margin-top:20px;padding-top:14px;border-top:1px solid var(--line)">';
   html += '<div class="kicker" style="margin-bottom:8px">每次加重量設定</div>';
   html += '<div class="settings-desc" style="margin-bottom:10px">做滿全部組數時，該動作自動增加的重量（kg）</div>';
 
-  html += allExercises.map(ex => {
+  html += exList.map(ex => {
     const inc = getIncrement(ex.id);
     return `<div class="settings-row">
       <div>
@@ -4561,10 +5668,11 @@ function initSettings(){
   }
 });
 document.getElementById('settingsList').addEventListener('click', e => {
+  if(e.target.closest('#planEditBtn')){ closeSettings(); openPlanEditor(); return; }
   const btn = e.target.closest('[data-pref]');
   if(!btn) return;
     const prefId = btn.dataset.pref;
-    const val = btn.dataset.val === '1';
+    const val = btn.dataset.val !== undefined ? btn.dataset.val === '1' : btn.getAttribute('aria-checked') !== 'true';
     setPref(prefId, val);
     renderSettings();
 
@@ -4573,7 +5681,10 @@ document.getElementById('settingsList').addEventListener('click', e => {
       renderCalendar(calYear, calMonth);
       if(selectedDateObj) selectDate(selectedDateObj);
     }
-    if(prefId === 'restTimer' && val === '0') stopRestTimer();
+    /* val 是布林值，原本寫成 val === '0' 永遠不成立，
+       關掉計時器時正在倒數的那個不會消失 */
+    if(prefId === 'restTimer' && !val) stopRestTimer();
+    if(prefId === 'wakeLock') keepAwake(val && sessionInProgress());
   });
 
   /* Escape 關閉 */
@@ -4581,14 +5692,28 @@ document.getElementById('settingsList').addEventListener('click', e => {
     if(e.key === 'Escape' && modal.classList.contains('show')) closeSettings();
   });
 }
+/* 'v3.10.0' 與 'v3.9.2' 逐段比數字；字串比較會把 3.10 排在 3.9 前面 */
+function compareVersions(a, b){
+  const pa = String(a).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+  const pb = String(b).replace(/^v/i, '').split('.').map(n => parseInt(n, 10) || 0);
+  for(let i = 0; i < Math.max(pa.length, pb.length); i++){
+    const d = (pa[i] || 0) - (pb[i] || 0);
+    if(d) return d > 0 ? 1 : -1;
+  }
+  return 0;
+}
+
 function checkRemoteVersion(){
   fetch('./version.json?t=' + Date.now(), { cache:'no-store' })
     .then(res => res.ok ? res.json() : null)
     .then(data => {
       if(!data || !data.version) return;
 
-      /* 版本相同就什麼都不做，並清掉重整記號 */
-      if(data.version === APP_VERSION){
+      /* 伺服器上的版本不比這台新，就什麼都不做，並清掉重整記號。
+         原本只判斷「不相等」—— v3.2.0 上線時 version.json 忘了改，還停在 v3.1.0，
+         結果每次打開都跳「有新版本 v3.1.0」，按下去還會把 SW 與快取整個清掉。
+         只有「真的比較新」才值得打擾使用者。 */
+      if(compareVersions(data.version, APP_VERSION) <= 0){
         try{ localStorage.removeItem('rcmeta_reloadedFor'); }catch(e){}
         return;
       }
@@ -4666,6 +5791,8 @@ function showVersionUpdateBanner(remoteVer, stuck){
    INIT & EVENT LISTENERS
    ══════════════════════════════════════════════ */
 function initApp(){
+  /* 課表要在任何畫面算出來之前就載入 */
+  loadPlan.initial = loadPlan();
   /* ── Theme ── */
 (function initTheme(){
   const THEME_KEY = 'recomp_theme';
@@ -4680,8 +5807,24 @@ function initApp(){
     return lsGet(THEME_KEY, 'auto');
   }
 
+  /* 「跟隨系統」在套用前先解析成實際的 light / dark。
+     原本直接把 data-theme 設成 auto，但深色樣式有 72 條寫在
+     [data-theme="dark"] 底下、auto 版只補了 8 條 —— 系統深色時
+     月曆的非本月格子還是米白色、A/B/休 標籤是白色方塊。
+     而 auto 是預設值，等於所有深色模式手機的使用者都看到半套深色。
+     解析之後兩種路徑共用同一份樣式，不必再維護兩套。 */
+  const darkMq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+  function resolveTheme(mode){
+    if(mode === 'dark' || mode === 'light') return mode;
+    return darkMq && darkMq.matches ? 'dark' : 'light';
+  }
+
   function applyTheme(mode){
-    html.setAttribute('data-theme', mode);
+    html.setAttribute('data-theme', resolveTheme(mode));
+    html.dataset.themePref = mode;
+    /* 瀏覽器頂端的顏色跟著主題走（原本固定是紅色，跟米白色的畫面接不起來） */
+    const meta = document.getElementById('themeColorMeta');
+    if(meta) meta.setAttribute('content', resolveTheme(mode) === 'dark' ? '#1a1a1e' : '#F5F3F0');
     if(btn){
       btn.innerHTML = `<i class="ph ${icons[mode] || 'ph-monitor'} icon" aria-hidden="true"></i>`;
       btn.title = labels[mode] || '';
@@ -4701,6 +5844,12 @@ function initApp(){
   if(btn){
     btn.addEventListener('click', cycleTheme);
   }
+  /* 系統在 app 開著的時候切換深淺色（例如日落自動切換），跟著換 */
+  if(darkMq){
+    const onSystemChange = () => { if(getStored() === 'auto') applyTheme('auto'); };
+    if(darkMq.addEventListener) darkMq.addEventListener('change', onSystemChange);
+    else if(darkMq.addListener) darkMq.addListener(onSystemChange);
+  }
 })();
   migrateLegacyExerciseKeys();
   migrateSchema();
@@ -4708,13 +5857,20 @@ function initApp(){
   const calGrid = document.getElementById('calGrid');
   const weeklyModal = document.getElementById('weeklyModal');
   const exportCalModal = document.getElementById('exportCalModal');
-  const drawer = document.getElementById('orderDrawer');
   const searchDrawer = document.getElementById('searchDrawer');
   const backdrop = document.getElementById('drawerBackdrop');
 
+  /* 點餐抽屜（orderDrawer）隨餐點功能一起移除了，這裡卻還在讀它的 classList，
+     於是一打開搜尋就丟 TypeError：抽屜滑出來了，但索引沒建、結果永遠是空的，
+     畫面上方還多一條紅色錯誤列。 */
   function syncBackdrop(){
-    backdrop.classList.toggle('show', drawer.classList.contains('open') || searchDrawer.classList.contains('open'));
+    backdrop.classList.toggle('show', searchDrawer.classList.contains('open'));
   }
+  /* 背景遮罩本來就會攔截點擊（pointer-events:auto），卻沒有對應的處理，
+     點抽屜外面沒有任何反應。行動裝置上點外面關閉是預期行為。 */
+  backdrop.addEventListener('click', () => {
+    if(searchDrawer.classList.contains('open')) closeSearchDrawer();
+  });
 
 
 
@@ -4792,44 +5948,76 @@ function initApp(){
 
   document.getElementById('dpPrev').addEventListener('click', () => {
     if(!selectedDateObj) return;
-    const d = new Date(selectedDateObj); d.setDate(d.getDate() - 1); selectDate(d);
+    const d = new Date(selectedDateObj); d.setDate(d.getDate() - 1); goToDate(d, -1);
   });
   document.getElementById('dpNext').addEventListener('click', () => {
     if(!selectedDateObj) return;
-    const d = new Date(selectedDateObj); d.setDate(d.getDate() + 1); selectDate(d);
+    const d = new Date(selectedDateObj); d.setDate(d.getDate() + 1); goToDate(d, 1);
   });
-/* ── Editable weight — click to edit ── */
-document.getElementById('dpWorkout').addEventListener('click', e => {
-  const weightSpan = e.target.closest('[data-edit-weight]');
-  if(!weightSpan) return;
 
+  /* 左右滑動換日：單手拿手機、另一手還握著把手的時候，
+     比伸到螢幕上方點箭頭容易得多 */
+  (function initSwipe(){
+    const screen = document.getElementById('screenToday');
+    let sx = 0, sy = 0, st = 0, tracking = false;
+    screen.addEventListener('touchstart', e => {
+      if(e.touches.length !== 1 || e.target.closest('input, .ex-weight-display, .bw-svg')) { tracking = false; return; }
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; st = Date.now(); tracking = true;
+    }, { passive:true });
+    screen.addEventListener('touchend', e => {
+      if(!tracking || !selectedDateObj) return;
+      tracking = false;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - sx, dy = t.clientY - sy;
+      if(Math.abs(dx) < 70 || Math.abs(dy) > Math.abs(dx) * 0.6 || Date.now() - st > 600) return;
+      const d = new Date(selectedDateObj);
+      d.setDate(d.getDate() + (dx < 0 ? 1 : -1));
+      goToDate(d, dx < 0 ? 1 : -1);
+    }, { passive:true });
+  })();
+/* ── Editable weight — click to edit ──
+   今天 / 未來：改的是「現在的重量」（今天有打勾的話，順便更正今天的紀錄）
+   過去：改的只有那一天的紀錄 —— 補登或更正歷史，不該動到今天要用的重量 */
+function beginWeightEdit(weightSpan){
   /* 如果已經在編輯中，不重複觸發 */
-  if(weightSpan.querySelector('.ex-weight-input')) return;
+  if(weightSpan.querySelector('.ex-weight-input') || !selectedDateObj) return;
 
-  const exId = weightSpan.dataset.editWeight;
-  const ex = [...WORKOUTS.A, ...WORKOUTS.B].find(x => x.id === exId);
+  const ex = exerciseById(weightSpan.dataset.editWeight);
   if(!ex) return;
 
-  const currentKg = getExerciseWeight(ex);
+  const dateStr = formatDateStr(selectedDateObj);
+  const isPast = atNoon(selectedDateObj) < atNoon(new Date());
+  const shownKg = displayKg(ex, dateStr);
+  const row = weightSpan.closest('[data-ex-row]');
+  const label = row && row.querySelector('[data-ex-weight]');
+  const restore = () => { if(label) label.innerHTML = weightLabelHtml(ex, dateStr); };
 
-  /* 替換成 input */
-  const originalHtml = weightSpan.innerHTML;
-  weightSpan.innerHTML = `<input type="number" class="ex-weight-input" value="${currentKg}" step="0.5" min="0" max="500">`;
-
+  weightSpan.innerHTML = `<input type="number" class="ex-weight-input" value="${shownKg}" step="0.5" min="0" max="500" inputmode="decimal" aria-label="${escapeHtml(ex.name)} 重量">`;
   const input = weightSpan.querySelector('.ex-weight-input');
   input.focus();
   input.select();
 
   function save(){
     const newKg = parseFloat(input.value);
-    if(!isNaN(newKg) && newKg >= 0 && newKg <= 500){
-      setExerciseWeight(ex, newKg);
-      weightSpan.innerHTML = `${newKg}kg`;
-      refreshChestWeightStat();
-      if(getPref('vibration') && navigator.vibrate) navigator.vibrate(25);
+    if(isNaN(newKg) || newKg < 0 || newKg > 500 || newKg === shownKg){ restore(); return; }
+    const newKgR = roundKg(newKg);
+    const doneToday = setsDoneFor(ex, dateStr);
+
+    if(isPast){
+      lsSet(logKey(dateStr, ex.id), String(newKgR));
+      flashToast(`已更正 ${selectedDateObj.getMonth()+1}/${selectedDateObj.getDate()} 的紀錄`);
     }else{
-      weightSpan.innerHTML = `${currentKg}kg`;
+      /* 今天已經升過重的話，下次的重量 = 今天實際用的 + 升重量 */
+      const inc = parseFloat(lsGet(bumpKey(dateStr, ex.id), '')) || 0;
+      if(doneToday > 0) lsSet(logKey(dateStr, ex.id), String(newKgR));
+      setExerciseWeight(ex, roundKg(newKgR + (doneToday > 0 ? inc : 0)));
     }
+    invalidateHistory();
+    restore();
+    refreshChestWeightStat();
+    refreshWeeklyIfOpen();
+    refreshProgressIfOpen();
+    haptic(25);
   }
 
   input.addEventListener('blur', save, { once:true });
@@ -4840,14 +6028,45 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     }
     if(e2.key === 'Escape'){
       e2.preventDefault();
+      e2.stopPropagation();
       input.removeEventListener('blur', save);
-      weightSpan.innerHTML = `${currentKg}kg`;
+      restore();
     }
   });
+}
+document.getElementById('dpWorkout').addEventListener('click', e => {
+  const weightSpan = e.target.closest('[data-edit-weight]');
+  if(weightSpan) beginWeightEdit(weightSpan);
 });
+document.getElementById('dpWorkout').addEventListener('keydown', e => {
+  if(e.key !== 'Enter' && e.key !== ' ') return;
+  const weightSpan = e.target.closest('[data-edit-weight]');
+  if(!weightSpan || e.target.classList.contains('ex-weight-input')) return;
+  e.preventDefault();
+  beginWeightEdit(weightSpan);
+});
+
+  /* ── 組數打勾 ──
+     升重的規則是「全部組數達上限 → 加重一次」。原本每次「變成全紅」都會加，
+     點錯一格再點回來（紅 → 空 → 完成 → 紅）就又加一次：36 → 38.5 → 41，
+     而且沒有任何提示。現在：
+     · 同一天同一個動作只會升一次（recomp_bump_ 標記）
+     · 從全紅退回來 → 收回那次升重，重量跟著打勾狀態走 */
   document.getElementById('dpWorkout').addEventListener('click', e => {
     const btn = e.target.closest('.set-check');
-    if(!btn) return;
+    if(!btn || !selectedDateObj) return;
+
+    const ex = exerciseById(btn.dataset.exid);
+    const row = btn.closest('[data-ex-row]');
+    if(!ex || !row) return;
+    const dateStr = formatDateStr(selectedDateObj);
+    const checks = Array.from(row.querySelectorAll('.set-check'));
+    const states = () => checks.map(c => lsGet(c.dataset.k, '0'));
+
+    const before = states();
+    const wasAllCapped = before.every(v => v === '2');
+    const kgForDay = displayKg(ex, dateStr);
+    const dayBefore = dayCompletion(selectedDateObj);
 
     const k = btn.dataset.k;
     const current = lsGet(k, '0');
@@ -4855,60 +6074,89 @@ document.getElementById('dpWorkout').addEventListener('click', e => {
     lsSet(k, next);
     btn.classList.toggle('done', next !== '0');
     btn.classList.toggle('cap', next === '2');
-    if(getPref('vibration') && navigator.vibrate) navigator.vibrate(next === '2' ? [30, 30, 30] : 25);
-    /* 剛打完一組（不是取消）就開始倒數 */
-    if(next !== '0') startRestTimer(REST_SECONDS);
-    else stopRestTimer();
-    _bumpCountCache.clear();
+    btn.setAttribute('aria-label', setAriaLabel(ex, +btn.dataset.set || 1, next));
+    if(next !== '0'){ btn.classList.remove('pop'); void btn.offsetWidth; btn.classList.add('pop'); }
+    haptic(next === '2' ? [30, 30, 30] : 25);
+    const plan = getPlanForDate(selectedDateObj);
+
+    const after = states();
+    const isAllCapped = after.every(v => v === '2');
+    const doneAfter = after.filter(v => v !== '0').length;
+
+    /* 這一天用的重量：打第一組時記下來；全部取消就當作沒練 */
+    if(doneAfter > 0 && lsGet(logKey(dateStr, ex.id), null) === null){
+      lsSet(logKey(dateStr, ex.id), String(kgForDay));
+    }
+    if(doneAfter === 0) lsRemove(logKey(dateStr, ex.id));
+
+    let bumped = 0, revoked = 0;
+    const marker = lsGet(bumpKey(dateStr, ex.id), null);
+    if(!wasAllCapped && isAllCapped && marker === null){
+      bumped = getIncrement(ex.id);
+      setExerciseWeight(ex, roundKg(getExerciseWeight(ex) + bumped));
+      lsSet(bumpKey(dateStr, ex.id), String(bumped));
+    }else if(wasAllCapped && !isAllCapped && marker !== null){
+      revoked = parseFloat(marker) || 0;
+      if(revoked > 0) setExerciseWeight(ex, roundKg(Math.max(0, getExerciseWeight(ex) - revoked)));
+      lsRemove(bumpKey(dateStr, ex.id));
+    }
+
+    invalidateHistory();
     renderMonthSummary();
     renderWeekProgress();
     refreshWeeklyIfOpen();
     refreshSearchIfOpen();
+    refreshProgressIfOpen();
 
-    const exId = btn.dataset.exid;
-    const row = btn.closest('[data-ex-row]');
-    if(!row || !exId) return;
+    const label = row.querySelector('[data-ex-weight]');
+    if(label) label.innerHTML = weightLabelHtml(ex, dateStr);
+    row.classList.toggle('is-complete', doneAfter === ex.sets);
+    renderSessionBar(plan, dateStr);
 
-    const allChecks = row.querySelectorAll('.set-check');
-    const allCapped = allChecks.length > 0 && Array.from(allChecks).every(c => lsGet(c.dataset.k, '0') === '2');
-
-    if(allCapped){
-      const ex = [...WORKOUTS.A, ...WORKOUTS.B].find(x => x.id === exId);
-      if(!ex) return;
-
-      const prevKg = getExerciseWeight(ex);
-      const bumpedKg = +(prevKg + getIncrement(exId)).toFixed(1);
-      setExerciseWeight(ex, bumpedKg);
-
-      const weightSpan = row.querySelector('[data-ex-weight]');
-      if(weightSpan){
-        weightSpan.querySelectorAll('.bump-badge,.bump-undo').forEach(el => el.remove());
-        const textNode = weightSpan.firstChild;
-        if(textNode && textNode.nodeType === Node.TEXT_NODE) textNode.textContent = ` ${bumpedKg}kg · ${ex.reps} `;
-        else weightSpan.prepend(document.createTextNode(` ${bumpedKg}kg · ${ex.reps} `));
-
-        const badge = document.createElement('span');
-        badge.className = 'bump-badge'; 
-        badge.textContent = `+${getIncrement(exId)}kg ▲`;
-        if(getPref('vibration') && navigator.vibrate) navigator.vibrate([50, 50, 100]);
-        weightSpan.append(badge);
-
-        const undoBtn = document.createElement('button');
-        undoBtn.type = 'button'; undoBtn.className = 'bump-undo'; undoBtn.textContent = '撤銷';
-        weightSpan.append(undoBtn);
-
-        const undoTimer = setTimeout(() => undoBtn.remove(), 10000);
-        undoBtn.addEventListener('click', () => {
-          clearTimeout(undoTimer);
-          setExerciseWeight(ex, prevKg);
-          weightSpan.innerHTML = ` ${prevKg}kg · ${ex.reps}`;
-          _bumpCountCache.clear();
-          refreshChestWeightStat();
-          refreshWeeklyIfOpen();
-        }, { once:true });
+    /* 剛打完一組（不是取消）就開始倒數，並告訴你下一組是什麼；
+       最後一組打完 → 不用倒數了，直接進完成畫面 */
+    const dayAfter = dayCompletion(selectedDateObj);
+    keepAwake(sessionInProgress());
+    if(next === '0') stopRestTimer();
+    else if(dayAfter.total && dayAfter.done === dayAfter.total){
+      stopRestTimer();
+      /* 同一天只慶祝一次：點錯一格再改回來，不該再跳一次 */
+      if(dayBefore.done < dayBefore.total && !_finishShown.has(dateStr)){
+        _finishShown.add(dateStr);
+        setTimeout(() => showFinish(dateStr), 420);
       }
+    }else{
+      const np = nextPendingSet(plan, dateStr);
+      startRestTimer(REST_SECONDS, np);
+    }
+
+    if(revoked > 0){
       refreshChestWeightStat();
-      refreshWeeklyIfOpen();
+      flashToast(`已收回升重 · ${ex.name} 回到 ${getExerciseWeight(ex)}kg`);
+    }
+    if(bumped > 0 && label){
+      haptic([50, 50, 100]);
+      const badge = label.querySelector('.bump-badge');
+      if(badge) badge.classList.add('is-new');
+
+      const undoBtn = document.createElement('button');
+      undoBtn.type = 'button'; undoBtn.className = 'bump-undo'; undoBtn.textContent = '撤銷';
+      label.append(undoBtn);
+      const undoTimer = setTimeout(() => undoBtn.remove(), 10000);
+      undoBtn.addEventListener('click', ev => {
+        ev.stopPropagation();
+        clearTimeout(undoTimer);
+        const inc = parseFloat(lsGet(bumpKey(dateStr, ex.id), '')) || 0;
+        if(inc > 0) setExerciseWeight(ex, roundKg(Math.max(0, getExerciseWeight(ex) - inc)));
+        /* '0'：這天確實全紅，但使用者選擇不升 —— 往回推重量時也不能算進去 */
+        lsSet(bumpKey(dateStr, ex.id), '0');
+        invalidateHistory();
+        label.innerHTML = weightLabelHtml(ex, dateStr);
+        refreshChestWeightStat();
+        refreshWeeklyIfOpen();
+        refreshProgressIfOpen();
+      }, { once:true });
+      refreshChestWeightStat();
     }
   });
 
@@ -4939,7 +6187,7 @@ if(bwFlashInput){
   setTimeout(() => bwFlashInput.classList.remove('saved-flash'), 700);
 }
 /* haptic feedback */
-if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
+haptic(50);
     renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
   });
 
@@ -4963,12 +6211,43 @@ if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
     saveCanvasAsImage(canvas, filename, okMsg, title);
   });
 
-  /* 本週進度的日期方塊 */
-  document.getElementById('weekProgressBody').addEventListener('click', e => {
-    const dot = e.target.closest('.week-dot[data-ymd]');
-    if(!dot) return;
-    const [y,m,d] = dot.dataset.ymd.split('-').map(Number);
-    selectDate(new Date(y, m-1, d));
+  /* 上方的一週日期列 */
+  document.getElementById('weekStrip').addEventListener('click', e => {
+    const day = e.target.closest('.ws-day[data-ymd]');
+    if(!day || !selectedDateObj) return;
+    const [y,m,d] = day.dataset.ymd.split('-').map(Number);
+    const target = new Date(y, m-1, d);
+    goToDate(target, Math.sign(atNoon(target) - atNoon(selectedDateObj)));
+  });
+
+  /* 休息日：恢復清單與「下次訓練」 */
+  document.getElementById('dpWorkout').addEventListener('click', e => {
+    const item = e.target.closest('[data-recovery]');
+    if(item && selectedDateObj){
+      const dateStr = formatDateStr(selectedDateObj);
+      const k = recoveryKey(dateStr, item.dataset.recovery);
+      const on = lsGet(k, '0') !== '1';
+      if(on) lsSet(k, '1'); else lsRemove(k);
+      item.classList.toggle('is-done', on);
+      item.setAttribute('aria-pressed', String(on));
+      renderSessionBar(getPlanForDate(selectedDateObj), dateStr);
+      haptic(on ? 25 : 10);
+      if(on && RECOVERY.every(r => lsGet(recoveryKey(dateStr, r.id), '0') === '1')) flashToast('恢復日完成 ✓');
+      return;
+    }
+    const go = e.target.closest('[data-goto]');
+    if(go){
+      const [y,m,d] = go.dataset.goto.split('-').map(Number);
+      goToDate(new Date(y, m-1, d), 1);
+    }
+  });
+
+  /* 訓練完成畫面 */
+  document.getElementById('finishCloseBtn').addEventListener('click', hideFinish);
+  document.getElementById('finishShareBtn').addEventListener('click', () => {
+    hideFinish();
+    const btn = document.getElementById('exportTrainCardBtn');
+    if(btn) btn.click();
   });
 
   document.getElementById('bwRangeSwitch').addEventListener('click', e => {
@@ -4982,8 +6261,9 @@ if(getPref('vibration') && navigator.vibrate) navigator.vibrate(50);
 
   document.getElementById('dpToday').addEventListener('click', () => {
     const now = new Date();
+    const dir = selectedDateObj ? Math.sign(atNoon(now) - atNoon(selectedDateObj)) : 0;
     renderCalendar(now.getFullYear(), now.getMonth());
-    selectDate(now);
+    goToDate(now, dir);
   });
 
   document.getElementById('searchOpenBtn').addEventListener('click', openSearchDrawer);
@@ -5048,7 +6328,9 @@ searchClearBtn.addEventListener('click', () => {
 
   document.addEventListener('keydown', e => {
     if(e.key !== 'Escape') return;
-    if(document.getElementById('exportPreviewModal').classList.contains('show')) closeExportPreview();
+    if(!document.getElementById('finishLayer').hidden) hideFinish();
+    else if(document.getElementById('planModal').classList.contains('show')) closePlanEditor();
+    else if(document.getElementById('exportPreviewModal').classList.contains('show')) closeExportPreview();
     else if(weeklyModal.classList.contains('show')) closeWeeklyModal();
     else if(exportCalModal.classList.contains('show')) closeExportCalModal();
     else if(searchDrawer.classList.contains('open')) closeSearchDrawer();
@@ -5110,7 +6392,7 @@ searchClearBtn.addEventListener('click', () => {
   document.getElementById('importBtn').addEventListener('click', () => { document.getElementById('importFileInput').click(); });
 
   const VALID_IMPORT_KEY = 
-    /^(recomp_(set_id|weight_id|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|pref_\w+)$)/;
+    /^(recomp_(set_id|weight_id|log|bump|rest|eaten|bw|migrated|pref_increment)_|recomp_(schema_version|theme|plan|pref_\w+)$)/;
   document.getElementById('importFileInput').addEventListener('change', e => {
     const file = e.target.files && e.target.files[0];
     if(!file) return;
@@ -5132,7 +6414,7 @@ searchClearBtn.addEventListener('click', () => {
           if(VALID_IMPORT_KEY.test(k) && typeof data[k] === 'string'){ lsSet(k, data[k]); count++; }
           else skipped++;
         });
-        _bumpCountCache.clear();
+        invalidateHistory();
 
         /* 匯入報告：讓使用者知道到底進了什麼 */
         const parts = [`已匯入 ${count} 筆`];
@@ -5146,6 +6428,7 @@ searchClearBtn.addEventListener('click', () => {
         }
         if(snapped) parts.push('可用「還原上一次變更」回到匯入前');
         showDataMsg(parts.join('，'));
+        loadPlan(); renderPlanLabels();
 
         renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
         refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
@@ -5161,12 +6444,13 @@ searchClearBtn.addEventListener('click', () => {
   document.getElementById('resetBtn').addEventListener('click', () => {
     const n = allRecompKeys().length;
     if(!n){ showDataMsg('目前沒有任何紀錄'); return; }
-    if(!confirm(`確定要清除全部 ${n} 筆紀錄嗎？\n（訓練打勾、重量進度、體重紀錄、飲食打勾）\n\n系統會先留一份快照，清除後仍可按「還原上一次變更」救回來。`)) return;
+    if(!confirm(`確定要清除全部 ${n} 筆紀錄嗎？\n（訓練打勾、重量進度、體重紀錄）\n\n系統會先留一份快照，清除後仍可按「還原上一次變更」救回來。`)) return;
 
     takeSnapshot('reset');
     allRecompKeys().forEach(k => lsRemove(k));
-    _bumpCountCache.clear();
+    invalidateHistory();
     showDataMsg(`已清除 ${n} 筆紀錄，可按「還原上一次變更」救回`);
+    loadPlan(); renderPlanLabels();
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
     refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
     renderStorageStatus();
@@ -5180,8 +6464,9 @@ searchClearBtn.addEventListener('click', () => {
     if(!confirm(`要還原到「${snapshotReasonText(snap.reason)}」之前的狀態嗎？${whenText}\n\n目前的紀錄會被這份快照取代。`)) return;
 
     const n = restoreSnapshot();
-    _bumpCountCache.clear();
+    invalidateHistory();
     showDataMsg(`已還原 ${n} 筆紀錄`);
+    loadPlan(); renderPlanLabels();
     renderCalendar(calYear, calMonth); if(selectedDateObj) selectDate(selectedDateObj);
     refreshChestWeightStat(); renderBwStats(); renderBwChart(); renderBwWeekly(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
     renderStorageStatus();
@@ -5196,6 +6481,15 @@ searchClearBtn.addEventListener('click', () => {
   initPwa();
   checkRemoteVersion();
   initSettings();
+  initProgress();
+  initPlanEditor();
+  renderPlanLabels();
+  if(loadPlan.initial === 'new') showOnboarding();
+  /* 桌面圖示長按的捷徑：/?screen=progress 直接打開那一頁 */
+  try{
+    const want = new URLSearchParams(location.search).get('screen');
+    if(want && loadPlan.initial !== 'new') showScreen(want);
+  }catch(e){}
 
   /* 資料安全：申請永久儲存 → 更新狀態面板 → 必要時提醒備份 */
   cleanupNagFlags();
@@ -5229,6 +6523,64 @@ if(verLabel) verLabel.textContent = APP_VERSION;
 console.log('RECOMP', APP_VERSION, 'schema', SCHEMA_VERSION);
 }
 /* ══════════════════════════════════════════════
+   觸覺回饋
+   iPhone 的 Safari 從來沒有實作 navigator.vibrate —— 「震動回饋」
+   這個設定在 iPhone 上一直是無聲無息的。iOS 18 起，切換原生的
+   <input type="checkbox" switch> 會有一下系統觸覺回饋，
+   所以在 iOS 上改由一個看不見的開關代勞（只能給一下，沒有節奏）。
+   必須在使用者手勢裡呼叫 —— 所有呼叫點都在點擊事件裡。
+   ══════════════════════════════════════════════ */
+let _hapticLabel = null;
+function haptic(pattern){
+  if(!getPref('vibration')) return;
+  if(navigator.vibrate){ try{ navigator.vibrate(pattern); }catch(e){} return; }
+  if(!isIosDevice()) return;
+  try{
+    if(!_hapticLabel){
+      _hapticLabel = document.createElement('label');
+      _hapticLabel.setAttribute('aria-hidden', 'true');
+      _hapticLabel.style.cssText = 'position:fixed;left:-100px;top:0;width:1px;height:1px;overflow:hidden;opacity:0;pointer-events:none';
+      const input = document.createElement('input');
+      input.type = 'checkbox';
+      input.setAttribute('switch', '');
+      input.tabIndex = -1;
+      _hapticLabel.appendChild(input);
+      document.body.appendChild(_hapticLabel);
+    }
+    _hapticLabel.click();
+  }catch(e){}
+}
+
+/* ══════════════════════════════════════════════
+   訓練中螢幕常亮
+   兩組之間手機放在椅子上，90 秒後螢幕就暗了、鎖了，
+   每一組都要重新解鎖。打勾之後向瀏覽器要求螢幕常亮，
+   練完（或全部取消）就放掉；切到背景時瀏覽器會自動收回，
+   回到前景且今天還沒練完就再要一次。
+   ══════════════════════════════════════════════ */
+let _wakeLock = null;
+async function keepAwake(on){
+  try{
+    if(on){
+      if(_wakeLock || !getPref('wakeLock') || !('wakeLock' in navigator)) return;
+      _wakeLock = await navigator.wakeLock.request('screen');
+      _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+    }else if(_wakeLock){
+      const l = _wakeLock; _wakeLock = null;
+      await l.release();
+    }
+  }catch(e){ _wakeLock = null; }
+}
+function sessionInProgress(){
+  const today = atNoon(new Date());
+  const c = dayCompletion(today);
+  return c.total > 0 && c.done > 0 && c.done < c.total;
+}
+document.addEventListener('visibilitychange', () => {
+  if(document.visibilityState === 'visible' && sessionInProgress()) keepAwake(true);
+});
+
+/* ══════════════════════════════════════════════
    組間休息計時器
    訓練規則寫著組間 90 秒，但原本要另外開一個 app 才能計時。
    打完一組自動開始倒數。
@@ -5253,18 +6605,20 @@ function paintRest(){
     const lab = document.getElementById('restTimerLabel');
     if(lab) lab.textContent = '休息結束，可以下一組了';
     if(num) num.textContent = '0:00';
-    if(getPref('vibration') && navigator.vibrate) navigator.vibrate([90,60,90]);
+    haptic([90,60,90]);
     setTimeout(stopRestTimer, 6000);
   }
 }
 
-function startRestTimer(seconds){
+function startRestTimer(seconds, next){
   if(!getPref('restTimer')) return;
   const el = document.getElementById('restTimer');
   if(!el) return;
   _restTotal = seconds;
   _restEnd = Date.now() + seconds * 1000;
-  document.getElementById('restTimerLabel').textContent = '組間休息';
+  document.getElementById('restTimerLabel').innerHTML = next
+    ? `組間休息 · 下一組是第 ${next.n} 組<b>${escapeHtml(next.ex.name)}</b>`
+    : '組間休息';
   el.classList.add('show');
   clearInterval(_restTick);
   paintRest();
@@ -5309,8 +6663,898 @@ function closeExportPreview(){
 /* ══════════════════════════════════════════════
    畫面切換
    ══════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════
+   課表範本
+   每週排程的第 0 天是週一；開始日對齊到本週週一，
+   這樣「一三五」就真的落在一三五。
+   ══════════════════════════════════════════════ */
+const E = (id, name, sets, reps, kg, note) => ({ id, name, sets, reps, kg, note:note || '' });
+const TEMPLATES = {
+  full: {
+    title:'全身入門', days:3, blurb:'每週 3 天 · 兩套全身課表輪替 · 第一次重訓從這裡開始',
+    plan: () => ({ cycle:['A','休','B','休','A','休','休','B','休','A','休','B','休','休'], workouts:{
+      A:{ name:'全身・臥推', exercises:[
+        E('squat','槓鈴深蹲',3,'5',20,'膝蓋與腳尖同方向'),
+        E('bench_press','槓鈴臥推',3,'5',20,'肩胛後收下壓'),
+        E('barbell_row','槓鈴划船',3,'5',20,''),
+      ]},
+      B:{ name:'全身・肩推', exercises:[
+        E('squat','槓鈴深蹲',3,'5',20,'膝蓋與腳尖同方向'),
+        E('overhead_press','站姿肩推',3,'5',15,'核心收緊不後仰'),
+        E('deadlift','硬舉',1,'5',40,'背打直，槓貼腿'),
+      ]},
+    }}),
+  },
+  ul: {
+    title:'上下半身', days:4, blurb:'每週 4 天 · 上半身 / 下半身輪替 · 有一點基礎之後最穩的選擇',
+    plan: () => ({ cycle:['A','B','休','A','B','休','休'], workouts:{
+      A:{ name:'上半身', exercises:[
+        E('bench_press','槓鈴臥推',4,'6-8',30,''),
+        E('lat_pulldown','滑輪下拉',4,'8-10',30,''),
+        E('db_shoulder_press','啞鈴肩推',3,'8-12',10,''),
+        E('seated_row','坐姿划船',3,'10-12',30,''),
+        E('db_curl','啞鈴彎舉',2,'12',8,''),
+      ]},
+      B:{ name:'下半身', exercises:[
+        E('squat','槓鈴深蹲',4,'6-8',40,''),
+        E('romanian_deadlift','羅馬尼亞硬舉',3,'8-10',40,''),
+        E('leg_press','腿推機',3,'10-12',60,''),
+        E('leg_curl','腿後勾',3,'12',20,''),
+        E('calf_raise','提踵',3,'15',30,''),
+      ]},
+    }}),
+  },
+  ppl: {
+    title:'推拉腿', days:6, blurb:'每週 6 天 · 推 / 拉 / 腿各練兩次 · 訓練量最大',
+    plan: () => ({ cycle:['A','B','C','A','B','C','休'], workouts:{
+      A:{ name:'推', exercises:[
+        E('bench_press','槓鈴臥推',4,'6-8',30,''),
+        E('incline_db_press','上斜啞鈴臥推',3,'8-12',12,''),
+        E('overhead_press','站姿肩推',3,'8-10',20,''),
+        E('lateral_raise','側平舉',3,'12-15',5,''),
+        E('triceps_pushdown','三頭下壓',3,'10-12',15,''),
+      ]},
+      B:{ name:'拉', exercises:[
+        E('deadlift','硬舉',3,'5',50,''),
+        E('lat_pulldown','滑輪下拉',3,'8-10',35,''),
+        E('barbell_row','槓鈴划船',3,'8-10',30,''),
+        E('face_pull','臉拉',3,'15',10,''),
+        E('db_curl','啞鈴彎舉',3,'10-12',8,''),
+      ]},
+      C:{ name:'腿', exercises:[
+        E('squat','槓鈴深蹲',4,'6-8',40,''),
+        E('leg_press','腿推機',3,'10-12',60,''),
+        E('leg_curl','腿後勾',3,'12',20,''),
+        E('calf_raise','提踵',4,'12-15',30,''),
+        E('cable_crunch','繩索捲腹',3,'15',20,''),
+      ]},
+    }}),
+  },
+  gongguan: {
+    title:'公館重組計畫', days:4, blurb:'器械 A/B · 31 天一輪 · 這個 app 最初的課表',
+    plan: () => { const p = legacyPlan(); return { cycle:p.cycle, workouts:p.workouts }; },
+  },
+};
+
+function templatePlan(key){
+  const t = TEMPLATES[key];
+  const body = t.plan();
+  /* 每週排程對齊週一；31 天的原版循環從今天開始 */
+  const start = body.cycle.length % 7 === 0 ? mondayOf(new Date()) : atNoon(new Date());
+  return { v:1, start:formatDateStr(start), cycle:body.cycle, workouts:body.workouts };
+}
+
+function daysPerWeek(cycle){
+  const n = cycle.filter(t => isTrainDay(t)).length;
+  return Math.round(n * 7 / cycle.length * 10) / 10;
+}
+
+/* 分頁上跟課表有關的標籤：搜尋篩選、月曆圖例 */
+function renderPlanLabels(){
+  const row = document.getElementById('searchFilterRow');
+  const codes = Object.keys(WORKOUTS);
+  if(!['all','rest','trained'].includes(searchFilter) && !WORKOUTS[searchFilter]) searchFilter = 'all';
+  if(row){
+    row.innerHTML = [['all','全部'], ...codes.map(c => [c, `${c}日`]), ['rest','休息'], ['trained','已完成訓練']]
+      .map(([f, l]) => `<button type="button" class="search-chip${searchFilter === f ? ' active' : ''}" data-filter="${f}">${escapeHtml(l)}</button>`).join('');
+  }
+  const legend = document.querySelector('#screenCalendar .cal-legend');
+  if(legend){
+    legend.innerHTML = codes.map(c => `<span><i class="tag-chip">${c}</i> ${escapeHtml(WORKOUT_NAMES[c])}</span>`).join('')
+      + '<span><i class="tag-chip is-rest">休</i> 休息</span>';
+  }
+}
+
+/* 課表換了之後，所有畫面重畫一次 */
+function rerenderAll(){
+  renderPlanLabels();
+  const d = selectedDateObj || new Date();
+  renderCalendar(d.getFullYear(), d.getMonth());
+  selectDate(d);
+  refreshChestWeightStat();
+  renderBwStats(); renderBwChart(); renderBwWeekly();
+  refreshProgressIfOpen(); refreshWeeklyIfOpen(); refreshSearchIfOpen();
+}
+
+/* ══════════════════════════════════════════════
+   第一次打開
+   ══════════════════════════════════════════════ */
+function showOnboarding(){
+  const ob = document.getElementById('onboard');
+  if(!ob) return;
+  ob.querySelector('#obPlans').innerHTML = Object.entries(TEMPLATES).map(([key, t]) => `
+    <button type="button" class="ob-plan" data-template="${key}">
+      <span class="ob-plan-days"><b>${t.days}</b><small>天／週</small></span>
+      <span class="ob-plan-text"><b>${escapeHtml(t.title)}</b><span>${escapeHtml(t.blurb)}</span></span>
+      <i class="ph ph-caret-right" aria-hidden="true"></i>
+    </button>`).join('') + `
+    <button type="button" class="ob-plan" data-template="custom">
+      <span class="ob-plan-days"><b>＋</b><small>自訂</small></span>
+      <span class="ob-plan-text"><b>自己排課表</b><span>動作、組數、每週哪幾天練，全部自己決定</span></span>
+      <i class="ph ph-caret-right" aria-hidden="true"></i>
+    </button>`;
+  obStep(1);
+  ob.hidden = false;
+  document.body.style.overflow = 'hidden';
+  const cta = ob.querySelector('#obStartBtn');
+  if(cta) cta.focus();
+}
+function obStep(n){
+  document.querySelectorAll('#onboard .ob-step').forEach(el => { el.hidden = +el.dataset.step !== n; });
+  const ob = document.getElementById('onboard');
+  if(ob) ob.scrollTop = 0;
+}
+function hideOnboarding(){
+  const ob = document.getElementById('onboard');
+  if(!ob) return;
+  ob.hidden = true;
+  document.body.style.overflow = '';
+}
+function chooseTemplate(key){
+  if(key === 'custom'){
+    lsSet('rcmeta_onboarded', '1');
+    hideOnboarding();
+    openPlanEditor({ v:1, start:formatDateStr(mondayOf(new Date())), cycle:['A','休','A','休','A','休','休'],
+      workouts:{ A:{ name:'', exercises:[ newExercise() ] } } }, true);
+    return;
+  }
+  const p = templatePlan(key);
+  savePlan(p);
+  lsSet('rcmeta_onboarded', '1');
+  hideOnboarding();
+  rerenderAll();
+  showScreen('today');
+  flashToast(`已套用「${TEMPLATES[key].title}」· 點重量數字改成你目前用的重量`);
+}
+
+/* ══════════════════════════════════════════════
+   課表編輯器
+   ══════════════════════════════════════════════ */
+let _planDraft = null;
+let _planDraftIsNew = false;
+
+function newExercise(){
+  return { id:'ex_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+           name:'', sets:3, reps:'8-12', kg:20, note:'', kgNow:20, isNew:true };
+}
+
+function planTrainOn(d, date){
+  const [y,m,dd] = String(d.start).split('-').map(Number);
+  const start = new Date(y, m-1, dd, 12);
+  const diff = Math.round((atNoon(date) - start) / 86400000);
+  const n = d.cycle.length;
+  return d.cycle[((diff % n) + n) % n];
+}
+function weeklyValues(d){
+  const mon = mondayOf(new Date());
+  return Array.from({ length:7 }, (_, i) => { const x = new Date(mon); x.setDate(mon.getDate() + i); return planTrainOn(d, x); });
+}
+
+function openPlanEditor(draft, isNew){
+  const src = draft || currentPlan();
+  _planDraft = clonePlan(src);
+  _planDraftIsNew = !!isNew;
+  Object.values(_planDraft.workouts).forEach(w => w.exercises.forEach(e => {
+    if(e.kgNow === undefined) e.kgNow = getExerciseWeight(e);
+  }));
+  renderPlanEditor();
+  const modal = document.getElementById('planModal');
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden', 'false');
+  document.getElementById('planMsg').textContent = '';
+  document.getElementById('planCloseBtn').focus();
+}
+function closePlanEditor(){
+  const modal = document.getElementById('planModal');
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden', 'true');
+  _planDraft = null;
+}
+
+function renderPlanEditor(){
+  const d = _planDraft;
+  if(!d) return;
+  const codes = Object.keys(d.workouts).sort();
+  const wd = ['一','二','三','四','五','六','日'];
+  let sched;
+  if(d.cycle.length === 7){
+    const vals = weeklyValues(d);
+    sched = `<div class="pe-week">${vals.map((v, i) => `
+      <button type="button" class="pe-day${d.workouts[v] ? '' : ' is-rest'}" data-day="${i}"
+        aria-label="週${wd[i]}：${d.workouts[v] ? v + ' 日' : '休息'}，點一下切換">
+        <span>${wd[i]}</span><b>${d.workouts[v] ? v : '休'}</b></button>`).join('')}</div>
+      <p class="pe-hint">點一下切換：休 → ${codes.join(' → ')} → 休</p>`;
+  }else{
+    sched = `<p class="pe-hint">目前是 ${d.cycle.length} 天一輪的循環（${d.cycle.slice(0, 7).join('-')}…），每 ${d.cycle.length} 天重來一次。</p>
+      <button type="button" class="btn" data-act="to-weekly"><i class="ph ph-calendar-check icon" aria-hidden="true"></i>改成每週固定排程</button>`;
+  }
+
+  const workouts = codes.map(code => {
+    const w = d.workouts[code];
+    return `<div class="pe-workout" data-code="${code}">
+      <div class="pe-w-head">
+        <span class="pe-code">${code}</span>
+        <input class="pe-input pe-wname" data-field="wname" value="${escapeHtml(w.name)}" placeholder="名稱，例如 上半身" aria-label="${code} 日名稱">
+        ${codes.length > 1 ? `<button type="button" class="icon-btn" data-act="del-workout" aria-label="刪除 ${code} 日"><i class="ph ph-trash" aria-hidden="true"></i></button>` : ''}
+      </div>
+      ${w.exercises.map((e, i) => `
+        <div class="pe-ex" data-i="${i}">
+          <div class="pe-ex-top">
+            <input class="pe-input pe-name" data-field="name" value="${escapeHtml(e.name)}" placeholder="動作名稱" aria-label="動作名稱">
+            <button type="button" class="icon-btn" data-act="del-ex" aria-label="刪除 ${escapeHtml(e.name || '這個動作')}"><i class="ph ph-x" aria-hidden="true"></i></button>
+          </div>
+          <div class="pe-ex-row">
+            <label><span>組數</span><input class="pe-input pe-num" data-field="sets" type="number" min="1" max="10" inputmode="numeric" value="${e.sets}"></label>
+            <label><span>次數</span><input class="pe-input pe-num" data-field="reps" value="${escapeHtml(e.reps)}"></label>
+            <label><span>${e.isNew ? '起始重量' : '目前重量'} kg</span><input class="pe-input pe-num" data-field="kgNow" type="number" min="0" max="500" step="0.5" inputmode="decimal" value="${e.kgNow}"></label>
+          </div>
+        </div>`).join('')}
+      <button type="button" class="btn btn-quiet pe-add" data-act="add-ex"><i class="ph ph-plus icon" aria-hidden="true"></i>新增動作</button>
+    </div>`;
+  }).join('');
+
+  const nextCode = 'ABCDEF'.split('').find(c => !d.workouts[c]);
+  document.getElementById('planBody').innerHTML = `
+    <div class="pe-section">
+      <div class="kicker">每週排程</div>
+      ${sched}
+    </div>
+    <div class="pe-section">
+      <div class="kicker">課表</div>
+      ${workouts}
+      ${nextCode ? `<button type="button" class="btn pe-add-workout" data-act="add-workout"><i class="ph ph-plus icon" aria-hidden="true"></i>新增 ${nextCode} 日</button>` : ''}
+    </div>`;
+}
+
+function setWeekly(d, vals){
+  d.start = formatDateStr(mondayOf(new Date()));
+  d.cycle = vals;
+}
+
+function savePlanDraft(){
+  const d = _planDraft;
+  const msg = document.getElementById('planMsg');
+  const codes = Object.keys(d.workouts).sort();
+  const out = { v:1, start:d.start, cycle:d.cycle.slice(), workouts:{} };
+  const weightChanges = [];
+  for(const code of codes){
+    const w = d.workouts[code];
+    const exs = w.exercises.filter(e => String(e.name).trim());
+    if(!exs.length){ msg.textContent = `${code} 日至少要有一個動作`; return; }
+    out.workouts[code] = {
+      name: String(w.name).trim() || `${code} 日`,
+      exercises: exs.map(e => {
+        const kgNow = Math.max(0, Math.min(500, parseFloat(e.kgNow) || 0));
+        weightChanges.push([e, kgNow]);
+        return { id:e.id, name:String(e.name).trim(), sets:Math.max(1, Math.min(10, parseInt(e.sets, 10) || 3)),
+                 reps:String(e.reps || '').trim() || '8-12', kg:e.isNew ? kgNow : (Number(e.kg) || kgNow), note:e.note || '' };
+      }),
+    };
+  }
+  out.cycle = out.cycle.map(t => out.workouts[t] ? t : '休');
+  if(!out.cycle.some(t => out.workouts[t])){ msg.textContent = '排程裡至少要有一天訓練'; return; }
+
+  savePlan(out);
+  weightChanges.forEach(([e, kg]) => { if(kg !== getExerciseWeight(e)) setExerciseWeight(e, roundKg(kg)); });
+  invalidateHistory();
+  lsSet('rcmeta_onboarded', '1');
+  closePlanEditor();
+  rerenderAll();
+  flashToast('課表已儲存');
+}
+
+function initPlanEditor(){
+  const body = document.getElementById('planBody');
+  if(!body) return;
+  body.addEventListener('input', e => {
+    const f = e.target.dataset.field;
+    if(!f || !_planDraft) return;
+    const w = e.target.closest('.pe-workout');
+    const code = w && w.dataset.code;
+    if(!code) return;
+    if(f === 'wname'){ _planDraft.workouts[code].name = e.target.value; return; }
+    const ex = e.target.closest('.pe-ex');
+    const item = ex && _planDraft.workouts[code].exercises[+ex.dataset.i];
+    if(item) item[f] = e.target.value;
+  });
+  body.addEventListener('click', e => {
+    const d = _planDraft;
+    if(!d) return;
+    const day = e.target.closest('.pe-day');
+    if(day){
+      const codes = Object.keys(d.workouts).sort();
+      const vals = weeklyValues(d).map(v => d.workouts[v] ? v : '休');
+      const order = ['休', ...codes];
+      const i = +day.dataset.day;
+      vals[i] = order[(order.indexOf(vals[i]) + 1) % order.length];
+      setWeekly(d, vals);
+      renderPlanEditor();
+      document.querySelector(`#planBody .pe-day[data-day="${i}"]`).focus();
+      return;
+    }
+    const act = e.target.closest('[data-act]');
+    if(!act) return;
+    const code = act.closest('.pe-workout') && act.closest('.pe-workout').dataset.code;
+    switch(act.dataset.act){
+      case 'to-weekly': setWeekly(d, weeklyValues(d).map(v => d.workouts[v] ? v : '休')); break;
+      case 'add-ex': d.workouts[code].exercises.push(newExercise()); break;
+      case 'del-ex': d.workouts[code].exercises.splice(+act.closest('.pe-ex').dataset.i, 1); break;
+      case 'add-workout': {
+        const c = 'ABCDEF'.split('').find(x => !d.workouts[x]);
+        if(c) d.workouts[c] = { name:'', exercises:[ newExercise() ] };
+        break;
+      }
+      case 'del-workout':
+        delete d.workouts[code];
+        d.cycle = d.cycle.map(t => t === code ? '休' : t);
+        break;
+      default: return;
+    }
+    renderPlanEditor();
+    if(act.dataset.act === 'add-ex' || act.dataset.act === 'add-workout'){
+      const inputs = document.querySelectorAll('#planBody .pe-name');
+      if(inputs.length) inputs[inputs.length - 1].focus();
+    }
+  });
+  document.getElementById('planCloseBtn').addEventListener('click', closePlanEditor);
+  document.getElementById('planCancelBtn').addEventListener('click', closePlanEditor);
+  document.getElementById('planSaveBtn').addEventListener('click', savePlanDraft);
+
+  const ob = document.getElementById('onboard');
+  ob.addEventListener('click', e => {
+    if(e.target.closest('#obStartBtn')){ obStep(2); return; }
+    if(e.target.closest('#obBackBtn')){ obStep(1); return; }
+    const t = e.target.closest('[data-template]');
+    if(t) chooseTemplate(t.dataset.template);
+  });
+}
+
+/* ══════════════════════════════════════════════
+   進步
+   訓練頁回答「今天要做什麼」，這一頁回答「有沒有變強」。
+   漸進超負荷是整份計畫的核心，但原本 app 裡看不到任何
+   一個動作的重量隨時間怎麼變 —— 只有胸推一條進度條。
+   重量來自 exerciseHistory()：v3.3 之後是逐次存下來的實際值，
+   之前的由升重紀錄往回推，圖上用虛線誠實標出來。
+   ══════════════════════════════════════════════ */
+const _pgOpen = new Set();
+
+function refreshProgressIfOpen(){
+  const sc = document.getElementById('screenProgress');
+  if(sc && sc.classList.contains('is-active')) renderProgress();
+}
+
+function dayCompletion(d){
+  const plan = getPlanForDate(d);
+  if(!isTrainDay(plan.train)) return { train:plan.train, done:0, total:0 };
+  const ds = formatDateStr(d);
+  let done = 0, total = 0;
+  WORKOUTS[plan.train].forEach(ex => { total += ex.sets; done += setsDoneFor(ex, ds); });
+  return { train:plan.train, done, total };
+}
+
+function mondayOf(d){
+  const m = atNoon(d);
+  m.setDate(m.getDate() - (m.getDay() + 6) % 7);
+  return m;
+}
+
+function fmtMD(d){ return `${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`; }
+function fmtK(n){
+  if(n >= 10000) return Math.round(n / 1000) + 'k';
+  if(n >= 1000) return (n / 1000).toFixed(1) + 'k';
+  return String(Math.round(n));
+}
+/* 訓練量用「噸」：2400kg 寫成 2.4k kg 讀起來很怪 */
+function fmtVol(n){
+  return n >= 1000 ? `${(n / 1000).toFixed(1)} 噸` : `${Math.round(n)} kg`;
+}
+/* 座標軸取整數刻度：41.4 / 40.3 / 39.2 這種刻度看不出間距 */
+function niceStep(range, target){
+  const raw = range / target;
+  const mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const n = raw / mag;
+  return (n <= 1 ? 1 : n <= 2 ? 2 : n <= 2.5 ? 2.5 : n <= 5 ? 5 : 10) * mag;
+}
+function signed(n, digits){
+  const v = digits === undefined ? roundKg(n) : +n.toFixed(digits);
+  return (v > 0 ? '+' : v < 0 ? '−' : '±') + Math.abs(v);
+}
+
+function computeProgress(){
+  const today = atNoon(new Date());
+  const start = atNoon(PLAN_START);
+
+  const lifts = allExercises().map(ex => {
+    const hist = exerciseHistory(ex);
+    const now = getExerciseWeight(ex);
+    const first = hist.length ? hist[0].kg : now;
+    return {
+      ex, hist, now, first,
+      train: workoutOfExercise(ex.id),
+      delta: roundKg(now - first),
+      pct: first > 0 ? (now - first) / first : 0,
+      bumps: hist.filter(s => s.bump > 0).length,
+    };
+  });
+  const trained = lifts.filter(l => l.hist.length);
+  const avgPct = trained.length ? trained.reduce((s, l) => s + l.pct, 0) / trained.length : 0;
+  const bumps = lifts.reduce((s, l) => s + l.bumps, 0);
+
+  /* 出席：排定的訓練日裡至少打了一組的比例。今天還沒練不算缺席 */
+  const days = [];
+  for(let d = new Date(start); d <= today; d.setDate(d.getDate() + 1)){
+    d.setHours(12,0,0,0);
+    days.push({ date:new Date(d), ...dayCompletion(d) });
+  }
+  const isTodayPending = x => +x.date === +today && x.done === 0;
+  const trainDays = days.filter(x => isTrainDay(x.train) && !isTodayPending(x));
+  const sessions = days.filter(x => x.done > 0).length;
+  const attendance = trainDays.length ? sessions / trainDays.length : 0;
+
+  /* 連續出席：只看訓練日，休息日不打斷也不計入 */
+  let streak = 0, longest = 0, run = 0;
+  trainDays.forEach(x => {
+    run = x.done > 0 ? run + 1 : 0;
+    longest = Math.max(longest, run);
+  });
+  for(let i = trainDays.length - 1; i >= 0 && trainDays[i].done > 0; i--) streak++;
+
+  /* 每週訓練量：近 12 週，以週一為界 */
+  const thisMonday = mondayOf(today);
+  const weeks = [];
+  for(let i = 11; i >= 0; i--){
+    const m = new Date(thisMonday); m.setDate(m.getDate() - i * 7);
+    weeks.push({ start:m, vol:0 });
+  }
+  const firstMonday = weeks[0].start;
+  lifts.forEach(l => l.hist.forEach(s => {
+    if(s.date < firstMonday) return;
+    const idx = Math.round((mondayOf(s.date) - firstMonday) / (7 * 86400000));
+    if(weeks[idx]) weeks[idx].vol += s.kg * s.done;
+  }));
+
+  const weekNo = Math.max(1, Math.floor((today - start) / (7 * 86400000)) + 1);
+  return { today, start, lifts, trained, avgPct, bumps, days, sessions, attendance, streak, longest, weeks, weekNo };
+}
+
+/* 重量是「一段一段的平台」：兩次訓練之間不會變，所以畫階梯而不是斜線 */
+function stepPoints(l, today){
+  const pts = l.hist.map(s => ({ t:+s.date, kg:s.kg, s }));
+  const endT = Math.max(+today, pts.length ? pts[pts.length-1].t : +today);
+  return { pts, endT };
+}
+
+function sparkSvg(l, today){
+  const W = 76, H = 26;
+  const { pts, endT } = stepPoints(l, today);
+  if(!pts.length){
+    return `<svg class="pg-spark" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+      <line x1="0" y1="${H/2}" x2="${W}" y2="${H/2}" stroke="var(--line)" stroke-width="1.5" stroke-dasharray="3 3"/></svg>`;
+  }
+  const t0 = pts[0].t, span = Math.max(1, endT - t0);
+  const all = pts.map(p => p.kg).concat(l.now);
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if(hi - lo < 1){ const mid = (hi + lo) / 2; lo = mid - .5; hi = mid + .5; }
+  const X = t => ((t - t0) / span) * W;
+  const Y = kg => H - 3 - ((kg - lo) / (hi - lo)) * (H - 6);
+  let d = `M${X(pts[0].t).toFixed(1)},${Y(pts[0].kg).toFixed(1)}`;
+  for(let i = 1; i < pts.length; i++) d += ` H${X(pts[i].t).toFixed(1)} V${Y(pts[i].kg).toFixed(1)}`;
+  d += ` H${W} V${Y(l.now).toFixed(1)}`;
+  return `<svg class="pg-spark" viewBox="0 0 ${W} ${H}" aria-hidden="true">
+    <path d="${d}" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linejoin="round"/>
+    <circle cx="${W}" cy="${Y(l.now).toFixed(1)}" r="2.5" fill="var(--signal-fill)"/></svg>`;
+}
+
+function liftDetailHtml(l, today){
+  const { pts, endT } = stepPoints(l, today);
+  if(!pts.length){
+    return `<div class="small muted">還沒有這個動作的紀錄。下次${escapeHtml(getTrainText(l.train))}打完第一組就會出現。</div>`;
+  }
+  const W = 700, H = 230, padL = 52, padR = 78, padT = 24, padB = 36;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const t0 = pts[0].t, span = Math.max(1, endT - t0);
+  const all = pts.map(p => p.kg).concat(l.now);
+  let lo = Math.min(...all), hi = Math.max(...all);
+  if(hi - lo < 2){ const mid = (hi + lo) / 2; lo = mid - 1; hi = mid + 1; }
+  const step = niceStep(hi - lo, 3);
+  lo = Math.floor(lo / step) * step;
+  hi = Math.ceil(hi / step) * step;
+  const X = t => padL + ((t - t0) / span) * plotW;
+  const Y = kg => padT + plotH - ((kg - lo) / (hi - lo)) * plotH;
+
+  let grid = '';
+  for(let v = lo; v <= hi + 1e-9; v += step){
+    const y = Y(v);
+    grid += `<line x1="${padL}" y1="${y.toFixed(1)}" x2="${W-padR}" y2="${y.toFixed(1)}" stroke="var(--line)" stroke-width="1"/>`
+         +  `<text x="${padL-10}" y="${(y+5).toFixed(1)}" text-anchor="end" class="chart-axis">${+v.toFixed(1)}</text>`;
+  }
+
+  /* 每一段平台各自決定實線或虛線：推算出來的就用虛線 */
+  let segs = '';
+  pts.forEach((p, i) => {
+    const nx = i < pts.length - 1 ? pts[i+1].t : endT;
+    const ny = i < pts.length - 1 ? pts[i+1].kg : l.now;
+    const dash = p.s.estimated ? ' stroke-dasharray="5 5"' : '';
+    segs += `<path d="M${X(p.t).toFixed(1)},${Y(p.kg).toFixed(1)} H${X(nx).toFixed(1)} V${Y(ny).toFixed(1)}"
+               fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"${dash}/>`;
+  });
+
+  const dots = pts.map(p => {
+    const cx = X(p.t).toFixed(1), cy = Y(p.kg).toFixed(1);
+    if(p.s.bump > 0) return `<circle cx="${cx}" cy="${cy}" r="4.5" fill="var(--signal-fill)" stroke="var(--card)" stroke-width="1.5"/>`;
+    if(p.s.done < p.s.total) return `<circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--paper)" stroke="var(--ink)" stroke-width="1.5"/>`;
+    return `<circle cx="${cx}" cy="${cy}" r="3.5" fill="var(--ink)"/>`;
+  }).join('');
+
+  const endX = X(endT), endY = Y(l.now);
+  const end = `<circle cx="${endX.toFixed(1)}" cy="${endY.toFixed(1)}" r="4.5" fill="var(--signal-fill)" stroke="var(--card)" stroke-width="2"/>`
+            + `<text x="${(endX+10).toFixed(1)}" y="${(endY+7).toFixed(1)}" class="chart-value">${l.now}</text>`;
+  const xAxis = `<text x="${padL}" y="${H-10}" class="chart-axis">${fmtMD(new Date(t0))}</text>`
+              + `<text x="${W-padR}" y="${H-10}" text-anchor="end" class="chart-axis">今天</text>`;
+
+  const recent = l.hist.slice(-6).reverse().map(s => `
+    <div class="pg-session">
+      <span class="muted">${fmtMD(s.date)}</span>
+      <span>${s.estimated ? '<span class="pg-est" title="由升重紀錄推算">≈</span>' : ''}${s.kg}kg <span class="muted">${s.done}/${s.total} 組</span></span>
+      <span class="${s.bump > 0 ? 'is-bump' : 'muted'}">${s.bump > 0 ? `▲ +${s.bump}` : ''}</span>
+    </div>`).join('');
+  const hasEst = l.hist.some(s => s.estimated);
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="bw-svg" role="img"
+         aria-label="${escapeHtml(l.ex.name)} 重量變化：${l.first}kg 到 ${l.now}kg，共 ${l.hist.length} 次訓練">
+      ${grid}${segs}${dots}${end}${xAxis}
+    </svg>
+    <div class="pg-legend">
+      <span><i class="pg-key-bump"></i>升重的那次</span>
+      <span><i class="pg-key-dot"></i>做滿</span>
+      <span><i class="pg-key-open"></i>沒做完</span>
+      ${hasEst ? '<span><i class="pg-key-dash"></i>推算值（v3.3 以前沒有逐次存重量）</span>' : ''}
+    </div>
+    <div class="pg-sessions">${recent}</div>`;
+}
+
+function volumeHtml(p){
+  const weeks = p.weeks;
+  const W = 700, H = 220, padL = 20, padR = 20, padT = 30, padB = 34;
+  const plotW = W - padL - padR, plotH = H - padT - padB;
+  const max = Math.max(1, ...weeks.map(w => w.vol));
+  const slot = plotW / weeks.length, barW = Math.min(34, slot * .62);
+  const baseY = padT + plotH;
+  const maxIdx = weeks.findIndex(w => w.vol === max);
+
+  let bars = '', labels = '';
+  weeks.forEach((w, i) => {
+    const cx = padL + slot * i + slot / 2;
+    const h = w.vol ? Math.max(2, (w.vol / max) * plotH) : 0;
+    const isNow = i === weeks.length - 1;
+    if(h) bars += `<rect x="${(cx - barW/2).toFixed(1)}" y="${(baseY - h).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" class="${isNow ? 'chart-bar-now' : 'chart-bar'}"/>`;
+    if(i % 2 === (weeks.length - 1) % 2) labels += `<text x="${cx.toFixed(1)}" y="${H - 10}" text-anchor="middle" class="chart-axis">${w.start.getMonth()+1}/${w.start.getDate()}</text>`;
+    /* 數字只標本週與最高的那週，每根都標會糊成一片 */
+    if(w.vol && (isNow || i === maxIdx)) labels += `<text x="${cx.toFixed(1)}" y="${(baseY - h - 9).toFixed(1)}" text-anchor="middle" class="chart-note">${fmtK(w.vol)}</text>`;
+  });
+
+  const last4 = weeks.slice(-4), prev4 = weeks.slice(-8, -4);
+  const avg = a => a.reduce((s, w) => s + w.vol, 0) / a.length;
+  const a4 = avg(last4), p4 = avg(prev4);
+  const trend = p4 > 0 ? (a4 - p4) / p4 * 100 : null;
+
+  return `
+    <svg viewBox="0 0 ${W} ${H}" class="bw-svg" role="img" aria-label="近 12 週每週訓練量，近 4 週平均每週 ${fmtVol(a4)}">
+      <line x1="${padL}" y1="${baseY}" x2="${W-padR}" y2="${baseY}" stroke="var(--ink)" stroke-width="1.5"/>
+      ${bars}${labels}
+    </svg>
+    <div class="chart-foot">
+      <span>近 4 週平均 ${fmtVol(a4)} / 週</span>
+      ${trend === null ? '' : `<span class="chart-foot-delta ${trend >= 0 ? 'is-down' : 'is-up'}">較前 4 週 ${signed(trend, 0)}%</span>`}
+    </div>`;
+}
+
+function heatHtml(p){
+  const WEEKS = 16;
+  const today = p.today, start = p.start;
+  const first = mondayOf(today); first.setDate(first.getDate() - (WEEKS - 1) * 7);
+
+  let html = '<span></span>';
+  let prevMonth = -1;
+  for(let w = 0; w < WEEKS; w++){
+    const m = new Date(first); m.setDate(m.getDate() + w * 7);
+    const label = m.getMonth() !== prevMonth ? `${m.getMonth()+1}月` : '';
+    prevMonth = m.getMonth();
+    html += `<span class="pg-heat-month">${label}</span>`;
+  }
+  const dows = ['一','','三','','五','','日'];
+  let attended = 0, scheduled = 0;
+  for(let r = 0; r < 7; r++){
+    html += `<span class="pg-heat-dow">${dows[r]}</span>`;
+    for(let w = 0; w < WEEKS; w++){
+      const d = new Date(first); d.setDate(d.getDate() + w * 7 + r); d.setHours(12,0,0,0);
+      let cls = 'h-future', tip = '';
+      if(d < start) cls = 'h-before';
+      else if(d <= today){
+        const c = dayCompletion(d);
+        const isToday = +d === +today;
+        if(!isTrainDay(c.train)){ cls = 'h-rest'; tip = '休息'; }
+        else{
+          if(!(isToday && !c.done)){ scheduled++; if(c.done) attended++; }
+          cls = c.done >= c.total ? 'h-full' : c.done ? 'h-partial' : (isToday ? 'h-future' : 'h-miss');
+          tip = `${c.train} · ${c.done}/${c.total} 組`;
+        }
+        if(isToday) cls += ' h-today';
+      }
+      html += `<span class="pg-cell ${cls}"${tip ? ` title="${fmtMD(d)} ${tip}"` : ''}></span>`;
+    }
+  }
+  return `
+    <div class="pg-heat" role="img" aria-label="近 ${WEEKS} 週出席 ${attended}/${scheduled} 個訓練日">${html}</div>
+    <div class="pg-heat-legend">
+      <span><i class="pg-cell h-full"></i>完成</span>
+      <span><i class="pg-cell h-partial"></i>部分</span>
+      <span><i class="pg-cell h-miss"></i>缺席</span>
+      <span><i class="pg-cell h-rest"></i>休息</span>
+    </div>
+    <div class="pg-heat-sum">
+      <span>目前連續 <b class="mono-num">${p.streak}</b> 次</span>
+      <span>最長 <b class="mono-num">${p.longest}</b> 次</span>
+    </div>`;
+}
+
+function renderProgress(){
+  const liftsEl = document.getElementById('pgLifts');
+  if(!liftsEl) return;
+  const p = computeProgress();
+
+  const pct = p.avgPct * 100;
+  const title = document.getElementById('pgTitle');
+  title.innerHTML = p.trained.length
+    ? `${signed(pct, 1)}<span class="pg-unit">%</span>`
+    : '還沒開始';
+  title.classList.toggle('is-up', pct > 0.05);
+  title.classList.toggle('is-down', pct < -0.05);
+  document.getElementById('pgKicker').textContent =
+    `平均力量 · ${fmtMD(p.start)} 起第 ${p.weekNo} 週`;
+
+  document.getElementById('pgStats').innerHTML = `
+    <div class="stat-cell">
+      <div class="stat-cell-label">訓練</div>
+      <div class="stat-cell-val mono-num">${p.sessions}<span class="unit">次</span></div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">出席率</div>
+      <div class="stat-cell-val mono-num">${Math.round(p.attendance * 100)}<span class="unit">%</span></div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-cell-label">升重</div>
+      <div class="stat-cell-val mono-num">${p.bumps}<span class="unit">次</span></div>
+    </div>`;
+
+  if(!p.trained.length){
+    liftsEl.innerHTML = `<div class="bw-empty">
+        <i class="ph ph-barbell empty-icon" aria-hidden="true"></i>
+        <div class="empty-title">還沒有訓練紀錄</div>
+        <div class="empty-hint">在「今日」打勾完成第一組之後，這裡會開始畫出每個動作的重量曲線。</div>
+      </div>`;
+  }else{
+    let html = '';
+    Object.keys(WORKOUTS).forEach(t => {
+      html += `<div class="pg-group"><span class="kicker">${escapeHtml(getTrainText(t))}</span></div>`;
+      p.lifts.filter(l => l.train === t).forEach(l => {
+        const open = _pgOpen.has(l.ex.id);
+        const dcls = l.delta > 0 ? 'is-up' : l.delta < 0 ? 'is-down' : '';
+        const meta = l.hist.length
+          ? `${l.first} → ${l.now}kg · ${l.hist.length} 次`
+          : `${l.now}kg · 尚未訓練`;
+        html += `
+          <button type="button" class="pg-lift" data-lift="${escapeHtml(l.ex.id)}"
+                  aria-expanded="${open}" aria-controls="pg-detail-${escapeHtml(l.ex.id)}">
+            <span>
+              <span class="pg-lift-name">${escapeHtml(l.ex.name)}</span>
+              <span class="pg-lift-meta" style="display:block">${meta}</span>
+            </span>
+            <span class="pg-lift-right">
+              ${sparkSvg(l, p.today)}
+              <span class="pg-delta ${dcls}">${l.hist.length ? signed(l.delta) : '—'}</span>
+              <i class="ph ph-caret-down pg-chev" aria-hidden="true"></i>
+            </span>
+          </button>
+          <div class="pg-detail" id="pg-detail-${escapeHtml(l.ex.id)}"${open ? '' : ' hidden'}>${liftDetailHtml(l, p.today)}</div>`;
+      });
+    });
+    liftsEl.innerHTML = html;
+  }
+
+  document.getElementById('pgVolume').innerHTML = volumeHtml(p);
+  document.getElementById('pgHeat').innerHTML = heatHtml(p);
+}
+
+/* ── 進步卡：1080×1350，與訓練卡同一套視覺 ── */
+function drawProgressCard(){
+  const p = computeProgress();
+  if(!p.sessions) return null;
+
+  const W = 1080, H = 1350, PAD = 72;
+  const canvas = document.createElement('canvas');
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  if(!ctx) return null;
+  ctx.textBaseline = 'top';
+
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const bg     = isDark ? '#1a1a1e' : '#F5F3F0';
+  const fg     = isDark ? '#e8e4df' : '#141414';
+  const muted  = isDark ? '#9a9a9a' : '#6F6F6F';
+  const accent = isDark ? '#ff4d58' : '#E30613';
+  const cardBg = isDark ? '#242428' : '#FFFCF9';
+  const rule   = isDark ? '#333338' : '#D9D4CE';
+  const pos    = isDark ? '#35d195' : '#0F7A5A';
+
+  const SANS = '-apple-system, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif';
+  const MONO = 'ui-monospace, "SF Mono", Menlo, monospace';
+  const font = (weight, size, stack) => `${weight} ${size}px ${stack || SANS}`;
+  const setLS = v => { try{ ctx.letterSpacing = v; }catch(e){} };
+  function fitText(text, maxW){
+    if(ctx.measureText(text).width <= maxW) return text;
+    let t = text;
+    while(t.length > 1 && ctx.measureText(t + '…').width > maxW) t = t.slice(0, -1);
+    return t + '…';
+  }
+
+  /* ── 底 ── */
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = accent; ctx.fillRect(0, 0, W, 16);
+
+  /* ── 抬頭 ── */
+  ctx.fillStyle = fg; ctx.font = font(900, 72); setLS('-2px');
+  ctx.fillText('RECOMP', PAD, 78); setLS('0px');
+  ctx.fillStyle = accent; ctx.font = font(800, 30);
+  ctx.fillText(`進步報告 · 第 ${p.weekNo} 週`, PAD, 170);
+  ctx.fillStyle = muted; ctx.font = font(500, 26, MONO); ctx.textAlign = 'right';
+  ctx.fillText(`${fmtMD(p.start)} – ${fmtMD(p.today)}`, W - PAD, 174);
+  ctx.textAlign = 'left';
+
+  /* ── 主視覺：平均力量提升 ── */
+  const heroY = 232, heroH = 250;
+  ctx.fillStyle = fg; ctx.fillRect(PAD + 8, heroY + 8, W - PAD * 2, heroH);
+  ctx.fillStyle = cardBg; ctx.fillRect(PAD, heroY, W - PAD * 2, heroH);
+  ctx.strokeStyle = fg; ctx.lineWidth = 3; ctx.strokeRect(PAD + 1.5, heroY + 1.5, W - PAD * 2 - 3, heroH - 3);
+
+  const pct = p.avgPct * 100;
+  const pctText = signed(pct, 1).replace('−', '-');
+  ctx.fillStyle = pct > 0.05 ? pos : fg; ctx.font = font(900, 140, MONO); setLS('-6px');
+  ctx.fillText(pctText, PAD + 40, heroY + 36);
+  const pw = ctx.measureText(pctText).width; setLS('0px');
+  ctx.fillStyle = accent; ctx.font = font(900, 56);
+  ctx.fillText('%', PAD + 40 + pw + 10, heroY + 110);
+  ctx.fillStyle = muted; ctx.font = font(700, 22); setLS('3px');
+  ctx.fillText('AVG STRENGTH · 平均力量提升', PAD + 40, heroY + heroH - 58); setLS('0px');
+
+  const stats = [
+    [String(p.sessions), '次訓練'],
+    [`${Math.round(p.attendance * 100)}%`, '出席率'],
+    [String(p.bumps), '次升重'],
+  ];
+  ctx.textAlign = 'right';
+  stats.forEach(([v, lab], i) => {
+    const y = heroY + 40 + i * 64;
+    ctx.fillStyle = muted; ctx.font = font(600, 22);
+    const lw = ctx.measureText(lab).width;
+    ctx.fillText(lab, W - PAD - 40, y + 16);
+    ctx.fillStyle = fg; ctx.font = font(800, 44, MONO);
+    ctx.fillText(v, W - PAD - 40 - lw - 12, y);
+  });
+  ctx.textAlign = 'left';
+
+  /* ── 每個動作 ── */
+  const footerY = H - 96;
+  const listTop = heroY + heroH + 44;
+  const groupH = 40;
+  const rows = p.lifts.length;
+  const rowH = Math.min(84, (footerY - 24 - listTop - groupH * 2) / rows);
+  let y = listTop;
+  Object.keys(WORKOUTS).forEach(t => {
+    ctx.fillStyle = muted; ctx.font = font(700, 20); setLS('3px');
+    ctx.fillText(getTrainText(t).replace('日', ''), PAD, y + 8); setLS('0px');
+    y += groupH;
+    p.lifts.filter(l => l.train === t).forEach((l, i) => {
+      if(i > 0){
+        ctx.strokeStyle = rule; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(PAD, y); ctx.lineTo(W - PAD, y); ctx.stroke();
+      }
+      const mid = y + rowH / 2;
+      ctx.fillStyle = fg; ctx.font = font(700, 28);
+      ctx.fillText(fitText(l.ex.name, 360), PAD, mid - 17);
+
+      /* 小階梯線 */
+      const sx = 470, sw = 180, sh = 34, sy = mid - sh / 2;
+      const { pts, endT } = stepPoints(l, p.today);
+      if(pts.length){
+        const t0 = pts[0].t, span = Math.max(1, endT - t0);
+        const all = pts.map(q => q.kg).concat(l.now);
+        let lo = Math.min(...all), hi = Math.max(...all);
+        if(hi - lo < 1){ const m = (hi + lo) / 2; lo = m - .5; hi = m + .5; }
+        const X = tt => sx + ((tt - t0) / span) * sw;
+        const Y = kg => sy + sh - ((kg - lo) / (hi - lo)) * sh;
+        ctx.strokeStyle = fg; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+        ctx.beginPath(); ctx.moveTo(X(pts[0].t), Y(pts[0].kg));
+        for(let k = 1; k < pts.length; k++){ ctx.lineTo(X(pts[k].t), Y(pts[k-1].kg)); ctx.lineTo(X(pts[k].t), Y(pts[k].kg)); }
+        ctx.lineTo(sx + sw, Y(pts[pts.length-1].kg)); ctx.lineTo(sx + sw, Y(l.now));
+        ctx.stroke();
+        ctx.fillStyle = accent; ctx.beginPath(); ctx.arc(sx + sw, Y(l.now), 6, 0, Math.PI * 2); ctx.fill();
+      }
+
+      ctx.textAlign = 'right';
+      ctx.fillStyle = muted; ctx.font = font(500, 24, MONO);
+      ctx.fillText(l.hist.length ? `${l.first}→${l.now}` : `${l.now}`, W - PAD - 150, mid - 13);
+      ctx.fillStyle = l.delta > 0 ? pos : l.delta < 0 ? accent : muted;
+      ctx.font = font(800, 30, MONO);
+      ctx.fillText(l.hist.length ? `${signed(l.delta).replace('−', '-')}kg` : '—', W - PAD, mid - 16);
+      ctx.textAlign = 'left';
+      y += rowH;
+    });
+  });
+
+  /* ── 頁尾 ── */
+  ctx.strokeStyle = fg; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(PAD, footerY); ctx.lineTo(W - PAD, footerY); ctx.stroke();
+  ctx.fillStyle = muted; ctx.font = font(600, 22, MONO);
+  ctx.fillText(`RECOMP ${APP_VERSION}`, PAD, footerY + 22);
+  const bw = getAllBwEntries();
+  if(bw.length >= 2){
+    ctx.textAlign = 'right'; ctx.fillStyle = fg; ctx.font = font(700, 24, MONO);
+    ctx.fillText(`BW ${bw[0].w} → ${bw[bw.length-1].w}kg`, W - PAD, footerY + 21);
+    ctx.textAlign = 'left';
+  }
+  return canvas;
+}
+
+function initProgress(){
+  const liftsEl = document.getElementById('pgLifts');
+  if(!liftsEl) return;
+  liftsEl.addEventListener('click', e => {
+    const btn = e.target.closest('.pg-lift[data-lift]');
+    if(!btn) return;
+    const id = btn.dataset.lift;
+    const open = btn.getAttribute('aria-expanded') !== 'true';
+    if(open) _pgOpen.add(id); else _pgOpen.delete(id);
+    btn.setAttribute('aria-expanded', String(open));
+    const panel = document.getElementById('pg-detail-' + id);
+    if(panel) panel.hidden = !open;
+  });
+  document.getElementById('pgExportBtn').addEventListener('click', () => {
+    const canvas = drawProgressCard();
+    if(!canvas){ flashToast('還沒有訓練紀錄可以匯出'); return; }
+    const fname = `recomp-progress-${formatDateStrPad(new Date())}.png`;
+    if(getPref('exportPreview')){
+      openExportPreview(canvas, fname, '已匯出進步卡', '進步卡', '確認後才會儲存或分享');
+    }else{
+      saveCanvasAsImage(canvas, fname, '已匯出進步卡', '進步卡');
+    }
+  });
+}
+
 function showScreen(name){
-  const map = { today:'screenToday', calendar:'screenCalendar', weight:'screenWeight' };
+  const map = { today:'screenToday', calendar:'screenCalendar', progress:'screenProgress', weight:'screenWeight' };
   const targetId = map[name];
   if(!targetId) return;
 
@@ -5319,6 +7563,8 @@ function showScreen(name){
     sc.classList.toggle('is-active', on);
     sc.hidden = !on;
   });
+  const tabbar = document.querySelector('.tabbar');
+  if(tabbar) tabbar.style.setProperty('--tab-i', ['today','calendar','progress','weight'].indexOf(name));
   document.querySelectorAll('.tabbar-btn').forEach(b => {
     const on = b.dataset.screen === name;
     b.classList.toggle('is-active', on);
@@ -5327,6 +7573,7 @@ function showScreen(name){
 
   /* 切到體重頁時重畫，因為隱藏時量不到寬度 */
   if(name === 'weight'){ renderBwStats(); renderBwChart(); renderBwWeekly(); }
+  if(name === 'progress') renderProgress();
   window.scrollTo({ top:0, behavior:'instant' in window ? 'instant' : 'auto' });
 }
 

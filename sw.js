@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_NAME = 'recomp-v7';
+const CACHE_NAME = 'recomp-v8';
 const CORE_ASSETS = ['/', '/index.html', '/manifest.json'];
 
 /* 安裝：先把核心資源存起來 */
@@ -47,8 +47,12 @@ self.addEventListener('fetch', event => {
         }
         return res;
       }).catch(async () => {
-        const cached = await caches.match(req);
-        return cached || caches.match('/') || caches.match('/index.html');
+        /* caches.match() 回傳的是 Promise，本身永遠是 truthy，
+           原本 a || b || c 的寫法永遠停在第二個，第三個退路從來沒用到。
+           ignoreSearch：「更新」按鈕會帶 ?v=時間戳 重新導向，離線時也要能對上 */
+        return (await caches.match(req, { ignoreSearch:true }))
+          || (await caches.match('/'))
+          || (await caches.match('/index.html'));
       })
     );
     return;

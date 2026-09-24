@@ -1,0 +1,11 @@
+{
+  "name": "recomp-tests",
+  "private": true,
+  "description": "RECOMP 的瀏覽器測試。app 本身是單一 HTML，不需要建置；這裡只放測試工具。",
+  "scripts": {
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

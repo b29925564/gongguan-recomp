@@ -1,22 +1,97 @@
 {
-  "name": "RECOMP",
+  "id": "/",
+  "name": "RECOMP 重訓紀錄",
   "short_name": "RECOMP",
-  "description": "Body Recomposition Dashboard",
+  "description": "自動漸進超負荷的重訓紀錄：打勾、自動加重、看見每個動作的力量曲線。資料只存在你的手機。",
+  "lang": "zh-Hant-TW",
+  "dir": "ltr",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#F5F3F0",
   "theme_color": "#E30613",
-  "orientation": "portrait-primary",
+  "categories": [
+    "health",
+    "fitness",
+    "lifestyle"
+  ],
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23E30613'/><text x='96' y='136' font-size='120' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900'>R</text></svg>",
+      "src": "/icons/icon-192.png",
       "sizes": "192x192",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23E30613'/><text x='256' y='370' font-size='320' text-anchor='middle' fill='white' font-family='sans-serif' font-weight='900'>R</text></svg>",
+      "src": "/icons/icon-512.png",
       "sizes": "512x512",
-      "type": "image/svg+xml"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/screenshots/today.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "今日訓練：一組一格的進度、52px 打勾按鈕"
+    },
+    {
+      "src": "/screenshots/progress.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "進步：每個動作的重量曲線與出席紀錄"
+    },
+    {
+      "src": "/screenshots/finish.jpg",
+      "sizes": "780x1688",
+      "type": "image/jpeg",
+      "form_factor": "narrow",
+      "label": "練完最後一組的完成畫面"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "今日訓練",
+      "short_name": "今日",
+      "url": "/?screen=today",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "看進步",
+      "short_name": "進步",
+      "url": "/?screen=progress",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "記體重",
+      "short_name": "體重",
+      "url": "/?screen=weight",
+      "icons": [
+        {
+          "src": "/icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
