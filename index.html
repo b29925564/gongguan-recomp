@@ -24,6 +24,382 @@
   }catch(e){}
 })();
 </script>
+<script>
+/* ══════════════════════════════════════════════
+   語言 / Language
+   介面原文是中文。英文模式下不改動任何程式邏輯，而是在文字要顯示的那一刻翻譯：
+   DOM 文字與 aria-label / placeholder / title / alt 由 MutationObserver 翻，
+   Canvas 的 fillText、confirm / alert、複製到剪貼簿的文字由包裝過的函式翻。
+   紀錄資料一律不動，中文模式的行為與之前完全一樣。
+   ── 決定語言 ──
+   rcmeta_lang 有值就用；沒有值的舊使用者（已有紀錄或已看過引導）維持中文；
+   全新使用者跟隨系統語言（zh 開頭 → 中文，其他 → 英文）。第一次決定之後就寫入 rcmeta_lang，
+   之後清除紀錄也不會突然換語言。放在 rcmeta_ 而不是 recomp_：語言是這台裝置的設定，不跟著備份走。
+   ══════════════════════════════════════════════ */
+(function(){
+  var ls = function(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } };
+  function detect(){
+    var v = ls('rcmeta_lang');
+    if(v === 'zh' || v === 'en') return v;
+    v = firstRun();
+    try{ localStorage.setItem('rcmeta_lang', v); }catch(e){}
+    return v;
+  }
+  function firstRun(){
+    try{
+      if(ls('rcmeta_onboarded') === '1') return 'zh';
+      for(var i = 0; i < localStorage.length; i++){
+        var k = localStorage.key(i);
+        if(k && k.indexOf('recomp_') === 0) return 'zh';
+      }
+    }catch(e){}
+    var langs = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || 'zh'];
+    return /^zh/i.test(langs[0] || '') ? 'zh' : 'en';
+  }
+  var LANG = detect();
+  window.LANG = LANG;
+  document.documentElement.setAttribute('lang', LANG === 'en' ? 'en' : 'zh-Hant');
+
+  var CJK = /[　-〿一-鿿＀-￯]/;
+  var MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var MONTHS_LONG = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+  var mon = function(m){ return MONTHS[(+m - 1 + 12) % 12] || m; };
+  var isCode = function(c){ return /^[A-Z]$/.test(c); };
+  var pl = function(n, one, many){ return n + ' ' + (String(n).trim() === '1' ? one : (many || one + 's')); };
+  var WD = { '日':'Sun','一':'Mon','二':'Tue','三':'Wed','四':'Thu','五':'Fri','六':'Sat' };
+
+  /* key：中文原文，{} 是程式插入的值。value：英文，{0} {1}… 依序對應，或是函式。 */
+  var EN = {
+    /* ── 導覽、共用 ── */
+    '搜尋':'Search', '切換主題':'Switch theme', '設定':'Settings', '今日':'Today', '今天':'Today',
+    '月曆':'Calendar', '進步':'Progress', '體重':'Weight', '主要導覽':'Main navigation',
+    '前一天':'Previous day', '後一天':'Next day', '本週日期':'This week', '上個月':'Previous month', '下個月':'Next month',
+    '訓練月曆':'Training calendar', '時間範圍':'Time range', '關閉':'Close', '取消':'Cancel', '完成':'Done',
+    '預覽':'Preview', '更新':'Update', '稍後':'Later', '知道了':'Got it', '編輯':'Edit', '撤銷':'Undo',
+    '上一步':'Back', '第一步':'Step 1', '已複製':'Copied', '回到今天':'Back to today',
+    '較早一週':'Earlier week', '較新一週':'Later week', '匯出圖片預覽':'Export preview',
+    '搜尋訓練紀錄':'Search training log', '日期、動作、A / B / 休…':'Date, exercise, A / B / rest…', '清除搜尋':'Clear search',
+    '全部':'All', '休':'Rest', '休息':'Rest', '休息日':'Rest day', '恢復日':'Recovery day', '訓練':'Workout', '本週':'This week', '上週':'Last week',
+    '本月':'This month', '週報':'Weekly report', '匯出圖片':'Export image', '目前':'Current', '筆':' entries',
+    '、':', ', '，':', ', '；':'; ',
+    '{} 週前': function(n){ return pl(n, 'week') + ' ago'; },
+    '{} 週後': function(n){ return 'in ' + pl(n, 'week'); },
+    '{} 天前': function(n){ return pl(n, 'day') + ' ago'; },
+
+    /* ── 日期 ── */
+    '日':'S', '一':'M', '二':'T', '三':'W', '四':'T', '五':'F', '六':'S',
+    '週日':'Sun', '週一':'Mon', '週二':'Tue', '週三':'Wed', '週四':'Thu', '週五':'Fri', '週六':'Sat',
+    '{} 月': function(m){ return MONTHS_LONG[+m - 1] || m; },
+    '{}月': function(m){ return mon(m); },
+    '{} 年 {} 月': function(y, m){ return (MONTHS_LONG[+m - 1] || m) + ' ' + y; },
+    '{}{} 年': '{0}{1}',
+    '本月 ·':'This month ·',
+    '{}月{}日 週{} {}': function(m, d, w, rest){ return (WD[w] || w) + ', ' + mon(m) + ' ' + d + ' ' + tr(rest); },
+
+    /* ── 今日 ── */
+    '胸推進度':'Chest press progress', '目標 50':'Goal 50', '訓練規則':'Training rules',
+    'RPE 7-8 · 組間 90 秒':'RPE 7–8 · 90 s rest between sets',
+    '第一組做到次數上限 → 下次 +2.5kg':'First set hits the top of the rep range → +2.5 kg next time',
+    '睡眠未滿 6 小時，隔天重量 -10%':'Under 6 hours of sleep → −10% weight the next day',
+    '{}日 {}': function(c, name){ return isCode(c) ? 'Day ' + c + ' · ' + tr(name) : null; },
+    '{}日': function(c){ return isCode(c) ? 'Day ' + c : null; },
+    '{} 日': function(c){ return isCode(c) ? 'Day ' + c : null; },
+    '第 {} 週':'Week {0}', '{}（今天）':'{0} (today)',
+    '{}年{}月{}日 {} 訓練': function(y, m, d, c){ return mon(m) + ' ' + d + ', ' + y + ' · ' + (isCode(c) ? 'Day ' + c : 'Rest'); },
+    '{} 重量 {} 公斤，點擊修改':'{0}: {1} kg, tap to edit', '點擊修改重量':'Tap to edit the weight',
+    '體重趨勢，{} 到 {}，變化 {}':'Weight trend, {0} to {1}, change {2}',
+    '每週體重增減，近 {} 週，平均每週 {}kg':'Weekly weight change over {0} weeks, average {1} kg per week', 'A日':'Day A', 'B日':'Day B',
+    '今天 ·':'Today ·', '· 第 {} 週':'· Week {0}',
+    '{} 個動作 · {} 組 · 約 {} 分鐘': function(a, b, c){ return pl(a, 'exercise') + ' · ' + pl(b, 'set') + ' · ~' + c + ' min'; },
+    '{} 個動作 · {} 組 · 約 {} 分鐘 →': function(a, b, c){ return pl(a, 'exercise') + ' · ' + pl(b, 'set') + ' · ~' + c + ' min →'; },
+    '恢復日 · 不做重訓':'Recovery day · no lifting',
+    '紀錄到 {}{}':'Logging to {0}{1}', '（今天）':' (today)',
+    '，完成 {}/{} 組':', {0}/{1} sets done',
+    '/{} 天完成':'/{0} days done', '/{} 組':'/{0} sets', '/0 組':'/0 sets',
+    '達上限':'maxed', '未完成':'not done', '{} 第 {} 組：{}':'{0} set {1}: {2}',
+    '走路 8000 步':'Walk 8,000 steps', '低強度活動，幫助血液循環與恢復':'Low-intensity movement helps circulation and recovery',
+    '睡滿 6.5 小時':'Sleep 6.5 hours', '未滿 6 小時，隔天重量 −10%':'Under 6 hours → −10% weight the next day',
+    '喝水 2500ml':'Drink 2,500 ml of water', '脫水 2% 力量就會明顯下降':'Just 2% dehydration noticeably cuts strength',
+    '/{} 項':'/{0} done', '休息 · 恢復':'Rest · Recovery',
+    '下次訓練 · {} {}':'Next workout · {0} {1}',
+    '今天不做重訓。肌肉是在休息的時候長出來的 —— 把恢復做好，下一次才推得動。':'No lifting today. Muscle grows while you rest, so recover well and you will push more next time.',
+    '訓練 · {}':'Workout · {0}',
+    '{}（{}/{} 組）':'{0} ({1}/{2} sets)',
+    '⚠ 補回提醒':'⚠ Catch-up reminder',
+    '：上次 {} 日（{}）有 {} 個動作未完成：': function(c, d, n){ return ': last Day ' + c + ' (' + d + ') left ' + pl(n, 'exercise') + ' unfinished:'; },
+    '建議今天優先補回這些動作':'Try to do these first today',
+    '上次 {}/{}': function(m, d){ return 'Last ' + mon(m) + ' ' + d; },
+    '點一下 = 完成，再點一下 = 達到次數上限（紅）':'Tap once = done, tap again = hit the top of the rep range (red)',
+    '同一個動作全部紅色 → 下次自動加重 · 點重量數字可以修改':'All sets red → weight goes up next time · tap the weight to edit it',
+    '匯出今日訓練卡（社群打卡）':'Export today’s workout card',
+    '訓練量':'Volume', '升重':'Weight ups', '{} 項':'{0}', '{}/{} 天':'{0}/{1} days',
+    '組間休息':'Rest', '結束':'Skip', '組間休息 · 下一組是第 {} 組':'Rest · next up: set {0}',
+    '休息結束，可以下一組了':'Rest over, time for the next set',
+    '已收回升重 · {} 回到 {}kg':'Weight increase undone · {0} back to {1} kg',
+    '已更正 {}/{} 的紀錄': function(m, d){ return 'Corrected the log for ' + mon(m) + ' ' + d; },
+    '訓練完成':'Workout complete', '分享訓練卡':'Share workout card', '恢復日完成 ✓':'Recovery day done ✓',
+    '休息日無訓練可匯出':'Nothing to export on a rest day', '已匯出訓練卡':'Workout card exported', '今日訓練卡':'Today’s workout card',
+    '✓ 全部完成':'✓ All done', '組完成':'sets done',
+
+    /* ── 月曆、週報 ── */
+    '上肢推':'Upper push', '下肢背':'Legs & back', '本月摘要':'Month summary',
+    '/{} 天':'/{0} days', '完成組數':'Sets done', '/ {} 天':'/ {0} days',
+    '紀錄 {}/{} 的體重': function(m, d){ return 'Log weight for ' + mon(m) + ' ' + d; },
+    '休息 / 恢復':'Rest / Recovery',
+    '無體重紀錄':'No weight logged', '{}kg（單筆）':'{0} kg (one entry)',
+    '{} → {}kg（{}{}kg）':'{0} → {1} kg ({2}{3} kg)',
+    'RECOMP 週報｜{}':'RECOMP weekly report | {0}',
+    '訓練完成：{}/{} 天':'Workouts done: {0}/{1} days', '體重：{}':'Weight: {0}',
+    '無升級':'none', '升重：{}':'Weight ups: {0}',
+    '完成組數：{}/{}　訓練量：{}kg':'Sets done: {0}/{1}   Volume: {2} kg',
+    '完成組數：{}/{} 訓練量：{}kg':'Sets done: {0}/{1}   Volume: {2} kg',
+    '每日明細：':'Daily breakdown:', '訓練✓':'Workout ✓', '訓練—':'Workout —', '{}｜{}{}':'{0} | {1}{2}',
+    '{} · 訓練週報':'{0} · Weekly report', '訓練未滿':'Workouts short',
+    '重量 × 組數':'Weight × sets', '體重摘要':'Weight summary', '本週升重':'Weight ups this week', '每日明細':'Daily breakdown',
+    '複製純文字（貼到 LINE / 備忘錄）':'Copy as text (for messages or notes)', '已複製週報':'Weekly report copied',
+    '月曆匯出':'Calendar export', 'PNG 預覽':'PNG preview', '下載 PNG':'Download PNG',
+    '匯出內容以目前顯示月份為準；Canvas 使用系統字體，中文字型會依裝置而異。':'Exports the month currently shown. The image uses your system font, so it can look slightly different on each device.',
+    '訓練 {}/{} 天 · 組數 {}/{} · 休息 {} 天':'Workouts {0}/{1} days · sets {2}/{3} · rest {4} days',
+    '已匯出 PNG':'PNG exported', '月曆 PNG':'Calendar PNG', '確認後才會儲存或分享':'Nothing is saved or shared until you confirm',
+
+    /* ── 搜尋 ── */
+    '已完成訓練':'Workouts done', '掃描今天前 365 天與後 31 天…':'Searching the past 365 days and next 31 days…',
+    '體重 {}':'Weight {0}', '（顯示前 120 筆）':' (showing the first 120)',
+    '找到 {} 筆{} · 掃描今天前 365 天與後 31 天': function(n, extra){ return pl(n, 'result') + tr(extra) + ' · past 365 days and next 31 days'; },
+    '沒有符合結果。':'No matches.',
+
+    /* ── 進步 ── */
+    '力量曲線':'Strength curves', '點動作看每一次':'Tap an exercise to see every session',
+    '每週訓練量':'Weekly volume', '重量 × 完成組數':'Weight × sets done', '出席':'Attendance', '近 16 週':'Last 16 weeks',
+    '匯出進步卡（社群分享）':'Export progress card',
+    '{} 噸':'{0} t',
+    '還沒有這個動作的紀錄。下次{}打完第一組就會出現。':'No sessions for this exercise yet. It will show up after your first set on {0}.',
+    '{}/{} 組':'{0}/{1} sets', '推算值（v3.3 以前沒有逐次存重量）':'Estimated (before v3.3, weights were not saved per session)',
+    '由升重紀錄推算':'Estimated from weight increases',
+    '升重的那次':'Weight went up', '做滿':'All sets done', '沒做完':'Unfinished',
+    '較前 4 週 {}%':'{0}% vs previous 4 weeks', '近 4 週平均 {} / 週':'4-week average {0} / week',
+    '{} · {}/{} 組':'{0} · {1}/{2} sets',
+    '部分':'Partial', '缺席':'Missed', '目前連續':'Current streak', '次':' sessions', '最長':'Best',
+    '還沒開始':'Not started yet', '平均力量 · {} 起第 {} 週':'Average strength · week {1} since {0}',
+    '出席率':'attendance', '還沒有訓練紀錄':'No training logged yet',
+    '在「今日」打勾完成第一組之後，這裡會開始畫出每個動作的重量曲線。':'Check off your first set on Today and a weight curve for each exercise starts here.',
+    '{} → {}kg · {} 次': function(a, b, n){ return a + ' → ' + b + ' kg · ' + pl(n, 'session'); },
+    '{}kg · 尚未訓練':'{0} kg · not trained yet',
+    '進步報告 · 第 {} 週':'Progress report · week {0}',
+    'AVG STRENGTH · 平均力量提升':'AVG STRENGTH', '次訓練':'workouts', '次升重':'weight ups',
+    '還沒有訓練紀錄可以匯出':'No training logged to export yet', '已匯出進步卡':'Progress card exported', '進步卡':'Progress card',
+    '{} 重量變化：{}kg 到 {}kg，共 {} 次訓練':'{0} weight: {1} kg to {2} kg over {3} sessions',
+    '近 12 週每週訓練量，近 4 週平均每週 {}':'Weekly volume for 12 weeks; 4-week average {0} per week',
+    '近 {} 週出席 {}/{} 個訓練日':'Attended {1}/{2} training days in the last {0} weeks',
+    '近 {} 週 · 每格為該週平均與前一週的差':'Last {0} weeks · each bar is that week’s average minus the week before',
+    '平均 {}{}kg / 週':'Average {0}{1} kg / week',
+
+    /* ── 體重 ── */
+    '紀錄體重':'Log weight', '紀錄':'Logged', '趨勢':'Trend',
+    '每週增減':'Weekly change', '往下＝變輕':'Down = lighter',
+    '還沒有紀錄。量完體重後在上面輸入。':'Nothing logged yet. Weigh yourself and enter it above.',
+    '累積變化':'Total change', '還需要跨兩週的紀錄':'Needs entries from two different weeks',
+    '這張圖比較每週的平均體重，至少要有兩個不同週次的資料。':'This chart compares weekly averages, so it needs data from at least two weeks.',
+    '還沒有體重紀錄':'No weight logged yet', '上面輸入今天的體重，累積兩筆之後這裡就會長出趨勢線。':'Enter today’s weight above. After two entries a trend line appears here.',
+    '再一筆就能畫圖':'One more entry to draw the chart', '趨勢線至少需要兩個時間點。':'A trend line needs at least two points.',
+    '持平':'Flat', '{} 筆 · {} – {}': function(n, a, b){ return pl(n, 'entry', 'entries') + ' · ' + a + ' – ' + b; },
+    '7 日平均':'7-day average', '單次量測':'Single reading',
+    '請先在月曆選擇日期':'Pick a date on the calendar first', '體重需介於 30–200kg 之間':'Weight must be between 30 and 200 kg', '已紀錄':'Saved',
+
+    /* ── 設定 ── */
+    '偏好設定':'Preferences', '資料管理':'Data', '永久儲存':'Persistent storage', '檢查中…':'Checking…',
+    '紀錄大小':'Data size', '上次備份':'Last backup',
+    '紀錄只存在這台裝置的瀏覽器裡。換裝置、清除網站資料，或系統在空間不足時回收，都會讓紀錄消失。請定期匯出備份。':'Your records live only in this device’s browser. Switching devices, clearing site data, or the system freeing up space will erase them. Export a backup regularly.',
+    '匯出備份':'Export backup', '匯入備份':'Import backup', '還原上一次變更':'Undo last change', '清除所有紀錄':'Delete all records',
+    '已啟用':'On', '未啟用':'Off', '此瀏覽器不支援':'Not supported in this browser',
+    '{} 筆 · {}': function(n, size){ return pl(n, 'entry', 'entries') + ' · ' + size; },
+    '從未備份':'Never', '該備份了':'Time for a backup', '立即備份':'Back up now',
+    '你還沒有匯出過備份。紀錄只存在這台裝置上。':'You haven’t exported a backup yet. Your records exist only on this device.',
+    '上次備份是 {} 天前。紀錄只存在這台裝置上。': function(n){ return 'Your last backup was ' + pl(n, 'day') + ' ago. Your records exist only on this device.'; },
+    '變更':'change', '還原到「{}」之前的狀態':'Restore to before “{0}”',
+    '組間計時器':'Rest timer', '打完一組自動開始倒數 90 秒':'Starts a 90-second countdown after each set',
+    '震動回饋':'Haptics', '訓練打勾、升重、體重儲存時震動':'Vibrate when you check a set, level up, or save your weight',
+    '月曆熱力圖':'Calendar heat map', '依完成度顯示月曆格子底色':'Shade calendar days by how much you finished',
+    '匯出前預覽':'Preview before export', '儲存或分享圖片前先看一次成品':'See the image before saving or sharing it',
+    '訓練中螢幕常亮':'Keep screen on while training', '開始打勾後螢幕不會自動變暗，練完自動解除':'The screen stays on once you start checking sets, until you finish',
+    '每週約 {} 天 · {} 個動作': function(d, n){ return '~' + d + ' days a week · ' + pl(n, 'exercise'); },
+    '每次加重量設定':'Weight increments', '做滿全部組數時，該動作自動增加的重量（kg）':'How much weight (kg) is added when you max out every set',
+    '目前重量：{}kg':'Current weight: {0} kg',
+    '跟隨系統':'Match system', '淺色':'Light', '深色':'Dark',
+    '語言':'Language',
+    '⚠ 儲存空間不足，資料可能無法保存。請先匯出備份再清除瀏覽器快取。':'⚠ Storage is full, so data may not be saved. Export a backup before clearing the browser cache.',
+    '已匯出 {} 筆紀錄': function(n){ return 'Exported ' + pl(n, 'record'); },
+    '無法存檔，備份內容已複製到剪貼簿':'Couldn’t save the file, so the backup was copied to the clipboard',
+    '匯出失敗：':'Export failed: ', '檔案格式不正確':'Unrecognized file format', '檔案裡沒有紀錄':'The file has no records',
+    '已匯入 {} 筆': function(n){ return 'Imported ' + pl(n, 'record'); },
+    '略過 {} 筆不認得的資料': function(n){ return 'skipped ' + pl(n, 'unrecognized item'); },
+    '來源備份日期 {}':'backup from {0}', '來源版本 {}':'app version {0}',
+    '可用「還原上一次變更」回到匯入前':'Use “Undo last change” to go back',
+    '匯入失敗：':'Import failed: ', '匯入失敗：無法讀取檔案':'Import failed: couldn’t read the file',
+    '目前沒有任何紀錄':'There are no records yet',
+    '確定要清除全部 {} 筆紀錄嗎？': function(n){ return 'Delete all ' + pl(n, 'record') + '?'; },
+    '（訓練打勾、重量進度、體重紀錄）':'(checked sets, weight progress and body weight)',
+    '系統會先留一份快照，清除後仍可按「還原上一次變更」救回來。':'A snapshot is saved first, so you can still bring them back with “Undo last change”.',
+    '已清除 {} 筆紀錄，可按「還原上一次變更」救回': function(n){ return 'Deleted ' + pl(n, 'record') + '. “Undo last change” brings them back'; },
+    '沒有可還原的快照':'Nothing to undo', '（{}）':' ({0})',
+    '要還原到「{}」之前的狀態嗎？{}':'Restore to before “{0}”?{1}',
+    '目前的紀錄會被這份快照取代。':'Your current records will be replaced by this snapshot.',
+    '已還原 {} 筆紀錄': function(n){ return 'Restored ' + pl(n, 'record'); },
+
+    /* ── 版本、安裝、圖片 ── */
+    '已有新版本可用':'A new version is available', '立即更新':'Update now',
+    '有新版本 {}':'New version {0}', '目前是 {}':'You have {0}', '更新中…':'Updating…',
+    '更新還沒生效':'The update hasn’t applied yet', '伺服器上是 {}，這台裝置仍是 {}。':'The server has {0}; this device still has {1}.',
+    '重整過一次了，通常是 CDN 還在送舊檔，過幾分鐘會自己好。':'The app already reloaded once. Usually the CDN is still serving the old files; it fixes itself within a few minutes.',
+    '可安裝到手機桌面，支援離線開啟':'Install on your home screen; works offline', '安裝 App':'Install app',
+    '儲存圖片':'Save image', '長按下方圖片 → 選「加入照片」或「儲存影像」即可存到相簿。':'Long-press the image below and choose “Save to Photos”.',
+    '產生圖片失敗：':'Couldn’t create the image: ', '產生圖片失敗':'Couldn’t create the image', '無法產生預覽':'Couldn’t create a preview',
+    '已匯出':'Exported', '已下載':'Downloaded', '儲存 / 分享':'Save / Share',
+
+    /* ── 引導、課表 ── */
+    '每一組':'Every set', '都算數。':'counts.',
+    '自動漸進超負荷':'Automatic progressive overload', '同一個動作每組都做到次數上限，下次自動加重。':'Hit the top of the rep range on every set and the weight goes up next time.',
+    '看得見的進步':'Progress you can see', '每個動作的重量曲線、出席紀錄、每週訓練量。':'A weight curve for every lift, attendance and weekly volume.',
+    '資料只在你的手機':'Your data stays on your phone', '不用註冊、不用網路，隨時匯出備份。':'No sign-up, no internet needed, and you can export a backup anytime.',
+    '選一套課表':'Pick a program', '之後隨時可以在 設定 → 訓練計畫 修改動作、組數和每週排程。':'You can change exercises, sets and the weekly schedule anytime in Settings → Program.',
+    '訓練計畫':'Program', '編輯課表':'Edit program', '儲存課表':'Save program', '課表已儲存':'Program saved',
+    '天／週':'days/wk', '＋':'+', '自訂':'custom', '自己排課表':'Build your own',
+    '動作、組數、每週哪幾天練，全部自己決定':'Choose your own exercises, sets and training days',
+    '全身入門':'Full Body Starter', '每週 3 天 · 兩套全身課表輪替 · 第一次重訓從這裡開始':'3 days a week · two alternating full-body workouts · the place to start',
+    '上下半身':'Upper / Lower', '每週 4 天 · 上半身 / 下半身輪替 · 有一點基礎之後最穩的選擇':'4 days a week · upper and lower days · the steady choice once you have the basics',
+    '推拉腿':'Push / Pull / Legs', '每週 6 天 · 推 / 拉 / 腿各練兩次 · 訓練量最大':'6 days a week · push, pull and legs twice each · the most volume',
+    '公館重組計畫':'Gongguan Recomp', '器械 A/B · 31 天一輪 · 這個 app 最初的課表':'Machines, A/B · 31-day cycle · the program this app started with',
+    '已套用「{}」· 點重量數字改成你目前用的重量':'“{0}” is ready · tap a weight to set yours',
+    '點一下切換：休 → {} → 休':'Tap to cycle: Rest → {0} → Rest',
+    '目前是 {} 天一輪的循環（{}…），每 {} 天重來一次。': function(n, c, m){ return 'This is a ' + n + '-day cycle (' + c.replace(/休/g, 'Rest') + '…) that repeats every ' + m + ' days.'; },
+    '改成每週固定排程':'Switch to a weekly schedule', '這個動作':'this exercise',
+    '起始重量':'Starting weight', '目前重量':'Current weight', '組數':'Sets', '次數':'Reps', '新增動作':'Add exercise',
+    '新增 {} 日':'Add Day {0}', '每週排程':'Weekly schedule', '課表':'Workouts',
+    '{} 日至少要有一個動作':'Day {0} needs at least one exercise', '排程裡至少要有一天訓練':'The schedule needs at least one training day',
+    '名稱，例如 上半身':'Name, e.g. Upper body', '{} 日名稱':'Day {0} name', '刪除 {} 日':'Delete Day {0}', '動作名稱':'Exercise name', '刪除 {}':'Remove {0}',
+    '週{}：{}，點一下切換': function(w, v){ return (WD[w] || w) + ': ' + tr(v) + ', tap to change'; },
+
+    /* 範本裡的課表與動作 */
+    '上半身':'Upper body', '下半身':'Lower body', '推':'Push', '拉':'Pull', '腿':'Legs',
+    '全身・臥推':'Full body · Bench', '全身・肩推':'Full body · Press',
+    '槓鈴深蹲':'Barbell squat', '膝蓋與腳尖同方向':'Knees track over toes',
+    '槓鈴臥推':'Barbell bench press', '肩胛後收下壓':'Shoulder blades back and down',
+    '槓鈴划船':'Barbell row', '站姿肩推':'Overhead press', '核心收緊不後仰':'Brace your core, don’t lean back',
+    '硬舉':'Deadlift', '背打直，槓貼腿':'Flat back, bar close to your legs',
+    '滑輪下拉':'Lat pulldown', '啞鈴肩推':'Dumbbell shoulder press', '坐姿划船':'Seated cable row', '啞鈴彎舉':'Dumbbell curl',
+    '羅馬尼亞硬舉':'Romanian deadlift', '腿推機':'Leg press', '腿後勾':'Leg curl', '提踵':'Calf raise',
+    '上斜啞鈴臥推':'Incline dumbbell press', '側平舉':'Lateral raise', '三頭下壓':'Triceps pushdown', '臉拉':'Face pull', '繩索捲腹':'Cable crunch',
+    '合式胸部推舉機':'Chest press machine', '肩胛夾緊':'Squeeze your shoulder blades',
+    '蝴蝶機':'Pec fly machine', '三頭肌推舉機':'Triceps press machine',
+    '散式高拉訓練機':'Lat pulldown machine', '握窄，上背厚度':'Narrow grip, for upper-back thickness', '握寬，背闊':'Wide grip, for lat width',
+    '腹部訓練機':'Ab crunch machine', '大腿推蹬訓練機':'Leg press machine', '同機順便補小腿，不另記一個動作':'Do calf presses on the same machine; no separate entry',
+    '二頭肌彎舉訓練機':'Biceps curl machine', '下背訓練機':'Back extension machine',
+    '小腿推蹬':'Calf press', '後三角訓練機':'Rear delt machine',
+  };
+
+  /* 編譯：沒有 {} 的是完全比對；有 {} 的轉成正規表示式，字面越長越優先 */
+  var exact = {}, patterns = [];
+  var esc = function(s){ return s.replace(/[.*+?^$()|[\]\\\/]/g, '\\$&'); };
+  Object.keys(EN).forEach(function(k){
+    if(k.indexOf('{}') < 0){ exact[k] = EN[k]; return; }
+    var re = new RegExp('^' + k.split('{}').map(esc).join('([\\s\\S]*?)') + '$');
+    patterns.push({ re:re, v:EN[k], weight:k.replace(/\{\}/g, '').length });
+  });
+  patterns.sort(function(a, b){ return b.weight - a.weight; });
+
+  function fill(v, groups){
+    if(typeof v === 'function') return v.apply(null, groups);
+    return v.replace(/\{(\d)\}/g, function(_, i){ var g = groups[+i]; return g == null ? '' : tr(g); });
+  }
+  /* 分隔符號拆開來分段翻，每一段都認得才算數（使用者自己打的中文不會被改成半中半英） */
+  var SEPS = [/(\s+·\s+|\s+→\s+|\s*｜\s*|\s*：\s*|\s*，\s*|\s*、\s*|\s*；\s*)/, /(\s+)/];
+  function trCore(s, depth){
+    if(Object.prototype.hasOwnProperty.call(exact, s)) return exact[s];
+    for(var i = 0; i < patterns.length; i++){
+      var m = s.match(patterns[i].re);
+      if(m){
+        var groups = m.slice(1);
+        if(groups.some(function(g){ return g === ''; }) && patterns[i].weight < 2) continue;
+        var r = fill(patterns[i].v, groups);
+        if(r != null) return r;
+      }
+    }
+    var SEP = SEPS[0].test(s) ? SEPS[0] : SEPS[1];
+    if(depth < 4 && SEP.test(s)){
+      var parts = s.split(SEP), ok = true;
+      var out = parts.map(function(p, idx){
+        if(idx % 2 === 1){
+          var sep = p.trim();
+          return sep === '' ? ' ' : (exact[sep] != null && CJK.test(sep) ? exact[sep] : p);
+        }
+        if(!CJK.test(p)) return p;
+        var t = trCore(p, depth + 1);
+        if(t === p || CJK.test(t)) ok = false;
+        return t;
+      });
+      if(ok) return out.join('');
+    }
+    return s;
+  }
+  function tr(s){
+    if(LANG !== 'en' || s == null) return s;
+    s = String(s);
+    if(!CJK.test(s)) return s;
+    var lead = s.match(/^\s*/)[0], trail = s.match(/\s*$/)[0];
+    var core = s.trim();
+    if(!core) return s;
+    return lead + trCore(core.replace(/\s+/g, ' '), 0) + trail;
+  }
+  function trLines(s){ return LANG === 'en' && s != null ? String(s).split('\n').map(tr).join('\n') : s; }
+  window.tr = tr;
+  window.trLines = trLines;
+
+  if(LANG !== 'en') return;
+
+  /* ── DOM ── */
+  var ATTRS = ['aria-label', 'placeholder', 'title', 'alt'];
+  var SKIP = { SCRIPT:1, STYLE:1, TEXTAREA:1, INPUT:1 };
+  function trNode(n){
+    if(n.nodeType === 3){
+      var p = n.parentNode;
+      if(!p || SKIP[p.nodeName] || (p.closest && p.closest('[data-i18n-skip]'))) return;
+      if(p.hasAttribute && p.hasAttribute('data-en')){ if(p.textContent !== p.getAttribute('data-en')) p.textContent = p.getAttribute('data-en'); return; }
+      var v = n.nodeValue;
+      if(CJK.test(v)){ var t = tr(v); if(t !== v) n.nodeValue = t; }
+    }else if(n.nodeType === 1){
+      if(SKIP[n.nodeName] && n.nodeName !== 'INPUT' && n.nodeName !== 'TEXTAREA') return;
+      for(var i = 0; i < ATTRS.length; i++){
+        var a = n.getAttribute(ATTRS[i]);
+        if(a && CJK.test(a)){ var ta = tr(a); if(ta !== a) n.setAttribute(ATTRS[i], ta); }
+      }
+      if(n.hasAttribute('data-en') && n.textContent !== n.getAttribute('data-en')){ n.textContent = n.getAttribute('data-en'); return; }
+      if(n.nodeName === 'INPUT' || n.nodeName === 'TEXTAREA') return;
+      for(var c = n.firstChild; c; c = c.nextSibling) trNode(c);
+    }
+  }
+  var obs = new MutationObserver(function(list){
+    for(var i = 0; i < list.length; i++){
+      var r = list[i];
+      if(r.type === 'childList') for(var j = 0; j < r.addedNodes.length; j++) trNode(r.addedNodes[j]);
+      else if(r.type === 'characterData') trNode(r.target);
+      else if(r.type === 'attributes') trNode(r.target);
+    }
+  });
+  obs.observe(document.documentElement, { childList:true, subtree:true, characterData:true, attributes:true, attributeFilter:ATTRS });
+  window.i18nTranslateTree = function(root){ trNode(root || document.documentElement); };
+
+  /* ── Canvas、對話框 ── */
+  var C2D = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
+  if(C2D){
+    var fillText = C2D.fillText, measureText = C2D.measureText;
+    C2D.fillText = function(t){ var a = [].slice.call(arguments); a[0] = tr(t); return fillText.apply(this, a); };
+    C2D.measureText = function(t){ return measureText.call(this, tr(t)); };
+  }
+  var _confirm = window.confirm, _alert = window.alert;
+  window.confirm = function(m){ return _confirm.call(window, trLines(m)); };
+  window.alert = function(m){ return _alert.call(window, trLines(m)); };
+})();
+</script>
 <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -1419,6 +1795,8 @@ body{
 .form-msg{display:block;margin-top:var(--s2);font-size:var(--fs-small);color:var(--concrete)}
 
 .range-switch{display:flex;border:1px solid var(--line)}
+.lang-switch{flex:none}
+.ob-lang{margin:var(--s4) auto 0;width:max-content}
 .range-btn{
   padding:5px 10px;
   background:none;border:none;border-right:1px solid var(--line);
@@ -2224,6 +2602,7 @@ body{
   content:'上限';position:absolute;bottom:3px;left:0;right:0;text-align:center;
   font-family:'Inter','Noto Sans TC',sans-serif;font-size:8px;font-weight:700;letter-spacing:.08em;
 }
+html[lang="en"] #screenToday .set-check.cap::before{content:'MAX'}
 #screenToday .set-check.cap svg{transform:translateY(-3px)}
 [data-theme="dark"] #screenToday .set-check.cap{color:#18181b}
 #screenToday .set-check.pop{animation:setPop 340ms var(--ease-out)}
@@ -2769,9 +3148,9 @@ body{
         <div class="card-head">
           <span class="kicker">趨勢</span>
           <div class="range-switch" id="bwRangeSwitch" role="group" aria-label="時間範圍">
-            <button type="button" data-range="30" class="range-btn">1月</button>
-            <button type="button" data-range="90" class="range-btn is-active">3月</button>
-            <button type="button" data-range="180" class="range-btn">6月</button>
+            <button type="button" data-range="30" class="range-btn" data-en="1M">1月</button>
+            <button type="button" data-range="90" class="range-btn is-active" data-en="3M">3月</button>
+            <button type="button" data-range="180" class="range-btn" data-en="6M">6月</button>
             <button type="button" data-range="0" class="range-btn">全部</button>
           </div>
         </div>
@@ -2997,6 +3376,10 @@ body{
         <li><b>資料只在你的手機</b><span>不用註冊、不用網路，隨時匯出備份。</span></li>
       </ul>
       <button type="button" class="btn btn-primary ob-cta" id="obStartBtn">選一套課表 <i class="ph ph-arrow-right icon" aria-hidden="true"></i></button>
+      <div class="range-switch lang-switch ob-lang" role="group" aria-label="Language" data-i18n-skip>
+        <button type="button" class="range-btn" data-lang="zh">中文</button>
+        <button type="button" class="range-btn" data-lang="en">English</button>
+      </div>
     </div>
   </div>
   <div class="ob-step" data-step="2" hidden>
@@ -3053,7 +3436,7 @@ body{
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v3.3.0';
+const APP_VERSION = 'v3.4.0';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
@@ -3741,6 +4124,7 @@ function saveCanvasAsImage(canvas, filename, okMsg, layerTitle){
   showImageSaveLayer(dataUrl, layerTitle);
 }
 function copyAnyText(t, msg){
+  t = trLines(t);
   const done = () => flashToast(msg || '已複製');
   if(navigator.clipboard && window.isSecureContext){
     navigator.clipboard.writeText(t).then(done).catch(fallback);
@@ -4000,7 +4384,7 @@ if(isPast && getPref('heatmap')){
       aria-pressed="${isSelected ? 'true' : 'false'}">
       <div style="display:flex;justify-content:space-between;align-items:flex-start">
         <span class="cal-daynum">${d}</span>
-        <span class="cal-tag${!isTrainDay(plan.train) ? ' is-rest' : ''}">${plan.train}</span>
+        <span class="cal-tag${!isTrainDay(plan.train) ? ' is-rest" data-en="–' : ''}">${plan.train}</span>
       </div>
 
       ${heatBar}
@@ -5583,6 +5967,13 @@ function renderSettings(){
 
   /* 偏好開關 */
   html += '<div class="kicker" style="margin-bottom:8px">偏好設定</div>';
+  html += `<div class="settings-row">
+      <div><div class="settings-label">${LANG === 'en' ? 'Language' : '語言 · Language'}</div></div>
+      <div class="range-switch lang-switch" role="group" aria-label="Language" data-i18n-skip>
+        <button type="button" class="range-btn" data-lang="zh">中文</button>
+        <button type="button" class="range-btn" data-lang="en">English</button>
+      </div>
+    </div>`;
 
   html += Object.entries(PREFS).map(([id, pref]) => {
     const isOn = getPref(id);
@@ -6739,6 +7130,13 @@ const TEMPLATES = {
 function templatePlan(key){
   const t = TEMPLATES[key];
   const body = t.plan();
+  if(LANG === 'en'){
+    /* 英文使用者拿到的課表直接存英文名稱，編輯課表時看到的也是英文 */
+    Object.values(body.workouts).forEach(w => {
+      w.name = tr(w.name);
+      w.exercises = w.exercises.map(e => ({ ...e, name:tr(e.name), note:tr(e.note) }));
+    });
+  }
   /* 每週排程對齊週一；31 天的原版循環從今天開始 */
   const start = body.cycle.length % 7 === 0 ? mondayOf(new Date()) : atNoon(new Date());
   return { v:1, start:formatDateStr(start), cycle:body.cycle, workouts:body.workouts };
@@ -6761,7 +7159,7 @@ function renderPlanLabels(){
   const legend = document.querySelector('#screenCalendar .cal-legend');
   if(legend){
     legend.innerHTML = codes.map(c => `<span><i class="tag-chip">${c}</i> ${escapeHtml(WORKOUT_NAMES[c])}</span>`).join('')
-      + '<span><i class="tag-chip is-rest">休</i> 休息</span>';
+      + '<span><i class="tag-chip is-rest" data-en="–">休</i> 休息</span>';
   }
 }
 
@@ -6882,7 +7280,7 @@ function renderPlanEditor(){
     sched = `<div class="pe-week">${vals.map((v, i) => `
       <button type="button" class="pe-day${d.workouts[v] ? '' : ' is-rest'}" data-day="${i}"
         aria-label="週${wd[i]}：${d.workouts[v] ? v + ' 日' : '休息'}，點一下切換">
-        <span>${wd[i]}</span><b>${d.workouts[v] ? v : '休'}</b></button>`).join('')}</div>
+        <span>${wd[i]}</span><b${d.workouts[v] ? '' : ' data-en="–"'}>${d.workouts[v] ? v : '休'}</b></button>`).join('')}</div>
       <p class="pe-hint">點一下切換：休 → ${codes.join(' → ')} → 休</p>`;
   }else{
     sched = `<p class="pe-hint">目前是 ${d.cycle.length} 天一輪的循環（${d.cycle.slice(0, 7).join('-')}…），每 ${d.cycle.length} 天重來一次。</p>
@@ -7586,6 +7984,23 @@ try{
   const b = document.getElementById('errorBanner');
   b.style.display = 'block'; b.textContent = 'Init error: ' + err.message;
 }
+
+/* 語言切換：整頁重新載入，所有畫面（含 Canvas、已存的課表範本名稱）一次換好 */
+function markLangSwitches(root){
+  (root || document).querySelectorAll('.lang-switch [data-lang]').forEach(b => {
+    const on = b.dataset.lang === LANG;
+    b.classList.toggle('is-active', on);
+    b.setAttribute('aria-pressed', String(on));
+  });
+}
+document.addEventListener('click', e => {
+  const b = e.target.closest && e.target.closest('.lang-switch [data-lang]');
+  if(!b || b.dataset.lang === LANG) return;
+  lsSet('rcmeta_lang', b.dataset.lang);
+  location.reload();
+});
+new MutationObserver(() => markLangSwitches()).observe(document.body, { childList:true, subtree:true });
+markLangSwitches();
 </script>
 </body>
 </html>
