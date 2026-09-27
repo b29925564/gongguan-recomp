@@ -18,6 +18,15 @@
 
 休息日有恢復清單（走路、睡眠、喝水）。深色模式、訓練中螢幕常亮、iPhone 觸覺回饋都在設定裡。
 
+## 語言 · Language
+
+介面有中文與英文。全新使用者跟隨手機語言；原本就在用的人維持中文。
+第一次打開的畫面和 設定 → 偏好設定 都可以切換（存在 `rcmeta_lang`，不隨備份走）。
+英文是在顯示時翻譯的：原文字串與英文對照都在 `index.html` 開頭的 `EN` 表，新增中文文字時記得補上英文，
+`tests/app.spec.mjs` 的 English 測試會找出沒翻到的字。
+
+RECOMP is available in English. New users get the language of their phone; switch anytime in Settings → Preferences.
+
 ## 資料
 
 所有紀錄只存在裝置的瀏覽器（`localStorage`，key 以 `recomp_` 開頭），不會上傳到任何地方。

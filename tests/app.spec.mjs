@@ -541,3 +541,92 @@ test('每個分頁都能正常切換', async ({ page }) => {
     await expect(page.locator(`.tabbar-btn[data-screen="${name}"]`)).toHaveAttribute('aria-selected', 'true');
   }
 });
+
+test.describe('English', () => {
+  /* 在頁面上找還沒翻到的中文：文字、aria-label、placeholder、title、alt。
+     使用者自己輸入的東西（input 值）不算。 */
+  const leftoverChinese = page => page.evaluate(() => {
+    const C = /[一-鿿]/, out = [];
+    const tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    let n; while((n = tw.nextNode())){
+      const p = n.parentElement;
+      if(p && !p.closest('script,style,[data-i18n-skip]') && C.test(n.nodeValue)) out.push(n.nodeValue.trim());
+    }
+    document.querySelectorAll('[aria-label],[placeholder],[title],[alt]').forEach(el => {
+      if(el.closest('[data-i18n-skip]')) return;
+      for(const a of ['aria-label', 'placeholder', 'title', 'alt']){ const v = el.getAttribute(a); if(v && C.test(v)) out.push(`${a}: ${v}`); }
+    });
+    return [...new Set(out)];
+  });
+
+  test.use({ locale: 'en-US' });
+
+  test('新的英文使用者：整個 app 都是英文，課表也存英文名稱', async ({ page }) => {
+    await page.goto('./');
+    await page.evaluate(() => localStorage.clear());
+    await page.goto('./');
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+    await expect(page.locator('#obStartBtn')).toContainText('Pick a program');
+    await page.click('#obStartBtn');
+    await page.click('[data-template="ul"]');
+    await expect(page.locator('#dpTitle')).toHaveText(/^Day [AB] · (Upper|Lower) body$|^Rest day$/);
+    const plan = JSON.parse(await stored(page, 'recomp_plan'));
+    expect(plan.workouts.A.name).toBe('Upper body');
+    expect(plan.workouts.A.exercises[0].name).toBe('Barbell bench press');
+    for(const s of ['calendar', 'progress', 'weight', 'today']){
+      await page.click(`.tabbar-btn[data-screen="${s}"]`);
+      expect(await leftoverChinese(page), s).toEqual([]);
+    }
+    await page.click('#settingsBtn');
+    expect(await leftoverChinese(page), 'settings').toEqual([]);
+  });
+
+  test('舊資料在英文模式下每一頁都翻好', async ({ page }) => {
+    const FIXTURE = JSON.parse(fs.readFileSync(path.join(ROOT, 'tests/fixtures/v3.2.0-storage.json'), 'utf8'));
+    await page.goto('./');
+    await page.evaluate(d => { localStorage.clear(); for(const k in d) localStorage.setItem(k, d[k]); localStorage.setItem('rcmeta_lang', 'en'); }, FIXTURE.data);
+    await page.goto('./');
+    await expect(page.locator('#dpTitle')).toHaveText('Day A · Upper push');
+    await chestSets(page).first().click();
+    expect(await leftoverChinese(page), 'today').toEqual([]);
+    for(const s of ['calendar', 'progress', 'weight']){
+      await page.click(`.tabbar-btn[data-screen="${s}"]`);
+      expect(await leftoverChinese(page), s).toEqual([]);
+    }
+    await page.click('.tabbar-btn[data-screen="calendar"]');
+    await page.click('#weekReportBtn');
+    expect(await leftoverChinese(page), 'weekly').toEqual([]);
+    await page.click('#weeklyCloseBtn');
+    await page.click('#searchOpenBtn');
+    expect(await leftoverChinese(page), 'search').toEqual([]);
+  });
+
+  test('原本就在用的人，手機語言是英文也維持中文', async ({ page }) => {
+    await open(page);
+    await expect(page.locator('html')).toHaveAttribute('lang', 'zh-Hant');
+    await expect(page.locator('#dpTitle')).toHaveText('A日 上肢推');
+  });
+
+  test('設定裡切換語言，清除紀錄之後也不會跑掉', async ({ page }) => {
+    await open(page);
+    await page.click('#settingsBtn');
+    await page.click('#settingsModal .lang-switch [data-lang="en"]');
+    await expect(page.locator('#dpTitle')).toHaveText('Day A · Upper push');
+    await page.evaluate(() => { for(const k of Object.keys(localStorage)) if(k.startsWith('recomp_')) localStorage.removeItem(k); });
+    await page.reload();
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en');
+  });
+
+  test('英文的訓練卡與進步卡上沒有中文', async ({ page }) => {
+    await open(page, () => localStorage.setItem('rcmeta_lang', 'en'));
+    await chestSets(page).first().click();
+    const drawn = await page.evaluate(() => {
+      const seen = [], P = CanvasRenderingContext2D.prototype, f = P.fillText;
+      P.fillText = function(t, ...r){ seen.push(tr(t)); return f.call(this, t, ...r); };
+      drawTrainingCard(); drawProgressCard(); drawCalendarToCanvas();
+      P.fillText = f;
+      return seen;
+    });
+    expect(drawn.filter(t => /[一-鿿]/.test(t))).toEqual([]);
+  });
+});
