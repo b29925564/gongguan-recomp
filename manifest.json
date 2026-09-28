@@ -9,7 +9,7 @@
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#F5F3F0",
+  "background_color": "#F2F2F5",
   "theme_color": "#E30613",
   "categories": [
     "health",
