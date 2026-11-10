@@ -9,7 +9,9 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
+    # 固定在 24.04：ubuntu-latest 換成 26.04 之後，Playwright 1.56 裝不了瀏覽器，
+    # 測試在十秒內就失敗（根本沒跑）。升級 Playwright 時再一起往上調。
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
       run:

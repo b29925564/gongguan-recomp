@@ -1629,7 +1629,12 @@ body{
 .wordmark{
   font-weight:var(--fw-display);font-size:var(--fs-lead);
   letter-spacing:var(--tr-title);flex-shrink:0;
+  display:inline-flex;align-items:center;gap:10px;
 }
+/* 「R.」標誌：與 icons/icon.svg 同一條路徑。R 跟著主題的文字色，句點永遠是紅色 */
+.logo-mark{height:20px;width:auto;flex:0 0 auto;display:block}
+.logo-mark .lm-r{fill:var(--ink)}
+.logo-mark .lm-dot{fill:var(--signal-fill)}
 .app-bar-sub{
   font-size:var(--fs-small);color:var(--concrete);
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
@@ -2946,7 +2951,7 @@ html[lang="en"] #screenToday .set-check.cap::before{content:'MAX'}
 <header class="app-bar">
   <div class="app-bar-inner">
     <div class="app-bar-lead">
-      <span class="wordmark">RECOMP</span>
+      <span class="wordmark"><svg class="logo-mark" viewBox="121 132 270 248" aria-hidden="true"><path class="lm-r" d="M188.64 379.68L121.57 379.68L121.57 132.32L228.15 132.32Q255.71 132.32 276.38 142.36Q297.05 152.41 308.59 171.25Q320.13 190.09 320.13 216.32Q320.13 242.88 308.34 261.15Q296.55 279.41 275.30 288.71Q254.05 298 225.83 298L162.08 298L162.08 245.87L212.22 245.87Q224.17 245.87 232.64 242.88Q241.10 239.90 245.59 233.42Q250.07 226.95 250.07 216.32Q250.07 205.70 245.59 199.06Q241.10 192.42 232.64 189.26Q224.17 186.11 212.22 186.11L188.64 186.11L188.64 379.68M328.43 379.68L255.38 379.68L194.95 266.13L266.34 266.13"/><rect class="lm-dot" x="342.43" y="331.68" width="48" height="48"/></svg>RECOMP</span>
       <span class="app-bar-sub" id="todayTopLabel">—</span>
     </div>
     <div class="app-bar-actions">
@@ -3437,7 +3442,7 @@ html[lang="en"] #screenToday .set-check.cap::before{content:'MAX'}
 <div id="toast" role="status" aria-live="polite">已複製</div>
 <script>
 'use strict';
-const APP_VERSION = 'v3.4.0';
+const APP_VERSION = 'v3.4.1';
 const SCHEMA_VERSION = 3;
 
 /* ── visible error banner ── */
